@@ -1,23 +1,23 @@
-import React, { useState, useContext } from 'react';
-import { Form, Button, Container, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
+import React, { useState, useContext } from "react";
+import { Form, Button, Container, Alert } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
-export default function Register() {
+function Register() {
   const { signup } = useContext(AuthContext);
-  const [name, setName]       = useState('');
-  const [email, setEmail]     = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError]     = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await signup(name, email, password);
-      nav('/');
+      nav("/");
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || "Registration failed");
     }
   };
 
@@ -29,32 +29,34 @@ export default function Register() {
         <Form.Group className="mb-3">
           <Form.Label>Name</Form.Label>
           <Form.Control
-            type="text" value={name}
-            onChange={e => setName(e.target.value)}
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label>Email</Form.Label>
           <Form.Control
-            type="email" value={email}
-            onChange={e => setEmail(e.target.value)}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label>Password</Form.Label>
           <Form.Control
-            type="password" value={password}
-            onChange={e => setPassword(e.target.value)}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </Form.Group>
-
         <Button type="submit">Register</Button>
       </Form>
     </Container>
   );
 }
+
+export default Register;

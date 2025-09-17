@@ -4,6 +4,7 @@ import NavigationBar from './components/NavigationBar';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 import Login from './pages/Login';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/services"   element={<Services />} />
         <Route path="/register"   element={<Register />} />
         <Route path="/login"      element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </>
   );

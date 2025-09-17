@@ -1,62 +1,3 @@
-// // server/controllers/authController.js
-// const asyncHandler = require('express-async-handler');
-// const bcrypt       = require('bcrypt');
-// const User         = require('../models/User');
-// const generateToken = require('../utils/generateToken');
-
-// // POST /api/auth/signup
-// exports.signup = asyncHandler(async (req, res) => {
-//   const { name, email, password } = req.body;
-//   if (!name || !email || !password) {
-//     res.status(400);
-//     throw new Error('Please include name, email and password');
-//   }
-//   const existing = await User.findOne({ email });
-//   if (existing) {
-//     res.status(400);
-//     throw new Error('User already exists');
-//   }
-//   const salt   = await bcrypt.genSalt(10);
-//   const hash   = await bcrypt.hash(password, salt);
-//   const user   = await User.create({ name, email, password: hash });
-//   const token  = generateToken(user._id);
-
-//   res.status(201).json({
-//     _id: user._id,
-//     name: user.name,
-//     email: user.email,
-//     token
-//   });
-// });
-
-// // POST /api/auth/login
-// exports.login = asyncHandler(async (req, res) => {
-//   const { email, password } = req.body;
-//   const user = await User.findOne({ email });
-//   if (!user) {
-//     res.status(401);
-//     throw new Error('Invalid credentials');
-//   }
-//   const match = await bcrypt.compare(password, user.password);
-//   if (!match) {
-//     res.status(401);
-//     throw new Error('Invalid credentials');
-//   }
-//   const token = generateToken(user._id);
-//   res.json({
-//     _id: user._id,
-//     name: user.name,
-//     email: user.email,
-//     token
-//   });
-// });
-
-// // POST /api/auth/logout
-// exports.logout = asyncHandler(async (req, res) => {
-//   // client drops token; just respond OK
-//   res.json({ message: 'Logged out' });
-// });
-
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
@@ -132,6 +73,30 @@ exports.login = asyncHandler(async (req, res) => {
     name: user.name,
     email: user.email,
     token: generateToken(user._id)
+  });
+});
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+exports.updateProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  user.name   = req.body.name   || user.name;
+  user.email  = req.body.email  || user.email;
+  user.avatar = req.body.avatar || user.avatar;
+
+  const updated = await user.save();
+
+  res.json({
+    _id: updated._id,
+    name: updated.name,
+    email: updated.email,
+    avatar: updated.avatar
   });
 });
 
