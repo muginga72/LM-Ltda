@@ -1,5 +1,7 @@
 // server/models/User.js
 const mongoose = require('mongoose');
+// const { updateProfile } = require('../controllers/userController');
+// const { protect } = require('../middleware/authMiddleware');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -20,5 +22,7 @@ const userSchema = new mongoose.Schema({
     required: true
   }
 }, { timestamps: true });
+
+// router.put('/profile', protect, updateProfile);
 
 module.exports = mongoose.model('User', userSchema);
