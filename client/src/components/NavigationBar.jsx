@@ -53,7 +53,7 @@ const NavigationBar = () => {
                 >
                   Profile
                 </Button>
-                <Button variant="outline-secondary" onClick={handleLogout}>
+                <Button variant="outline-danger" onClick={handleLogout}>
                   Logout
                 </Button>
               </>
