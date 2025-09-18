@@ -1,36 +1,40 @@
 // client/src/components/NavigationBar.js
-import React, { useContext } from 'react';
-import {
-  Navbar,
-  Nav,
-  Container,
-  Image,
-  Dropdown
-} from 'react-bootstrap';
+import React, { useContext, useState } from 'react';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { LinkContainer } from 'react-router-bootstrap';
 import { AuthContext } from '../contexts/AuthContext';
+import logo from '../assets/logo.png';
+import ProfileModal from './ProfileModal'; // <-- new modal component
 
-export default function NavigationBar() {
+const NavigationBar = () => {
   const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const nav = useNavigate();
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    nav('/login');
   };
 
-  // Fallback avatar image
-  const defaultAvatar = '/images/avatar.png';
-
   return (
-    <Navbar bg="light" expand="lg" className="shadow-sm">
-      <Container>
-        <Navbar.Brand as={NavLink} to="/" className="fw-bold text-primary">
-          LM Ltda
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="navbar-nav" />
-        <Navbar.Collapse id="navbar-nav">
-          <Nav className="ms-auto align-items-center">
+    <>
+      <Navbar bg="light" expand>
+        <Container>
+          <LinkContainer to="/">
+            <Navbar.Brand className="d-flex align-items-center gap-2">
+              <img
+                src={logo}
+                alt="LMJ Logo"
+                width="50"
+                height="50"
+                className="rounded-circle"
+              />
+              LM Ltda
+            </Navbar.Brand>
+          </LinkContainer>
+
+          <Nav className="ms-auto">
             <Nav.Link as={NavLink} to="/">Home</Nav.Link>
             <Nav.Link as={NavLink} to="/services">Services</Nav.Link>
 
@@ -40,33 +44,33 @@ export default function NavigationBar() {
                 <Nav.Link as={NavLink} to="/register">Register</Nav.Link>
               </>
             ) : (
-              <Dropdown align="end">
-                <Dropdown.Toggle
-                  variant="light"
-                  id="dropdown-avatar"
-                  className="d-flex align-items-center border-0 bg-transparent"
+              <>
+                <Navbar.Text className="me-2">Hello, {user.name}</Navbar.Text>
+                <Button
+                  variant="outline-primary"
+                  className="me-2"
+                  onClick={() => setShowProfileModal(true)}
                 >
-                  <Image
-                    src={user.avatar || defaultAvatar}
-                    roundedCircle
-                    width="32"
-                    height="32"
-                    className="me-2"
-                    alt="User Avatar"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <span className="fw-semibold">{user.name}</span>
-                </Dropdown.Toggle>
-
-                <Dropdown.Menu>
-                  <Dropdown.Item as={NavLink} to="/profile">Profile</Dropdown.Item>
-                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+                  Profile
+                </Button>
+                <Button variant="outline-secondary" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
             )}
           </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+        </Container>
+      </Navbar>
+
+      {/* Profile Modal */}
+      {user && (
+        <ProfileModal
+          show={showProfileModal}
+          onHide={() => setShowProfileModal(false)}
+        />
+      )}
+    </>
   );
 }
+
+export default NavigationBar;
