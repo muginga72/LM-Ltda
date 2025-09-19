@@ -1,6 +1,7 @@
 // src/components/Home.jsx
 import React from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import beverageImg from "../assets/images/beverage.png";
 import buffetImg from "../assets/images/buffet.png";
 import tutoringImg from "../assets/images/tutoring.png";
@@ -10,40 +11,81 @@ import humburgerImg from "../assets/images/humburger.png";
 
 const features = [
   {
-    title: "Beverages Service",
+    title: "🍹Beverages Service",
     img: beverageImg,
     link: "",
   },
   {
-    title: "Buffet for You",
+    title: "🍽️ Buffet for You",
     img: buffetImg,
     link: "",
   },
   {
-    title: "Tutoring",
+    title: "📚 Tutoring",
     img: tutoringImg,
     link: "",
   },
   {
-    title: "Meal to Order",
+    title: "👨‍🍳 Made-to-Order Meals",
     img: mealorderImg,
     link: "",
   },
   {
-    title: "Wedding Events",
+    title: "💍 Wedding Events",
     img: weddingImg,
     link: "",
   },
   {
-    title: "Humburgers",
+    title: "🍔 Humburgers",
     img: humburgerImg,
     link: "",
   },
 ];
 
 function HomePage() {
+  const navigate = useNavigate();
+
   return (
     <>
+      {/* Hero Section */}
+      <section className="text-center py-2">
+        <Container>
+          <div style={{ padding: "2rem 0rem 0rem", textAlign: "center" }}>
+            <h1>Welcome to LMJ Services</h1>
+            <p>Explore our mission, values, and what makes us different.</p>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <button
+                onClick={() => window.open("/who-we-are", "_blank")}
+                style={{
+                  marginRight: "1rem",
+                  backgroundColor: "lightgray",
+                  color: "blue",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "5px",
+                }}
+              >
+                Who We Are
+              </button>
+              <button
+                onClick={() => navigate("/contact")}
+                style={{
+                  marginRight: "1rem",
+                  backgroundColor: "lightgray",
+                  color: "blue",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "5px",
+                }}
+              >
+                Contact Us
+              </button>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* Feature Grid */}
       <section className="py-5">
         <Container>
@@ -74,13 +116,13 @@ function HomePage() {
       <section className="bg-warning text-dark text-center py-4">
         <Container>
           <h4 className="mb-0">
-            "Love served fresh. From intimate dinners to grand wedding celebrations—this season is made to be savored."
+            "Love served fresh. From intimate dinners to grand wedding
+            celebrations—this season is made to be savored."
           </h4>
 
           <footer className="text-center py-4">
             <small>
-              &copy; {new Date().getFullYear()} LM Ltda. All rights
-              reserved.
+              &copy; {new Date().getFullYear()} LM Ltda. All rights reserved.
             </small>
           </footer>
         </Container>
