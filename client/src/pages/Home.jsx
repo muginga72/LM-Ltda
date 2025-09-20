@@ -1,49 +1,20 @@
-// src/components/Home.jsx
-import React from "react";
-import { Container, Row, Col, Button, Card } from "react-bootstrap";
+// src/components/HomePage.jsx
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import beverageImg from "../assets/images/beverage.png";
-import buffetImg from "../assets/images/buffet.png";
-import tutoringImg from "../assets/images/tutoring.png";
-import mealorderImg from "../assets/images/mealorder.png";
-import weddingImg from "../assets/images/wedding.png";
-import humburgerImg from "../assets/images/humburger.png";
-
-const features = [
-  {
-    title: "🍹Beverages Service",
-    img: beverageImg,
-    link: "",
-  },
-  {
-    title: "🍽️ Buffet for You",
-    img: buffetImg,
-    link: "",
-  },
-  {
-    title: "📚 Tutoring",
-    img: tutoringImg,
-    link: "",
-  },
-  {
-    title: "👨‍🍳 Made-to-Order Meals",
-    img: mealorderImg,
-    link: "",
-  },
-  {
-    title: "💍 Wedding Events",
-    img: weddingImg,
-    link: "",
-  },
-  {
-    title: "🍔 Humburgers",
-    img: humburgerImg,
-    link: "",
-  },
-];
+import HomePageLayout from "../components/HomePageLayout";
+import axios from "axios";
 
 function HomePage() {
+  const [features, setfeatures] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get("/api/home")
+      .then((res) => setfeatures(res.data.features))
+      .catch(console.error);
+  }, []);
 
   return (
     <>
@@ -55,57 +26,37 @@ function HomePage() {
             <p>Explore our mission, values, and what makes us different.</p>
 
             <div style={{ marginBottom: "1rem" }}>
-              <button
+              <Button
+                variant="light"
+                style={{ color: "blue", marginRight: "1rem" }}
                 onClick={() => window.open("/who-we-are", "_blank")}
-                style={{
-                  marginRight: "1rem",
-                  backgroundColor: "lightgray",
-                  color: "blue",
-                  padding: "0.5rem 1rem",
-                  border: "none",
-                  borderRadius: "5px",
-                }}
               >
                 Who We Are
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="light"
+                style={{ color: "blue" }}
                 onClick={() => navigate("/contact")}
-                style={{
-                  marginRight: "1rem",
-                  backgroundColor: "lightgray",
-                  color: "blue",
-                  padding: "0.5rem 1rem",
-                  border: "none",
-                  borderRadius: "5px",
-                }}
               >
                 Contact Us
-              </button>
+              </Button>
             </div>
           </div>
         </Container>
       </section>
 
       {/* Feature Grid */}
-      <section className="py-5">
+      <section className="py-3">
         <Container>
-          <Row className="g-4">
-            {features.map((f, idx) => (
-              <Col key={idx} xs={12} md={6} lg={4}>
-                <Card className="h-100 shadow-sm d-flex flex-column">
-                  <Card.Img
-                    variant="top"
-                    src={f.img}
-                    alt={f.title}
-                    style={{ objectFit: "cover", height: "300px" }}
-                  />
-                  <Card.Body className="text-center">
-                    <Card.Title>{f.title}</Card.Title>
-                    <Button variant="outline-primary" href={f.link}>
-                      Explore
-                    </Button>
-                  </Card.Body>
-                </Card>
+          <Row className="justify-content-center">
+            {features.map((feature, index) => (
+              <Col key={index} xs={12} md={4} lg={4} className="mb-4 d-flex">
+                <HomePageLayout
+                  title={feature.title}
+                  description={feature.price} // Using price as description fallback
+                  image={`/images/${feature.image}`}
+                  link={feature.link}
+                />
               </Col>
             ))}
           </Row>
@@ -119,7 +70,6 @@ function HomePage() {
             "Love served fresh. From intimate dinners to grand wedding
             celebrations—this season is made to be savored."
           </h4>
-
           <footer className="text-center py-4">
             <small>
               &copy; {new Date().getFullYear()} LM Ltda. All rights reserved.
