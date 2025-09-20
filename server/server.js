@@ -13,6 +13,7 @@ const userRoutes = require('./routes/userRoutes');
 const requestRoutes  = require('./routes/requests');
 const scheduleRoutes = require('./routes/schedules');
 const shareRoutes    = require('./routes/shares');
+const homeRoutes = require('./routes/homeRoutes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(bodyParser.json());
+// app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 // Stripe webhook must get raw body
 app.use('/api/requests/webhook', requestRoutes);
@@ -27,6 +29,7 @@ app.use('/api/requests/webhook', requestRoutes);
 // Mount API
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/home', homeRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
