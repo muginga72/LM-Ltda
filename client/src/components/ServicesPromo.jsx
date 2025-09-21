@@ -44,10 +44,8 @@ const ServicesPromo = () => {
               onClick={() => window.open("/learn-more", "_blank")}
               style={{
                 marginRight: "1rem",
-                backgroundColor: "lightgray",
-                color: "green",
+                variant: "outline-primary",
                 borderRadius: '12px',
-                borderColor: "gray"
               }}
             >
               Learn More
