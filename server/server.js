@@ -13,7 +13,8 @@ const userRoutes = require('./routes/userRoutes');
 const requestRoutes  = require('./routes/requests');
 const scheduleRoutes = require('./routes/schedules');
 const shareRoutes    = require('./routes/shares');
-const homeRoutes = require('./routes/homeRoutes');
+// const homeRoutes = require('./routes/homeRoutes');
+const cardsRoutes = require('./routes/cardsRoutes');
 
 const app = express();
 
@@ -29,7 +30,8 @@ app.use('/api/requests/webhook', requestRoutes);
 // Mount API
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/home', homeRoutes);
+// app.use('/api/home', homeRoutes);
+app.use('/api/cards', cardsRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);

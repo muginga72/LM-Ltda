@@ -1,20 +1,11 @@
 // src/components/HomePage.jsx
-import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import React from "react";
+import { Container, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import HomePageLayout from "../components/HomePageLayout";
-import axios from "axios";
+import CardsLayout from "../components/CardsLayout";
 
 function HomePage() {
-  const [features, setfeatures] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    axios
-      .get("/api/home")
-      .then((res) => setfeatures(res.data.features))
-      .catch(console.error);
-  }, []);
 
   return (
     <>
@@ -24,17 +15,16 @@ function HomePage() {
           <div style={{ padding: "2rem 0rem 0rem", textAlign: "center" }}>
             <h1>Welcome to LMJ Services</h1>
             <p>Explore our mission, values, and what makes us different.</p>
-
             <div style={{ marginBottom: "1rem" }}>
               <Button
-                variant="light"
+                variant="outline-primary"
                 style={{ color: "blue", marginRight: "1rem" }}
                 onClick={() => window.open("/who-we-are", "_blank")}
               >
                 Who We Are
               </Button>
               <Button
-                variant="light"
+                variant="outline-primary"
                 style={{ color: "blue" }}
                 onClick={() => navigate("/contact")}
               >
@@ -47,20 +37,7 @@ function HomePage() {
 
       {/* Feature Grid */}
       <section className="py-3">
-        <Container>
-          <Row className="justify-content-center">
-            {features.map((feature, index) => (
-              <Col key={index} xs={12} md={4} lg={4} className="mb-4 d-flex">
-                <HomePageLayout
-                  title={feature.title}
-                  description={feature.price} // Using price as description fallback
-                  image={`/images/${feature.image}`}
-                  link={feature.link}
-                />
-              </Col>
-            ))}
-          </Row>
-        </Container>
+        <CardsLayout />
       </section>
 
       {/* Seasonal Banner */}
