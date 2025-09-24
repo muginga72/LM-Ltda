@@ -49,7 +49,7 @@ function HomePage() {
           </h4>
           <footer className="text-center py-4">
             <small>
-              &copy; {new Date().getFullYear()} LM Ltda. All rights reserved.
+              &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
             </small>
           </footer>
         </Container>

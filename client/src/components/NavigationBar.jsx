@@ -26,11 +26,11 @@ const NavigationBar = () => {
               <img
                 src={logo}
                 alt="LMJ Logo"
-                width="50"
-                height="50"
+                width="80"
+                height="80"
                 className="rounded-circle"
               />
-              LM Ltda
+              LM Ltd
             </Navbar.Brand>
           </LinkContainer>
 

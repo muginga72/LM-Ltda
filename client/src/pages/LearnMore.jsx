@@ -92,7 +92,7 @@ const LearnMore = () => {
 
       <footer className="text-center py-4 border-top">
         <small>
-          &copy; {new Date().getFullYear()} LMJM Services. All rights reserved.
+          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
         </small>
       </footer>
     </div>
