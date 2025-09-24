@@ -2,6 +2,9 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import NavigationBar from './components/NavigationBar';
 import ServicesPromo from "./components/ServicesPromo";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
+import AdminLogin from "./pages/AdminLogin";
 import LearnMore from "./pages/LearnMore";
 import WhoWeAre from "./pages/WhoWeAre";
 import Contact from "./pages/Contact";
@@ -25,6 +28,15 @@ function App() {
         <Route path="/learn-more" element={<LearnMore />} />
         <Route path="/who-we-are" element={<WhoWeAre />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </>
   );

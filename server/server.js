@@ -15,6 +15,7 @@ const scheduleRoutes = require('./routes/schedules');
 const shareRoutes    = require('./routes/shares');
 const testimonialsRoute = require("./routes/testimonials");
 const cardsRoutes = require('./routes/cardsRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Instantiate the Express application
 const app = express();
@@ -31,6 +32,7 @@ app.use('/api/requests/webhook', requestRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cards', cardsRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);

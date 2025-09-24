@@ -3,7 +3,7 @@ import { Form, Button, Container, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 
-export default function Login() {
+function AdminLogin() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,11 +14,11 @@ export default function Login() {
     e.preventDefault();
     try {
       const user = await login(email, password);
-      if (user.role === "admin") {
-        nav("/admin"); // redirect to admin dashboard
-      } else {
-        nav("/"); // redirect to normal homepage
+      if (user.role !== "admin") {
+        setError("Access denied: Admins only");
+        return;
       }
+      nav("/admin");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }
@@ -26,7 +26,7 @@ export default function Login() {
 
   return (
     <Container style={{ maxWidth: 400, marginTop: 50 }}>
-      <h2>Login</h2>
+      <h2>Admin</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -38,7 +38,6 @@ export default function Login() {
             required
           />
         </Form.Group>
-
         <Form.Group className="mb-3">
           <Form.Label>Password</Form.Label>
           <Form.Control
@@ -48,9 +47,10 @@ export default function Login() {
             required
           />
         </Form.Group>
-
-        <Button type="submit">Login</Button>
+        <Button type="submit">Login as Admin</Button>
       </Form>
     </Container>
   );
 }
+
+export default AdminLogin;

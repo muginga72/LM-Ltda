@@ -94,7 +94,7 @@ const Contact = () => {
 
       <footer className="text-center py-4 border-top">
         <small>
-          &copy; {new Date().getFullYear()} LMJM Services. All rights
+          &copy; {new Date().getFullYear()} LM Ltd. All rights
           reserved.
         </small>
       </footer>

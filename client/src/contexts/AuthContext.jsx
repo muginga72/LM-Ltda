@@ -1,31 +1,31 @@
-import React, { createContext, useState, useEffect } from 'react';
-import authService from '../services/authService';
+import React, { createContext, useState } from "react";
+import authService from "../services/authService";
 
 export const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(
-    () => JSON.parse(localStorage.getItem('user')) || null
-  );
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
 
-  useEffect(() => {
-    localStorage.setItem('user', JSON.stringify(user));
-  }, [user]);
-
-  const signup = async (name, email, password) => {
-    const data = await authService.signup(name, email, password);
+  const signup = async (name, email, password, role) => {
+    const data = await authService.signup(name, email, password, role);
+    localStorage.setItem("user", JSON.stringify(data));
     setUser(data);
-    return data;
   };
 
   const login = async (email, password) => {
     const data = await authService.login(email, password);
+    localStorage.setItem("user", JSON.stringify(data));
     setUser(data);
     return data;
   };
 
+  // const logout = () => {
+  //   authService.logout();
+  //   setUser(null);
+  // };
+
   const logout = () => {
-    authService.logout();
+    localStorage.removeItem("user");
     setUser(null);
   };
 
@@ -34,4 +34,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};

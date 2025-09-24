@@ -8,13 +8,14 @@ function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user"); // default
   const [error, setError] = useState("");
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signup(name, email, password);
+      await signup(name, email, password, role);
       nav("/");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
@@ -53,6 +54,16 @@ function Register() {
             required
           />
         </Form.Group>
+
+        {/* Role Selector */}
+        <Form.Group className="mb-3">
+          <Form.Label>Role</Form.Label>
+          <Form.Select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </Form.Select>
+        </Form.Group>
+
         <Button type="submit">Register</Button>
       </Form>
     </Container>
