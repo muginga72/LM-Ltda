@@ -2,6 +2,9 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import NavigationBar from './components/NavigationBar';
 import ServicesPromo from "./components/ServicesPromo";
+import LearnMore from "./pages/LearnMore";
+import WhoWeAre from "./pages/WhoWeAre";
+import Contact from "./pages/Contact";
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Register from './pages/Register';
@@ -19,6 +22,9 @@ function App() {
         <Route path="/register"   element={<Register />} />
         <Route path="/login"      element={<Login />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/learn-more" element={<LearnMore />} />
+        <Route path="/who-we-are" element={<WhoWeAre />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </>
   );

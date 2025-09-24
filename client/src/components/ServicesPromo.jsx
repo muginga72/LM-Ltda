@@ -27,7 +27,7 @@ const ServicesPromo = () => {
       name: "Wedding",
       image: "/images/wedding.png",
     },
-        {
+    {
       name: "Benerage",
       image: "/images/cocktail.png",
     },
@@ -44,9 +44,9 @@ const ServicesPromo = () => {
               onClick={() => window.open("/learn-more", "_blank")}
               style={{
                 marginRight: "1rem",
-                variant: "outline-primary",
-                borderRadius: '12px',
+                borderRadius: "12px",
               }}
+              variant="primary"
             >
               Learn More
             </Button>
@@ -69,7 +69,7 @@ const ServicesPromo = () => {
                     />
                     <Carousel.Caption className="text-center">
                       <h5>{product.name}</h5>
-                      <p>{product.description}</p>
+                      <p>{product.description || ""}</p>
                     </Carousel.Caption>
                   </div>
                 </Carousel.Item>
