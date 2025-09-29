@@ -1,5 +1,36 @@
-// server/controllers/userController.js
+// // server/controllers/userController.js
+// const User = require('../models/User');
+
+// const updateProfile = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const { name, email, avatar } = req.body;
+
+//     const user = await User.findById(userId);
+//     if (!user) return res.status(404).json({ message: 'User not found' });
+
+//     user.name = name || user.name;
+//     user.email = email || user.email;
+//     user.avatar = avatar || user.avatar;
+
+//     const updatedUser = await user.save();
+
+//     res.json({
+//       name: updatedUser.name,
+//       email: updatedUser.email,
+//       avatar: updatedUser.avatar,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+// module.exports = { updateProfile };
+
 const User = require('../models/User');
+const ServiceRequest = require("../models/ServiceRequest.js");
+const ServiceSchedule = require("../models/ServiceSchedule.js");
 
 const updateProfile = async (req, res) => {
   try {
@@ -21,9 +52,43 @@ const updateProfile = async (req, res) => {
       avatar: updatedUser.avatar,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Update profile error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-module.exports = { updateProfile };
+const getUserRequests = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const requests = await ServiceRequest.find({ userId });
+    const scheduled = requests.filter(r => r.status === "confirmed");
+    const past = requests.filter(r => ["completed", "expired"].includes(r.status));
+
+    res.json({ requests, scheduled, past });
+  } catch (error) {
+    console.error("Error fetching user requests:", error);
+    res.status(500).json({ message: "Failed to fetch requests." });
+  }
+};
+
+const getUserSchedules = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const schedules = await ServiceSchedule.find({ userId });
+    const scheduled = schedules.filter(s => s.status === "confirmed");
+    const past = schedules.filter(s => ["completed", "expired"].includes(s.status));
+
+    res.json({ scheduled, past });
+  } catch (error) {
+    console.error("Error fetching user schedules:", error);
+    res.status(500).json({ message: "Failed to fetch schedules." });
+  }
+};
+
+module.exports = {
+  updateProfile,
+  getUserRequests,
+  getUserSchedules,
+};

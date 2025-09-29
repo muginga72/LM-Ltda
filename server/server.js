@@ -38,6 +38,7 @@ app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares',    shareRoutes);
 app.use("/api/testimonials", testimonialsRoute);
+app.use("/api/user", userRoutes);
 
 // Connect & start
 mongoose.connect(process.env.MONGO_URI, {
