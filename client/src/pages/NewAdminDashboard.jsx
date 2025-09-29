@@ -3,14 +3,16 @@ import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { Container, Table, Spinner, Alert, Badge } from "react-bootstrap";
 
-function UserDashboard() {
+function NewAdminDashboard() {
   const { user } = useContext(AuthContext);
 
+  const [users, setUsers] = useState([]);
   const [requestedServices, setRequestedServices] = useState([]);
   const [scheduledServices, setScheduledServices] = useState([]);
   const [sharedServices, setSharedServices] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [errorUsers, setErrorUsers] = useState("");
   const [errorRequested, setErrorRequested] = useState("");
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
@@ -19,6 +21,16 @@ function UserDashboard() {
     const headers = {
       Authorization: `Bearer ${user?.token}`,
       "Cache-Control": "no-cache",
+    };
+
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get("/api/admin/users", { headers });
+        setUsers(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setErrorUsers("Failed to load user list.");
+      }
     };
 
     const fetchRequested = async () => {
@@ -52,11 +64,43 @@ function UserDashboard() {
     };
 
     if (user?.token) {
-      Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(
-        () => setLoading(false)
-      );
+      const promises = [fetchRequested(), fetchScheduled(), fetchShared()];
+      if (user.role === "admin") promises.unshift(fetchUsers());
+      Promise.all(promises).finally(() => setLoading(false));
     }
   }, [user]);
+
+  const renderUserTable = () => (
+    <>
+      <h4 className="mb-3 text-center">👥 All Users</h4>
+      {errorUsers ? (
+        <Alert variant="danger">{errorUsers}</Alert>
+      ) : users.length === 0 ? (
+        <Alert variant="info">No users found.</Alert>
+      ) : (
+        <Table striped bordered hover responsive className="mb-4">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u, index) => (
+              <tr key={u._id}>
+                <td>{index + 1}</td>
+                <td>{u.name}</td>
+                <td>{u.email}</td>
+                <td>{u.role}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </>
+  );
 
   const renderRequestedTable = () => (
     <>
@@ -69,7 +113,7 @@ function UserDashboard() {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>Service Title</th>
               <th>Type</th>
               <th>Fullname</th>
@@ -111,7 +155,7 @@ function UserDashboard() {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>Service Title</th>
               <th>Type</th>
               <th>Fullname</th>
@@ -149,7 +193,7 @@ function UserDashboard() {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>Service Title</th>
               <th>Email</th>
               <th>Shared On</th>
@@ -173,7 +217,10 @@ function UserDashboard() {
   return (
     <>
       <Container style={{ padding: "2rem" }}>
-        <h2 className="mb-4 text-center">Welcome, {user?.name}</h2>
+        <h2 className="mb-2 text-center">
+          {user?.role === "admin" ? "Admin Dashboard" : "User Dashboard"}
+        </h2>
+        <h5 className="text-center mb-4">Welcome, {user?.name}</h5>
         <p>Email: {user?.email}</p>
         <p>Role: {user?.role}</p>
         <hr />
@@ -185,6 +232,7 @@ function UserDashboard() {
           </div>
         ) : (
           <>
+            {user?.role === "admin" && renderUserTable()}
             {renderRequestedTable()}
             {renderScheduledTable()}
             {renderSharedTable()}
@@ -199,4 +247,4 @@ function UserDashboard() {
   );
 }
 
-export default UserDashboard;
+export default NewAdminDashboard;
