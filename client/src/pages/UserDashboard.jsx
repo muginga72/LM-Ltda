@@ -5,86 +5,163 @@ import { Container, Table, Spinner, Alert, Badge } from "react-bootstrap";
 
 function UserDashboard() {
   const { user } = useContext(AuthContext);
-  const [requests, setRequests] = useState([]);
-  const [scheduledRequests, setScheduledRequests] = useState([]);
-  const [pastRequests, setPastRequests] = useState([]);
+
+  const [requestedServices, setRequestedServices] = useState([]);
   const [scheduledServices, setScheduledServices] = useState([]);
-  const [pastServices, setPastServices] = useState([]);
+  const [sharedServices, setSharedServices] = useState([]);
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errorRequested, setErrorRequested] = useState("");
+  const [errorScheduled, setErrorScheduled] = useState("");
+  const [errorShared, setErrorShared] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [reqRes, schedRes] = await Promise.all([
-          axios.get("/api/user/requests", {
-            headers: { Authorization: `Bearer ${user?.token}` },
-          }),
-          axios.get("/api/user/schedules", {
-            headers: { Authorization: `Bearer ${user?.token}` },
-          }),
-        ]);
+    const headers = {
+      Authorization: `Bearer ${user?.token}`,
+      "Cache-Control": "no-cache",
+    };
 
-        setRequests(reqRes.data.requests || []);
-        setScheduledRequests(reqRes.data.scheduled || []);
-        setPastRequests(reqRes.data.past || []);
-        setScheduledServices(schedRes.data.scheduled || []);
-        setPastServices(schedRes.data.past || []);
+    const fetchRequested = async () => {
+      try {
+        const res = await axios.get("/api/requests", { headers });
+        setRequestedServices(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error("Dashboard error:", err);
-        setError("Failed to load your service data.");
-      } finally {
-        setLoading(false);
+        console.error("Requested services error:", err);
+        setErrorRequested("Failed to load requested services.");
       }
     };
 
-    if (user?.token) fetchData();
+    const fetchScheduled = async () => {
+      try {
+        const res = await axios.get("/api/schedules", { headers });
+        setScheduledServices(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Scheduled services error:", err);
+        setErrorScheduled("Failed to load scheduled services.");
+      }
+    };
+
+    const fetchShared = async () => {
+      try {
+        const res = await axios.get("/api/shares", { headers });
+        setSharedServices(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Shared services error:", err);
+        setErrorShared("Failed to load shared services.");
+      }
+    };
+
+    if (user?.token) {
+      Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(
+        () => setLoading(false)
+      );
+    }
   }, [user]);
 
-  const renderStatusBadge = (status) => {
-    const variantMap = {
-      pending: "warning",
-      confirmed: "primary",
-      completed: "success",
-      cancelled: "danger",
-      expired: "secondary",
-    };
-    const variant = variantMap[status?.toLowerCase()] || "dark";
-    return (
-      <Badge bg={variant} className="text-capitalize">
-        {status}
-      </Badge>
-    );
-  };
-
-  const renderTable = (title, data, dateField = "createdAt") => (
+  const renderRequestedTable = () => (
     <>
-      <h5 className="mt-4 mb-3">{title}</h5>
-      {data.length === 0 ? (
-        <Alert variant="info">No {title.toLowerCase()} available.</Alert>
+      <h5 className="mt-4 mb-3">📝 Requested Services</h5>
+      {errorRequested ? (
+        <Alert variant="danger">{errorRequested}</Alert>
+      ) : requestedServices.length === 0 ? (
+        <Alert variant="info">No requested services available.</Alert>
       ) : (
         <Table striped bordered hover responsive>
           <thead>
             <tr>
               <th>ID</th>
-              <th>Service</th>
-              <th>Status</th>
-              <th>
-                {dateField === "scheduledFor" ? "Scheduled Date" : "Requested On"}
-              </th>
+              <th>Service Title</th>
+              <th>Type</th>
+              <th>Fullname</th>
+              <th>Details</th>
+              <th>Paid</th>
+              <th>Requested On</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((item, index) => (
+            {requestedServices.map((item, index) => (
               <tr key={item._id}>
                 <td>{index + 1}</td>
-                <td>{item.serviceName || item.serviceTitle}</td>
-                <td>{renderStatusBadge(item.status)}</td>
+                <td>{item.serviceTitle}</td>
+                <td>{item.serviceType}</td>
+                <td>{item.fullName}</td>
+                <td>{item.details || "—"}</td>
                 <td>
-                  {item[dateField]
-                    ? new Date(item[dateField]).toLocaleDateString()
-                    : "—"}
+                  <Badge bg={item.paid ? "success" : "secondary"}>
+                    {item.paid ? "Paid" : "Unpaid"}
+                  </Badge>
                 </td>
+                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </>
+  );
+
+  const renderScheduledTable = () => (
+    <>
+      <h5 className="mt-4 mb-3">📅 Scheduled Services</h5>
+      {errorScheduled ? (
+        <Alert variant="danger">{errorScheduled}</Alert>
+      ) : scheduledServices.length === 0 ? (
+        <Alert variant="info">No scheduled services available.</Alert>
+      ) : (
+        <Table striped bordered hover responsive>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Service Title</th>
+              <th>Type</th>
+              <th>Fullname</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Scheduled On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scheduledServices.map((item, index) => (
+              <tr key={item._id}>
+                <td>{index + 1}</td>
+                <td>{item.serviceTitle}</td>
+                <td>{item.serviceType}</td>
+                <td>{item.fullName}</td>
+                <td>{item.date}</td>
+                <td>{item.time}</td>
+                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </>
+  );
+
+  const renderSharedTable = () => (
+    <>
+      <h5 className="mt-4 mb-3">📧 Shared Services</h5>
+      {errorShared ? (
+        <Alert variant="danger">{errorShared}</Alert>
+      ) : sharedServices.length === 0 ? (
+        <Alert variant="info">No shared services available.</Alert>
+      ) : (
+        <Table striped bordered hover responsive>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Service Title</th>
+              <th>Email</th>
+              <th>Shared On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sharedServices.map((item, index) => (
+              <tr key={item._id}>
+                <td>{index + 1}</td>
+                <td>{item.serviceTitle}</td>
+                <td>{item.email}</td>
+                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
@@ -103,16 +180,14 @@ function UserDashboard() {
         <h4 className="mb-3 text-center">Your Service Overview</h4>
 
         {loading ? (
-          <Spinner animation="border" />
-        ) : error ? (
-          <Alert variant="danger">{error}</Alert>
+          <div className="text-center">
+            <Spinner animation="border" />
+          </div>
         ) : (
           <>
-            {renderTable("Requested Services", requests)}
-            {renderTable("Scheduled Requests", scheduledRequests, "scheduledFor")}
-            {renderTable("Past Requests", pastRequests, "scheduledFor")}
-            {renderTable("Scheduled Services", scheduledServices, "scheduledFor")}
-            {renderTable("Past Services", pastServices, "scheduledFor")}
+            {renderRequestedTable()}
+            {renderScheduledTable()}
+            {renderSharedTable()}
           </>
         )}
         <hr />
