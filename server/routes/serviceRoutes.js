@@ -41,7 +41,7 @@ const services = [
   },
   {
     id: 7,
-    title: "🍔 Humburguer",
+    title: "🍔 Hamburguer",
     description: "The humble hamburger is a culinary icon versatile, nostalgic, and endlessly customizable.",
     image: "/humburger-sp.png",
   },
