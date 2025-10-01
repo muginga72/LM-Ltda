@@ -13,7 +13,7 @@ function HomePage() {
       <section className="text-center py-2">
         <Container>
           <div style={{ padding: "2rem 0rem 0rem", textAlign: "center" }}>
-            <h1>Welcome to LM Ltda</h1>
+            <h1>Welcome to LM Ltd</h1>
             <p>Explore our mission, values, and what makes us different.</p>
             <div style={{ marginBottom: "1rem" }}>
               <Button

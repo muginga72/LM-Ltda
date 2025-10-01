@@ -3,21 +3,23 @@ const bcrypt = require('bcryptjs');
 const generateToken = require('../utils/generateToken');
 
 // SIGNUP
+// Register user (always as "user")
 const signup = async (req, res) => {
-  const { name, email, password, role } = req.body;
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: 'User already exists' });
+    const { name, email, password } = req.body;
 
-    // hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Check if user already exists
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
 
+    // Force role to "user"
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
-      role: role || 'user'
+      password,
+      role: 'user'
     });
 
     res.status(201).json({
@@ -28,7 +30,7 @@ const signup = async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (err) {
-    console.error(err);
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
