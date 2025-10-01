@@ -1,11 +1,8 @@
 import React from "react";
 import { Container, Row, Col, Carousel, Image, Button } from "react-bootstrap";
-// import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const ServicesPromo = () => {
-  // const navigate = useNavigate();
-
   const products = [
     {
       name: "Beauty Promotion",

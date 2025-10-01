@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, ButtonGroup, Modal, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const ServiceCardWithModals = ({ title, description, image }) => {
+const ServiceCardWithModals = ({ title, description, image, price }) => {
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
@@ -41,6 +41,7 @@ const ServiceCardWithModals = ({ title, description, image }) => {
       ...prev,
       activeModalType: "",
       showModal: { ...prev.showModal, [type]: false },
+      activeModalType: "",
     }));
   };
 
@@ -125,24 +126,50 @@ const ServiceCardWithModals = ({ title, description, image }) => {
     }
   };
 
-  // const today = new Date().toLocaleDateString(undefined, {
-  //   weekday: "long",
-  //   year: "numeric",
-  //   month: "long",
-  //   day: "numeric",
-  // });
-
   return (
     <>
       <Card className="h-100 shadow-sm d-flex flex-column">
         {image && (
-          <Card.Img
-            variant="top"
-            src={image}
-            alt={title}
-            style={{ objectFit: "cover", height: "300px" }}
-          />
+          <div
+            style={{
+              position: "relative",
+              height: "300px",
+              overflow: "hidden",
+            }}
+          >
+            <Card.Img
+              src={image}
+              alt={title}
+              style={{
+                objectFit: "cover",
+                width: "100%",
+                height: "100%",
+                display: "block",
+                borderRadius: "6px 6px 0 0",
+              }}
+            />
+            {price && price.trim() !== "" && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  right: "10px",
+                  color: "#fff",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                  zIndex: 2,
+                }}
+              >
+                <span className="badge bg-warning fs-6">
+                  ${price || "0.00"}
+                </span>
+              </div>
+            )}
+          </div>
         )}
+
         <Card.Body>
           <Card.Title>{title}</Card.Title>
           <Card.Text>{description}</Card.Text>
@@ -150,26 +177,38 @@ const ServiceCardWithModals = ({ title, description, image }) => {
 
         <div className="px-3 pb-3">
           <ButtonGroup vertical className="w-100">
-            <Button variant="success" className="mb-2" onClick={() => handleShow("request")}>
+            <Button
+              variant="success"
+              className="mb-2"
+              onClick={() => handleShow("request")}
+            >
               Request Services
             </Button>
-            <Button variant="primary" className="mb-2" onClick={() => handleShow("schedule")}>
+            <Button
+              variant="primary"
+              className="mb-2"
+              onClick={() => handleShow("schedule")}
+            >
               Schedule Services
             </Button>
-            <Button variant="outline-secondary" onClick={() => handleShow("share")}>
+            <Button
+              variant="outline-secondary"
+              onClick={() => handleShow("share")}
+            >
               Share
             </Button>
           </ButtonGroup>
         </div>
-
-        {/* <Card.Footer className="text-muted text-center" style={{ fontSize: "0.8rem" }}>
-          {today}
-        </Card.Footer> */}
       </Card>
 
       {/* Modals */}
       {["request", "schedule", "share"].map((type) => (
-        <Modal key={type} show={state.showModal[type]} onHide={() => handleClose(type)} centered>
+        <Modal
+          key={type}
+          show={state.showModal[type]}
+          onHide={() => handleClose(type)}
+          centered
+        >
           <Modal.Header closeButton>
             <Modal.Title>
               {type === "request"
@@ -215,8 +254,11 @@ const ServiceCardWithModals = ({ title, description, image }) => {
                   />
                 </Form.Group>
               )}
-              {type === "schedule" && (
+              {type === "schedule" && price && (
                 <>
+                  <div className="alert alert-warning fw-bold text-center mt-3">
+                    Price for this service: ${price}
+                  </div>
                   <Form.Group controlId="date" className="mt-3">
                     <Form.Label>Date</Form.Label>
                     <Form.Control
@@ -264,7 +306,8 @@ const ServiceCardWithModals = ({ title, description, image }) => {
               disabled={
                 loading ||
                 (type === "request" &&
-                  (!state.requestData.serviceType || !state.requestData.details)) ||
+                  (!state.requestData.serviceType ||
+                    !state.requestData.details)) ||
                 (type === "schedule" &&
                   (!state.scheduleData.fullName ||
                     !state.scheduleData.serviceType ||

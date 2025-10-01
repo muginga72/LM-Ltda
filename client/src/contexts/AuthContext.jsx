@@ -19,11 +19,6 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // const logout = () => {
-  //   authService.logout();
-  //   setUser(null);
-  // };
-
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);

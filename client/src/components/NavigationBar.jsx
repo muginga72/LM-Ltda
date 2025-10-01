@@ -4,7 +4,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { LinkContainer } from 'react-router-bootstrap';
 import { AuthContext } from '../contexts/AuthContext';
 import logo from '../assets/logo-v01.png';
-// import logo from '../assets/logo.png';
 import ProfileModal from './ProfileModal';
 
 const NavigationBar = () => {
@@ -28,10 +27,8 @@ const NavigationBar = () => {
                 alt="LM Ltd Logo"
                 width="150"
                 height="100"
-                // className="rounded-circle"
                 className="rounded"
               />
-              {/* LM Ltd */}
             </Navbar.Brand>
           </LinkContainer>
 
