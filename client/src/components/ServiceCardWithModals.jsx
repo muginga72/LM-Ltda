@@ -39,7 +39,6 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
   const handleClose = (type) => {
     setState((prev) => ({
       ...prev,
-      activeModalType: "",
       showModal: { ...prev.showModal, [type]: false },
       activeModalType: "",
     }));
@@ -156,7 +155,7 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
                   right: "10px",
                   color: "#fff",
                   padding: "6px 12px",
-                  borderRadius: "6px",
+                  borderRadius: "12px",
                   fontWeight: "bold",
                   fontSize: "0.9rem",
                   zIndex: 2,
