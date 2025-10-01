@@ -28,6 +28,7 @@ export default function Services() {
                 title={service.title}
                 description={service.description}
                 image={`/images/${service.image}`}
+                price={service.price}
                 link={`/services/${service.id}`}
               />
             </div>

@@ -42,21 +42,6 @@ const getUserRequests = async (req, res) => {
   }
 };
 
-// const getUserSchedules = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-
-//     const schedules = await ServiceSchedule.find({ userId });
-//     const scheduled = schedules.filter(s => s.status === "confirmed");
-//     const past = schedules.filter(s => ["completed", "expired"].includes(s.status));
-
-//     res.json({ scheduled, past });
-//   } catch (error) {
-//     console.error("Error fetching user schedules:", error);
-//     res.status(500).json({ message: "Failed to fetch schedules." });
-//   }
-// };
-
 const getUserSchedules = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -72,7 +57,6 @@ const getUserSchedules = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch schedules." });
   }
 };
-
 
 module.exports = {
   updateProfile,

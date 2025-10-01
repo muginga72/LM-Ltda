@@ -18,25 +18,25 @@ const features = [
   {
     title: "📚 Tutoring",
     image: "tutor-chemistry.png",
-    price: "$30/hr",
+    price: "$40/hr",
     link: "/services/tutoring",
   },
   {
     title: "👨‍🍳 Made-to-Order Meals",
     image: "mealorder.png",
-    price: "$10 - $25",
+    price: "$12.50",
     link: "/services/made-to-order",
   },
   {
     title: "💍 Wedding Events",
     image: "wedding.png",
-    price: "Custom pricing",
+    price: "$150.00",
     link: "/services/weddings",
   },
   {
     title: "🍔 Hamburgers",
     image: "humburger.png",
-    price: "$8 - $12",
+    price: "$10.00",
     link: "/services/hamburgers",
   },
 ];
