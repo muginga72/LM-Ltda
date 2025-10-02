@@ -174,28 +174,22 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
           <Card.Text>{description}</Card.Text>
         </Card.Body>
 
-        <div className="px-3 pb-3">
-          <ButtonGroup vertical className="w-100">
-            <Button
-              variant="success"
-              className="mb-2"
-              onClick={() => handleShow("request")}
-            >
-              Request Services
+        <div className="px-4 pb-3">
+          <ButtonGroup vertical className="w-100 px-3">
+            <div className="d-flex gap-3 mt-2">
+            <Button variant="outline-primary" onClick={() => handleShow("request")}>
+              Request
             </Button>
-            <Button
-              variant="primary"
-              className="mb-2"
-              onClick={() => handleShow("schedule")}
-            >
-              Schedule Services
+            <Button variant="outline-secondary" onClick={() => handleShow("schedule")}>
+              Schedule
             </Button>
-            <Button
-              variant="outline-secondary"
-              onClick={() => handleShow("share")}
-            >
+            <Button variant="outline-info" onClick={() => handleShow("share")}>
               Share
             </Button>
+            {/* <Button variant="outline-warning">
+              Pay
+            </Button> */}
+          </div>
           </ButtonGroup>
         </div>
       </Card>
