@@ -3,6 +3,7 @@ import React from "react";
 import { Container, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import CardsLayout from "../components/CardsLayout";
+import WelcomeBanner from "../components/WelcomeBanner";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -10,11 +11,10 @@ function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="text-center py-2">
+      <section className="text-center">
         <Container>
-          <div style={{ padding: "2rem 0rem 0rem", textAlign: "center" }}>
-            <h1>Welcome to LM Ltd</h1>
-            <p>Explore our mission, values, and what makes us different.</p>
+          <div style={{ textAlign: "center" }}>
+            <WelcomeBanner />
             <div style={{ marginBottom: "1rem" }}>
               <Button
                 variant="outline-primary"
