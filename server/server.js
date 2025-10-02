@@ -16,7 +16,6 @@ const shareRoutes    = require('./routes/shares');
 const testimonialsRoute = require("./routes/testimonials");
 const cardsRoutes = require('./routes/cardsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const uploadRoutes = require("./routes/uploadRoutes");
 const paymentsRoutes = require('./routes/payments/paymentsRoutes');
 const adminPaymentsRoutes = require("./routes/payments/adminPaymentsRoutes");
 
@@ -37,7 +36,6 @@ app.use("/api/user", userRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cards', cardsRoutes);
 app.use('/api/admin', adminRoutes);
-app.use("/api/uploads", uploadRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
