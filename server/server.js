@@ -16,6 +16,9 @@ const shareRoutes    = require('./routes/shares');
 const testimonialsRoute = require("./routes/testimonials");
 const cardsRoutes = require('./routes/cardsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const uploadRoutes = require("./routes/uploadRoutes");
+const paymentsRoutes = require('./routes/payments/paymentsRoutes');
+const adminPaymentsRoutes = require("./routes/payments/adminPaymentsRoutes");
 
 // Instantiate the Express application
 const app = express();
@@ -28,17 +31,20 @@ app.use(bodyParser.json());
 // Stripe webhook must get raw body
 app.use('/api/requests/webhook', requestRoutes);
 
-// Mount API
+// Mount API (lightblue API name check the router)
 app.use('/api/auth', authRoutes);
+app.use("/api/user", userRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cards', cardsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use("/api/uploads", uploadRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares',    shareRoutes);
 app.use("/api/testimonials", testimonialsRoute);
-app.use("/api/user", userRoutes);
+app.use("/api/payments", paymentsRoutes);
+app.use("/api/admin-payments", adminPaymentsRoutes);
 
 // Connect & start
 mongoose.connect(process.env.MONGO_URI, {
