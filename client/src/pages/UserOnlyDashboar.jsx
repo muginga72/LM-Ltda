@@ -1,7 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
-import { Container, Table, Spinner, Alert, Badge } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Spinner,
+  Alert,
+  Button,
+  Dropdown,
+  ButtonGroup,
+  Modal,
+} from "react-bootstrap";
 
 function UserOnlyDashboard() {
   const { user } = useContext(AuthContext);
@@ -15,6 +24,23 @@ function UserOnlyDashboard() {
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
 
+  const [showModal, setShowModal] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+
+  const handlePayClick = (serviceId) => {
+    setSelectedServiceId(serviceId);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedServiceId(null);
+  };
+
+  const handleUpload = (serviceId) => {
+    alert(`Upload document for service ID: ${serviceId}`);
+  };
+
   useEffect(() => {
     if (!user || user.role === "admin") return;
 
@@ -26,7 +52,9 @@ function UserOnlyDashboard() {
     const fetchRequested = async () => {
       try {
         const res = await axios.get("/api/requests", { headers });
-        const filtered = res.data.filter(item => item.email === user.email || item.fullName === user.name);
+        const filtered = res.data.filter(
+          (item) => item.email === user.email || item.fullName === user.name
+        );
         setRequestedServices(filtered);
       } catch (err) {
         console.error("Requested services error:", err);
@@ -37,7 +65,7 @@ function UserOnlyDashboard() {
     const fetchScheduled = async () => {
       try {
         const res = await axios.get("/api/schedules", { headers });
-        const filtered = res.data.filter(item => item.fullName === user.name);
+        const filtered = res.data.filter((item) => item.fullName === user.name);
         setScheduledServices(filtered);
       } catch (err) {
         console.error("Scheduled services error:", err);
@@ -48,7 +76,7 @@ function UserOnlyDashboard() {
     const fetchShared = async () => {
       try {
         const res = await axios.get("/api/shares", { headers });
-        const filtered = res.data.filter(item => item.email === user.email);
+        const filtered = res.data.filter((item) => item.email === user.email);
         setSharedServices(filtered);
       } catch (err) {
         console.error("Shared services error:", err);
@@ -56,8 +84,25 @@ function UserOnlyDashboard() {
       }
     };
 
-    Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(() => setLoading(false));
+    Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(
+      () => setLoading(false)
+    );
   }, [user]);
+
+  const handleEmail = async (serviceId) => {
+    try {
+      await axios.post("/api/send-email", {
+        from: user.email, // dynamically use logged-in user's email
+        to: "lmj.muginga@gmail.com",
+        subject: "Payment Confirmation",
+        text: `Hello, I have completed payment for service ID: ${serviceId}. Please find the support document attached or uploaded.`,
+      });
+      alert("Email sent successfully!");
+    } catch (error) {
+      console.error("Email send error:", error);
+      alert("Failed to send email.");
+    }
+  };
 
   const renderRequestedTable = () => (
     <>
@@ -74,7 +119,7 @@ function UserOnlyDashboard() {
               <th>Service Title</th>
               <th>Type</th>
               <th>Details</th>
-              <th>Paid</th>
+              <th>Status</th>
               <th>Requested On</th>
             </tr>
           </thead>
@@ -86,9 +131,18 @@ function UserOnlyDashboard() {
                 <td>{item.serviceType}</td>
                 <td>{item.details || "—"}</td>
                 <td>
-                  <Badge bg={item.paid ? "success" : "secondary"}>
-                    {item.paid ? "Paid" : "Unpaid"}
-                  </Badge>
+                  {item.paid ? (
+                    <Button variant="success" disabled>
+                      Paid
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="warning"
+                      onClick={() => handlePayClick(item._id)}
+                    >
+                      Pay Now
+                    </Button>
+                  )}
                 </td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>
@@ -116,6 +170,8 @@ function UserOnlyDashboard() {
               <th>Date</th>
               <th>Time</th>
               <th>Scheduled On</th>
+              <th>Status</th>
+              <th>Upload/Email</th>
             </tr>
           </thead>
           <tbody>
@@ -127,6 +183,51 @@ function UserOnlyDashboard() {
                 <td>{item.date}</td>
                 <td>{item.time}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+                <td>
+                  {item.paid ? (
+                    <Button variant="success" disabled>
+                      Paid
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="warning"
+                      onClick={() => handlePayClick(item._id)}
+                    >
+                      Pay Now
+                    </Button>
+                  )}
+                </td>
+                <td>
+                  {item.paid ? (
+                    <Button variant="success" disabled>
+                      Paid
+                    </Button>
+                  ) : (
+                    <Dropdown as={ButtonGroup}>
+                      <Button
+                        variant="outline-primary"
+                        onClick={() => handlePayClick(item._id)}
+                      >
+                        Support Doc
+                      </Button>
+                      <Dropdown.Toggle
+                        split
+                        variant="outline-primary"
+                        id={`dropdown-split-${item._id}`}
+                      />
+                      <Dropdown.Menu>
+                        <Dropdown.Item onClick={() => handleUpload(item._id)}>
+                          Upload Document
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleEmail(item._id)}
+                        >
+                          Send Email
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -200,8 +301,62 @@ function UserOnlyDashboard() {
         )}
         <hr />
       </Container>
+
+      {/* Payment Instructions Modal */}
+      <Modal show={showModal} onHide={handleCloseModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Payment Instructions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Please pay using the bank details below by deposit or transfer:</p>
+          <ul>
+            <li>
+              <strong>Bank Name:</strong> BFA
+            </li>
+            <li>
+              <strong>Account Name:</strong> Maria Miguel
+            </li>
+            <li>
+              <strong>Account Number:</strong> 342295560 30 001
+            </li>
+            <li>
+              <strong>Routing Number:</strong> AO06 0006 0000 42295560301 25
+            </li>
+            <li>
+              <strong>Customer Name:</strong> Your full name or service ID
+            </li>
+          </ul>
+          <hr />
+          <p>
+            Once you've completed the payment, please upload the support
+            document or send it via email to confirm.
+          </p>
+          <div className="d-flex justify-content-between mt-3">
+            <Button
+              variant="outline-primary"
+              onClick={() => handleUpload(selectedServiceId)}
+            >
+              Upload Document
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={() => handleEmail(selectedServiceId)}
+            >
+              Send Email
+            </Button>
+          </div>
+        </Modal.Body>
+        {/* <Modal.Footer>
+          <Button variant="outline-dark" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer> */}
+      </Modal>
+
       <footer className="text-center py-2">
-        <small>&copy; {new Date().getFullYear()} LM Ltd. All rights reserved.</small>
+        <small>
+          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+        </small>
       </footer>
     </>
   );
