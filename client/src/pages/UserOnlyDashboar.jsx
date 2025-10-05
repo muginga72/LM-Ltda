@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import UploadDocumentModal from "../components/UploadDocumentModal";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   Container,
@@ -7,8 +8,6 @@ import {
   Spinner,
   Alert,
   Button,
-  Dropdown,
-  ButtonGroup,
   Modal,
 } from "react-bootstrap";
 
@@ -25,6 +24,8 @@ function UserOnlyDashboard() {
   const [errorShared, setErrorShared] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadServiceId, setUploadServiceId] = useState(null);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
 
   const handlePayClick = (serviceId) => {
@@ -35,10 +36,6 @@ function UserOnlyDashboard() {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedServiceId(null);
-  };
-
-  const handleUpload = (serviceId) => {
-    alert(`Upload document for service ID: ${serviceId}`);
   };
 
   useEffect(() => {
@@ -119,8 +116,8 @@ function UserOnlyDashboard() {
               <th>Service Title</th>
               <th>Type</th>
               <th>Details</th>
-              <th>Status</th>
               <th>Requested On</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -130,6 +127,7 @@ function UserOnlyDashboard() {
                 <td>{item.serviceTitle}</td>
                 <td>{item.serviceType}</td>
                 <td>{item.details || "—"}</td>
+                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td>
                   {item.paid ? (
                     <Button variant="success" disabled>
@@ -144,7 +142,6 @@ function UserOnlyDashboard() {
                     </Button>
                   )}
                 </td>
-                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
@@ -171,7 +168,7 @@ function UserOnlyDashboard() {
               <th>Time</th>
               <th>Scheduled On</th>
               <th>Status</th>
-              <th>Upload/Email</th>
+              {/* <th>Upload/Email</th> */}
             </tr>
           </thead>
           <tbody>
@@ -195,37 +192,6 @@ function UserOnlyDashboard() {
                     >
                       Pay Now
                     </Button>
-                  )}
-                </td>
-                <td>
-                  {item.paid ? (
-                    <Button variant="success" disabled>
-                      Paid
-                    </Button>
-                  ) : (
-                    <Dropdown as={ButtonGroup}>
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => handlePayClick(item._id)}
-                      >
-                        Support Doc
-                      </Button>
-                      <Dropdown.Toggle
-                        split
-                        variant="outline-primary"
-                        id={`dropdown-split-${item._id}`}
-                      />
-                      <Dropdown.Menu>
-                        <Dropdown.Item onClick={() => handleUpload(item._id)}>
-                          Upload Document
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() => handleEmail(item._id)}
-                        >
-                          Send Email
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
                   )}
                 </td>
               </tr>
@@ -334,7 +300,10 @@ function UserOnlyDashboard() {
           <div className="d-flex justify-content-between mt-3">
             <Button
               variant="outline-primary"
-              onClick={() => handleUpload(selectedServiceId)}
+              onClick={() => {
+                setUploadServiceId(selectedServiceId);
+                setShowUploadModal(true);
+              }}
             >
               Upload Document
             </Button>
@@ -346,11 +315,13 @@ function UserOnlyDashboard() {
             </Button>
           </div>
         </Modal.Body>
-        {/* <Modal.Footer>
-          <Button variant="outline-dark" onClick={handleCloseModal}>
-            Close
-          </Button>
-        </Modal.Footer> */}
+
+        <UploadDocumentModal
+          show={showUploadModal}
+          handleClose={() => setShowUploadModal(false)}
+          serviceId={uploadServiceId}
+          user={user}
+        />
       </Modal>
 
       <footer className="text-center py-2">

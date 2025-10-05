@@ -118,8 +118,8 @@ function NewAdminDashboard() {
               <th>Type</th>
               <th>Fullname</th>
               <th>Details</th>
-              <th>Paid</th>
               <th>Requested On</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -130,12 +130,12 @@ function NewAdminDashboard() {
                 <td>{item.serviceType}</td>
                 <td>{item.fullName}</td>
                 <td>{item.details || "—"}</td>
+                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td>
                   <Badge bg={item.paid ? "success" : "secondary"}>
                     {item.paid ? "Paid" : "Unpaid"}
                   </Badge>
                 </td>
-                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
@@ -162,6 +162,7 @@ function NewAdminDashboard() {
               <th>Date</th>
               <th>Time</th>
               <th>Scheduled On</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -174,6 +175,11 @@ function NewAdminDashboard() {
                 <td>{item.date}</td>
                 <td>{item.time}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+                <td>
+                  <Badge bg={item.paid ? "success" : "secondary"}>
+                    {item.paid ? "Paid" : "Unpaid"}
+                  </Badge>
+                </td>
               </tr>
             ))}
           </tbody>

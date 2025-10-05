@@ -16,6 +16,7 @@ const shareRoutes    = require('./routes/shares');
 const testimonialsRoute = require("./routes/testimonials");
 const cardsRoutes = require('./routes/cardsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const uploadRoutes = require('./routes/uploadFilesRoutes');
 const paymentsRoutes = require('./routes/payments/paymentsRoutes');
 const adminPaymentsRoutes = require("./routes/payments/adminPaymentsRoutes");
 
@@ -26,16 +27,19 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Stripe webhook must get raw body
 app.use('/api/requests/webhook', requestRoutes);
+app.use("/uploads", express.static("uploads"));
 
 // Mount API (lightblue API name check the router)
+app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use("/api/user", userRoutes);
 app.use('/api/users', userRoutes);
+app.use("/api", uploadRoutes);
 app.use('/api/cards', cardsRoutes);
-app.use('/api/admin', adminRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
