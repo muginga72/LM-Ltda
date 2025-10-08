@@ -20,7 +20,7 @@ image
 
 Clone the repo
 
-git clone https://github.com/your-username/LM-Ltda.git 
+git clone https://github.com/muginga72/LM-Ltda.git 
 
 cd LM-Ltda
 
