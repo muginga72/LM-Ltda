@@ -1,97 +1,51 @@
-📦 LM-Ltd
+# 🛠️ LM-Ltd Services Platform
 
-A modular React + Vite application for managing service requests, scheduling, and sharing. Built for speed, clarity, and educational impact—with dynamic UI feedback, reusable components, and backend integration via Ruby on Rails.
+LM-Ltd Services is a scalable, modular web application designed to streamline digital service requests, scheduling, and verification. Built with React, Node.js, and MongoDB, it empowers users to request services, manage schedules, and submit payment proof via secure upload or email.
 
-🚀 Features
+---
 
-• ⚡️ Vite-powered React app with Hot Module Replacement (HMR) • 🧩 Modular service cards with modal interactions • 🗂 Accordion view for compact service browsing • 🧠 Form validation and dynamic placeholders • 🔗 Backend-ready for Ruby on Rails API • 
+## 🚀 Features
 
-✅ ESLint with recommended rules for clean code
+- 🧾 **Service Request Dashboard**  
+  Users can submit service requests with details and track their status.
 
-🛠 Tech Stack
+- 📅 **Scheduling System**  
+  Schedule services with date/time selection and payment tracking.
 
-Layer Technology Frontend React + Vite Styling React Bootstrap State Mgmt useState / useEffect Backend Ruby on Rails (API) Database PostgreSQL / MongoDB Linting ESLint + Prettier
+- 📤 **Payment Verification Workflow**  
+  Upload proof of payment or send confirmation via email to admins.
 
-📁 Project Structure
+- 📧 **Admin Notification**  
+  Automatic email alerts for uploaded documents and payment confirmations.
 
-image
+- 🔐 **Role-Based Access Control (RBAC)**  
+  Admins and users have distinct dashboards and permissions.
 
-⚙️ Getting Started
+- 🧱 **Modular Architecture**  
+  Clean separation of routes, controllers, middleware, and utilities.
 
-Clone the repo
+- 🐳 **Dockerized Dev Environment**  
+  Rapid setup with Docker Compose and MongoDB GridFS integration.
 
-git clone https://github.com/muginga72/LM-Ltda.git 
+---
 
-cd LM-Ltda
+## 🧰 Tech Stack
 
-Install dependencies
+| Layer         | Technology                     |
+|--------------|---------------------------------|
+| Frontend      | React + Bootstrap              |
+| Backend       | Node.js + Express              |
+| Database      | MongoDB + GridFS               |
+| Auth          | JWT-based authentication       |
+| File Upload   | Multer + GridFS                |
+| Email Service | Nodemailer (Gmail SMTP)        |
+| DevOps        | Docker Compose                 |
 
+---
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/your-org/lm-ltd-services.git
+cd lm-ltd-services
 npm install
-
-Start development server
-
-npm run dev
-
-🔌 Vite Plugin Options
-
-You can choose between two official plugins for React Fast Refresh:
-
-Babel-based (default)
-
-npm install @vitejs/plugin-react --save-dev
-
-SWC-based (faster builds)
-
-npm install @vitejs/plugin-react-swc --save-dev
-
-Update vite.config.js accordingly:
-
-import { defineConfig } from 'vite'; import react from '@vitejs/plugin-react'; // or '@vitejs/plugin-react-swc'
-
-export default defineConfig({ plugins: [react()], })
-
-🧹 ESLint Configuration
-
-Basic ESLint setup is included. For production-grade linting:
-
-npm install eslint eslint-plugin-react eslint-plugin-react-hooks --save-dev
-
-If using TypeScript:
-
-npm install typescript @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
-
-Update .eslintrc.js:
-
-module.exports = { parser: '@typescript-eslint/parser', 
-
-extends: [ 'eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended', ], 
-
-plugins: ['react', '@typescript-eslint'], rules: { // your custom rules }, };
-
-🔗 Backend Integration (Rails)
-
-To connect with your Ruby on Rails backend:
-
-Enable CORS in Rails (rack-cors)
-
-Create API endpoints:• POST /api service_requests • POST /api/service_schedules • POST /api/service_shares
-
-Use fetch or axios in React to send form data
-
-Add success/error feedback to modals
-
-📦 Deployment
-
-For production builds:
-
-npm run build
-
-Then serve with your preferred static host (e.g. Netlify, Vercel, or Rails asset pipeline).
-
-🧠 Contributing
-
-Pull requests are welcome! For major changes, open an issue first to discuss what you’d like to change.
-
-📜 License
-
-MIT
