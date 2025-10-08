@@ -58,25 +58,25 @@ JWT_SECRET=your_jwt_secret
 EMAIL_USER=your.email@gmail.com
 EMAIL_PASS=your_app_password
 
-🐳 Docker Setup
+## 🐳 Docker Setup
 
 docker-compose up --build
 
-📂 File Uploads
+## 📂 File Uploads
 Uploaded documents are stored in MongoDB GridFS and served via /uploads/:filename.
 
-📧 Email Integration
+## 📧 Email Integration
 Users can send payment confirmation emails to:
 Recipient: lmj.muginga@gmail.com
 Subject: Payment Confirmation
 Body: Includes service ID and user details
 
-🧪 Testing
+## 🧪 Testing
 npm run test
 
 Includes unit tests for backend routes and service logic.
 
-🧑‍💻 Contributing
+## 🧑‍💻 Contributing
 We welcome contributors! Please follow our onboarding flow:
 - Fork the repo
 - Clone locally
@@ -84,7 +84,7 @@ We welcome contributors! Please follow our onboarding flow:
 - Submit a pull request
 See CONTRIBUTING.md for full guidelines.
 
-📌 Roadmap
+## 📌 Roadmap
 - [x] User dashboard with service tracking
 - [x] Admin dashboard with verification tools
 - [x] File upload and email workflows
@@ -92,11 +92,11 @@ See CONTRIBUTING.md for full guidelines.
 - [ ] Plugin system for service extensions
 - [ ] Multi-language support
 
-🛡️ License
+## 🛡️ License
 
 MIT License © LM Ltd
 
-🤝 Contact
+## 🤝 Contact
 For support or collaboration inquiries:
 📧 lmj.muginga@gmail.com
 🌐 www.lm-ltd-services.com
