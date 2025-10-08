@@ -4,7 +4,9 @@ A modular React + Vite application for managing service requests, scheduling, an
 
 🚀 Features
 
-• ⚡️ Vite-powered React app with Hot Module Replacement (HMR) • 🧩 Modular service cards with modal interactions • 🗂 Accordion view for compact service browsing • 🧠 Form validation and dynamic placeholders • 🔗 Backend-ready for Ruby on Rails API • ✅ ESLint with recommended rules for clean code
+• ⚡️ Vite-powered React app with Hot Module Replacement (HMR) • 🧩 Modular service cards with modal interactions • 🗂 Accordion view for compact service browsing • 🧠 Form validation and dynamic placeholders • 🔗 Backend-ready for Ruby on Rails API • 
+
+✅ ESLint with recommended rules for clean code
 
 🛠 Tech Stack
 
@@ -17,7 +19,9 @@ image
 ⚙️ Getting Started
 
 Clone the repo
+
 git clone https://github.com/your-username/LM-Ltda.git 
+
 cd LM-Ltda
 
 Install dependencies
@@ -58,7 +62,11 @@ npm install typescript @typescript-eslint/parser @typescript-eslint/eslint-plugi
 
 Update .eslintrc.js:
 
-module.exports = { parser: '@typescript-eslint/parser', extends: [ 'eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended', ], plugins: ['react', '@typescript-eslint'], rules: { // your custom rules }, };
+module.exports = { parser: '@typescript-eslint/parser', 
+
+extends: [ 'eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended', ], 
+
+plugins: ['react', '@typescript-eslint'], rules: { // your custom rules }, };
 
 🔗 Backend Integration (Rails)
 
