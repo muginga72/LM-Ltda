@@ -12,24 +12,33 @@ function Register() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // Only send name, email, password
-        body: JSON.stringify({ name, email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }),
       });
 
-      const data = await res.json();
+      // Safely parse JSON
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
-        // redirect after successful signup
+        // ✅ redirect after successful signup
         navigate("/dashboard");
       } else {
+        // Show backend error or fallback
         setError(data.message || "Registration failed");
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setError("Registration failed");
+      setError("Registration failed. Please try again.");
     }
   };
 
@@ -55,6 +64,7 @@ function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
           />
         </Form.Group>
 
@@ -65,11 +75,11 @@ function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
           />
         </Form.Group>
 
         {/* Removed role selector so users cannot choose admin */}
-
         <Button type="submit">Register</Button>
       </Form>
     </Container>

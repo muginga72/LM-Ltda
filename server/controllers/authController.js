@@ -1,12 +1,15 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const generateToken = require('../utils/generateToken');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const generateToken = require("../utils/generateToken");
 
-// SIGNUP
 // Register user (always as "user")
 const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
     // Check if user already exists
     const existing = await User.findOne({ email });
@@ -18,8 +21,9 @@ const signup = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password,
-      role: 'user'
+      password,     // hashed by pre-save hook
+      role: 'user',
+      avatar,
     });
 
     res.status(201).json({

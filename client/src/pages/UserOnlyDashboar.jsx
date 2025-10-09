@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import UploadDocumentModal from "../components/UploadDocumentModal";
+import EmailSupportModal from "../components/EmailSupportModal";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   Container,
@@ -27,6 +28,7 @@ function UserOnlyDashboard() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadServiceId, setUploadServiceId] = useState(null);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
+  const [emailSupportModal, setEmailSupportModal] = useState(false);
 
   const handlePayClick = (serviceId) => {
     setSelectedServiceId(serviceId);
@@ -86,20 +88,20 @@ function UserOnlyDashboard() {
     );
   }, [user]);
 
-  const handleEmail = async (serviceId) => {
-    try {
-      await axios.post("/api/send-email", {
-        from: user.email, // dynamically use logged-in user's email
-        to: "lmj.muginga@gmail.com",
-        subject: "Payment Confirmation",
-        text: `Hello, I have completed payment for service ID: ${serviceId}. Please find the support document attached or uploaded.`,
-      });
-      alert("Email sent successfully!");
-    } catch (error) {
-      console.error("Email send error:", error);
-      alert("Failed to send email.");
-    }
-  };
+  // const handleEmail = async (serviceId) => {
+  //   try {
+  //     await axios.post("/api/send-email", {
+  //       from: user.email, // dynamically use logged-in user's email
+  //       to: "lmj.muginga@gmail.com",
+  //       subject: "Payment Confirmation",
+  //       text: `Hello, I have completed payment for service ID: ${serviceId}. Please find the support document attached or uploaded.`,
+  //     });
+  //     alert("Email sent successfully!");
+  //   } catch (error) {
+  //     console.error("Email send error:", error);
+  //     alert("Failed to send email.");
+  //   }
+  // };
 
   const renderRequestedTable = () => (
     <>
@@ -307,12 +309,14 @@ function UserOnlyDashboard() {
             >
               Upload Document
             </Button>
-            <Button
-              variant="outline-secondary"
-              onClick={() => handleEmail(selectedServiceId)}
-            >
+            <Button variant="success" onClick={() => setShowModal(true)}>
               Send Email
             </Button>
+            <EmailSupportModal
+              show={emailSupportModal}
+              handleClose={() => setEmailSupportModal(false)}
+              userEmail={user.email}
+            />
           </div>
         </Modal.Body>
 
