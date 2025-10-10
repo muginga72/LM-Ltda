@@ -88,21 +88,6 @@ function UserOnlyDashboard() {
     );
   }, [user]);
 
-  // const handleEmail = async (serviceId) => {
-  //   try {
-  //     await axios.post("/api/send-email", {
-  //       from: user.email, // dynamically use logged-in user's email
-  //       to: "lmj.muginga@gmail.com",
-  //       subject: "Payment Confirmation",
-  //       text: `Hello, I have completed payment for service ID: ${serviceId}. Please find the support document attached or uploaded.`,
-  //     });
-  //     alert("Email sent successfully!");
-  //   } catch (error) {
-  //     console.error("Email send error:", error);
-  //     alert("Failed to send email.");
-  //   }
-  // };
-
   const renderRequestedTable = () => (
     <>
       <h5 className="mt-4 mb-3">📝 Your Requested Services</h5>
@@ -309,14 +294,12 @@ function UserOnlyDashboard() {
             >
               Upload Document
             </Button>
-            <Button variant="success" onClick={() => setShowModal(true)}>
+            <Button
+              variant="outline-success"
+              onClick={() => setEmailSupportModal(true)}
+            >
               Send Email
             </Button>
-            <EmailSupportModal
-              show={emailSupportModal}
-              handleClose={() => setEmailSupportModal(false)}
-              userEmail={user.email}
-            />
           </div>
         </Modal.Body>
 
@@ -325,6 +308,13 @@ function UserOnlyDashboard() {
           handleClose={() => setShowUploadModal(false)}
           serviceId={uploadServiceId}
           user={user}
+        />
+
+        <EmailSupportModal
+          show={emailSupportModal}
+          handleClose={() => setEmailSupportModal(false)}
+          userEmail={user?.email}
+          serviceId={selectedServiceId}
         />
       </Modal>
 
