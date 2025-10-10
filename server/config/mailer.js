@@ -1,6 +1,8 @@
 // server/config/mailer.js
-module.exports = {
-  sendMail: (to, subject, body) => {
-    console.log(`Pretend sending email to ${to}: ${subject}`);
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
-};
+});

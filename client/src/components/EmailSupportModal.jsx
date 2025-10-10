@@ -1,45 +1,70 @@
 // components/EmailSupportModal.jsx
-import React, { useState } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Modal, Button, Alert, Form } from "react-bootstrap";
+import axios from "axios";
 
-const EmailSupportModal = ({ show, handleClose, userEmail }) => {
+function EmailSupportModal({ show, handleClose, serviceId, userEmail }) {
+  const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
-  const [status, setStatus] = useState('');
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   const handleSendEmail = async () => {
+    if (!userEmail || !serviceId || !file) {
+      setStatus("Please provide all required information and attach a file.");
+      return;
+    }
+
     setSending(true);
+    setStatus("");
+
+    const formData = new FormData();
+    formData.append("userEmail", userEmail);
+    formData.append("serviceId", serviceId);
+    formData.append("attachment", file);
+
     try {
-      const res = await fetch('/api/send-payment-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail }),
+      const res = await axios.post("/api/send-payment-email", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      const data = await res.json();
-      setStatus(data.message);
+      setStatus(res.data.message || "Email sent successfully.");
     } catch (err) {
-      setStatus('Failed to send email.');
+      console.error(err);
+      setStatus("Failed to send email.");
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Support Payment</Modal.Title>
+        <Modal.Title>Email Support</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>Click below to notify support and begin payment verification.</p>
-        {status && <p className="text-info">{status}</p>}
+        <p>
+          Notify support that you've made a payment for service ID:{" "}
+          <strong>{serviceId}</strong>.
+        </p>
+        <Form.Group controlId="formFile">
+          <Form.Label>Attach proof of payment (PDF, image, etc.):</Form.Label>
+          <Form.Control type="file" onChange={handleFileChange} />
+        </Form.Group>
+        {status && <Alert variant="info" className="mt-3">{status}</Alert>}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>Close</Button>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
         <Button variant="primary" onClick={handleSendEmail} disabled={sending}>
-          {sending ? 'Sending...' : 'Send Email'}
+          {sending ? "Sending..." : "Send Email"}
         </Button>
       </Modal.Footer>
     </Modal>
   );
-};
+}
 
 export default EmailSupportModal;

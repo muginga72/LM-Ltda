@@ -9,7 +9,7 @@ router.post("/send-email", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "your.email@gmail.com", // this is the authenticated sender (your app's email)
+        user: "lmj.muginga@gmail.com", // this is the authenticated sender (your app's email)
         pass: "your-app-password",
       },
     });
