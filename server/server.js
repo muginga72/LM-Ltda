@@ -45,7 +45,7 @@ app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares',    shareRoutes);
 app.use("/api/testimonials", testimonialsRoute);
-app.use("/api/payments", paymentsRoutes);
+app.use("/api", paymentsRoutes);
 app.use("/api/admin-payments", adminPaymentsRoutes);
 
 // Connect & start
