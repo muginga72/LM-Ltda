@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
+import ServiceStatusControl from "../components/ServiceStatusControl";
 import { Container, Table, Spinner, Alert, Badge } from "react-bootstrap";
 
 function NewAdminDashboard() {
@@ -132,9 +133,31 @@ function NewAdminDashboard() {
                 <td>{item.details || "—"}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <Badge bg={item.paid ? "success" : "secondary"}>
-                    {item.paid ? "Paid" : "Unpaid"}
-                  </Badge>
+                  <ServiceStatusControl
+                    serviceId={item._id}
+                    currentStatus={
+                      item.status || (item.paid ? "paid" : "unpaid")
+                    }
+                    type="requested"
+                    token={user?.token}
+                    onStatusUpdate={(id, newStatus, type) => {
+                      const updateList = (list) =>
+                        list.map((item) =>
+                          item._id === id
+                            ? {
+                                ...item,
+                                status: newStatus,
+                                paid: newStatus === "paid",
+                              }
+                            : item
+                        );
+                      if (type === "requested") {
+                        setRequestedServices((prev) => updateList(prev));
+                      } else if (type === "scheduled") {
+                        setScheduledServices((prev) => updateList(prev));
+                      }
+                    }}
+                  />
                 </td>
               </tr>
             ))}
@@ -176,9 +199,31 @@ function NewAdminDashboard() {
                 <td>{item.time}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <Badge bg={item.paid ? "success" : "secondary"}>
-                    {item.paid ? "Paid" : "Unpaid"}
-                  </Badge>
+                  <ServiceStatusControl
+                    serviceId={item._id}
+                    currentStatus={
+                      item.status || (item.paid ? "paid" : "unpaid")
+                    }
+                    type="requested"
+                    token={user?.token}
+                    onStatusUpdate={(id, newStatus, type) => {
+                      const updateList = (list) =>
+                        list.map((item) =>
+                          item._id === id
+                            ? {
+                                ...item,
+                                status: newStatus,
+                                paid: newStatus === "paid",
+                              }
+                            : item
+                        );
+                      if (type === "requested") {
+                        setRequestedServices((prev) => updateList(prev));
+                      } else if (type === "scheduled") {
+                        setScheduledServices((prev) => updateList(prev));
+                      }
+                    }}
+                  />
                 </td>
               </tr>
             ))}
@@ -247,7 +292,9 @@ function NewAdminDashboard() {
         <hr />
       </Container>
       <footer className="text-center py-2">
-        <small>&copy; {new Date().getFullYear()} LM Ltd. All rights reserved.</small>
+        <small>
+          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+        </small>
       </footer>
     </>
   );
