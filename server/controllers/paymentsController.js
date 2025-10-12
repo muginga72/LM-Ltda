@@ -6,6 +6,7 @@ const transporter = require("../config/mailer");
 const uploadPaymentProof = async (req, res) => {
   try {
     const payment = new Payment({
+      fullName: req.body.fullName,
       userEmail: req.body.userEmail,
       serviceId: req.body.serviceId,
       fileId: req.file.id,
@@ -21,6 +22,7 @@ const uploadPaymentProof = async (req, res) => {
       subject: "📬 New Payment Proof Uploaded",
       html: `
         <h3>New Payment Proof Received</h3>
+        <p><strong>User:</strong> ${payment.fullName}</p>
         <p><strong>User:</strong> ${payment.userEmail}</p>
         <p><strong>Service:</strong> ${payment.serviceId}</p>
         <p><strong>File:</strong> ${payment.fileName}</p>
@@ -51,6 +53,8 @@ const updatePaymentStatus = async (req, res) => {
         subject: "✅ Payment Verified",
         html: `
           <h3>Your payment has been verified</h3>
+          <p>Dear ${payment.fullName}</p>
+          <p>Email: ${payment.userEmail}</p>
           <p>Service: ${payment.serviceId}</p>
           <p>Status: Paid</p>
           <p>Thank you for your payment!</p>

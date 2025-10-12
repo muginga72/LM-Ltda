@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const PaymentSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
   userEmail: { type: String, required: true },
   serviceId: { type: String, required: true },
   fileId: { type: mongoose.Schema.Types.ObjectId, required: true },

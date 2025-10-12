@@ -7,6 +7,7 @@ const ServiceSchedule = require("../../models/ServiceSchedule");
 // POST /api/payments/proof-payment-received
 router.post("/proof-payment-received", async (req, res) => {
   const {
+    fullName,
     serviceId,
     userEmail,
     serviceTitle,
@@ -17,7 +18,7 @@ router.post("/proof-payment-received", async (req, res) => {
     referenceId,
   } = req.body;
 
-  if (!userEmail || !serviceId || !serviceTitle || amountPaid == null || totalAmount == null) {
+  if (!fullName || !userEmail || !serviceId || !serviceTitle || amountPaid == null || totalAmount == null) {
     return res.status(400).json({ message: "Missing required fields." });
   }
 
@@ -27,7 +28,7 @@ router.post("/proof-payment-received", async (req, res) => {
   try {
     // Try updating in ServiceRequest first
     let updated = await ServiceRequest.findByIdAndUpdate(
-      serviceId,
+      fullName, serviceId, userEmail,
       { status, paid: status === "paid" },
       { new: true }
     );
@@ -35,7 +36,7 @@ router.post("/proof-payment-received", async (req, res) => {
     // If not found, try ServiceSchedule
     if (!updated) {
       updated = await ServiceSchedule.findByIdAndUpdate(
-        serviceId,
+        fullName, serviceId, userEmail,
         { status, paid: status === "paid" },
         { new: true }
       );
