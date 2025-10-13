@@ -5,9 +5,9 @@ const generateToken = require("../utils/generateToken");
 // Register user (always as "user")
 const signup = async (req, res) => {
   try {
-    const { name, email, password, avatar } = req.body;
+    const { fullName, email, password, avatar } = req.body;
 
-    if (!name || !email || !password) {
+    if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -19,7 +19,7 @@ const signup = async (req, res) => {
 
     // Force role to "user"
     const user = await User.create({
-      name,
+      fullName,
       email,
       password,     // hashed by pre-save hook
       role: 'user',
@@ -28,7 +28,7 @@ const signup = async (req, res) => {
 
     res.status(201).json({
       _id: user._id,
-      name: user.name,
+      fullName: user.fullName,
       email: user.email,
       role: user.role,
       token: generateToken(user._id)
@@ -51,7 +51,7 @@ const login = async (req, res) => {
 
     res.json({
       _id: user._id,
-      name: user.name,
+      fullName: user.fullName,
       email: user.email,
       role: user.role,
       token: generateToken(user._id)
