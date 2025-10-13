@@ -2,16 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, ButtonGroup, Modal, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const ServiceCardWithModals = ({ title, description, image, price }) => {
+const ServiceCardWithModals = ({ userEmail, title, description, image, price }) => {
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
     showModal: { request: false, schedule: false, share: false },
     selectedService: title,
     activeModalType: "",
-    requestData: { fullName: "", serviceType: "", details: "" },
-    scheduleData: { fullName: "", serviceType: "", date: "", time: "" },
-    shareData: { email: "" },
+    requestData: { fullName: "", userEmail: "", serviceType: "", details: "" },
+    scheduleData: { fullName: "", userEmail: "", serviceType: "", date: "", time: "" },
+    shareData: { fullName: "", email: "" },
   };
 
   const [state, setState] = useState(defaultState);
@@ -56,15 +56,18 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
     const { activeModalType } = state;
     if (activeModalType === "request") {
       if (field === "fullName") return "Your full name";
+      if (field === "userEmail") return `Enter email to share ${title}`;
       if (field === "serviceType") return `Type of ${title}`;
       if (field === "details") return `Describe your ${title} request...`;
     }
     if (activeModalType === "schedule") {
       if (field === "fullName") return "Your full name";
+      if (field === "userEmail") return `Enter email to share ${title}`;
       if (field === "serviceType") return `Scheduling for ${title}`;
     }
     if (activeModalType === "share") {
-      if (field === "email") return `Enter email to share ${title}`;
+      if (field === "fullName") return "Your full name";
+      if (field === "userEmail") return `Enter email to share ${title}`;
     }
     return "";
   };
@@ -177,19 +180,25 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
         <div className="px-4 pb-3">
           <ButtonGroup vertical className="w-100 px-3">
             <div className="d-flex gap-3 mt-2">
-            <Button variant="outline-primary" onClick={() => handleShow("request")}>
-              Request
-            </Button>
-            <Button variant="outline-secondary" onClick={() => handleShow("schedule")}>
-              Schedule
-            </Button>
-            <Button variant="outline-info" onClick={() => handleShow("share")}>
-              Share
-            </Button>
-            {/* <Button variant="outline-warning">
-              Pay
-            </Button> */}
-          </div>
+              <Button
+                variant="outline-primary"
+                onClick={() => handleShow("request")}
+              >
+                Request
+              </Button>
+              <Button
+                variant="outline-secondary"
+                onClick={() => handleShow("schedule")}
+              >
+                Schedule
+              </Button>
+              <Button
+                variant="outline-info"
+                onClick={() => handleShow("share")}
+              >
+                Share
+              </Button>
+            </div>
           </ButtonGroup>
         </div>
       </Card>
@@ -220,8 +229,9 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
                     <Form.Control
                       type="text"
                       placeholder={getPlaceholder("fullName")}
-                      value={state[`${type}Data`].fullName}
+                      value={state[`${type}Data`].fullName || ""}
                       onChange={(e) => handleChange(e, `${type}Data`)}
+                      name="fullName"
                     />
                   </Form.Group>
                   <Form.Group controlId="serviceType">
@@ -229,12 +239,14 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
                     <Form.Control
                       type="text"
                       placeholder={getPlaceholder("serviceType")}
-                      value={state[`${type}Data`].serviceType}
+                      value={state[`${type}Data`].serviceType || ""}
                       onChange={(e) => handleChange(e, `${type}Data`)}
+                      name="serviceType"
                     />
                   </Form.Group>
                 </>
               )}
+
               {type === "request" && (
                 <Form.Group controlId="details" className="mt-3">
                   <Form.Label>Details</Form.Label>
@@ -242,11 +254,13 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
                     as="textarea"
                     rows={3}
                     placeholder={getPlaceholder("details")}
-                    value={state.requestData.details}
+                    value={state.requestData.details || ""}
                     onChange={(e) => handleChange(e, "requestData")}
+                    name="details"
                   />
                 </Form.Group>
               )}
+
               {type === "schedule" && price && (
                 <>
                   <div className="alert alert-warning fw-bold text-center mt-3">
@@ -256,31 +270,47 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
                     <Form.Label>Date</Form.Label>
                     <Form.Control
                       type="date"
-                      value={state.scheduleData.date}
+                      value={state.scheduleData.date || ""}
                       onChange={(e) => handleChange(e, "scheduleData")}
+                      name="date"
                     />
                   </Form.Group>
                   <Form.Group controlId="time" className="mt-3">
                     <Form.Label>Time</Form.Label>
                     <Form.Control
                       type="time"
-                      value={state.scheduleData.time}
+                      value={state.scheduleData.time || ""}
                       onChange={(e) => handleChange(e, "scheduleData")}
+                      name="time"
                     />
                   </Form.Group>
                 </>
               )}
+
               {type === "share" && (
-                <Form.Group controlId="email">
-                  <Form.Label>Email</Form.Label>
+                <Form.Group controlId="fullName">
+                  <Form.Label>Full Name</Form.Label>
                   <Form.Control
-                    type="email"
-                    placeholder={getPlaceholder("email")}
-                    value={state.shareData.email}
+                    type="text"
+                    placeholder={getPlaceholder("fullName")}
+                    value={state.shareData.fullName || ""}
                     onChange={(e) => handleChange(e, "shareData")}
+                    name="fullName"
                   />
                 </Form.Group>
               )}
+
+              {/* Email for all types */}
+              <Form.Group controlId="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder={getPlaceholder("email")}
+                  value={state[`${type}Data`].email || ""}
+                  onChange={(e) => handleChange(e, `${type}Data`)}
+                  name="email"
+                />
+              </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
@@ -299,10 +329,10 @@ const ServiceCardWithModals = ({ title, description, image, price }) => {
               disabled={
                 loading ||
                 (type === "request" &&
-                  (!state.requestData.serviceType ||
-                    !state.requestData.details)) ||
+                  (!state.requestData.serviceType || !state.requestData.details)) ||
                 (type === "schedule" &&
                   (!state.scheduleData.fullName ||
+                    !state.scheduleData.userEmail ||
                     !state.scheduleData.serviceType ||
                     !state.scheduleData.date ||
                     !state.scheduleData.time)) ||

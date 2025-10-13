@@ -304,6 +304,7 @@ function NewAdminDashboard() {
             <tr>
               <th>#</th>
               <th>Service Title</th>
+              <th>Fullname</th>
               <th>Email</th>
               <th>Shared On</th>
             </tr>
@@ -313,6 +314,7 @@ function NewAdminDashboard() {
               <tr key={item._id}>
                 <td>{index + 1}</td>
                 <td>{item.serviceTitle}</td>
+                <td>{item.fullName}</td>
                 <td>{item.email}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>

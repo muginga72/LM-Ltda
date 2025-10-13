@@ -25,31 +25,39 @@ function AdminLogin() {
   };
 
   return (
-    <Container style={{ maxWidth: 400, marginTop: 50 }}>
-      <h2>Admin</h2>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Button type="submit">Login as Admin</Button>
-      </Form>
-    </Container>
+    <>
+      <Container style={{ maxWidth: 400, marginTop: 50 }}>
+        <h2>Admin</h2>
+        {error && <Alert variant="danger">{error}</Alert>}
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </Form.Group>
+          <Button type="submit" className="mb-3">Login as Admin</Button>
+        </Form>
+      </Container>
+      <hr />
+      <footer className="text-center py-2">
+        <small>
+          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+        </small>
+      </footer>
+    </>
   );
 }
 

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Button, Modal, Table, Spinner, Form } from "react-bootstrap";
 
-function ConfirmPaymentModal({ service, user, fetchAllServices }) {
+function ConfirmPaymentModal({ fullName, service, user, fetchAllServices }) {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [price, setPrice] = useState(null);
@@ -12,7 +12,7 @@ function ConfirmPaymentModal({ service, user, fetchAllServices }) {
   const [referenceId, setReferenceId] = useState("");
 
   const [customerEmail, setCustomerEmail] = useState(
-    service?.userEmail || service?.email || service?.user?.email || ""
+    service.fullName || service?.userEmail || service?.email || service?.user?.email || ""
   );
 
   const handleOpen = async () => {
@@ -42,7 +42,7 @@ function ConfirmPaymentModal({ service, user, fetchAllServices }) {
   const handleClose = () => setShow(false);
 
   const handleConfirmPayment = async () => {
-    if (!amountPaid || !referenceId || !customerEmail) {
+    if (!fullName || !amountPaid || !referenceId || !customerEmail) {
       alert("Please fill in Amount Paid, Payment Method, and Customer Email.");
       return;
     }
@@ -58,6 +58,7 @@ function ConfirmPaymentModal({ service, user, fetchAllServices }) {
       await axios.post(
         "/api/payments/proof-payment-received",
         {
+          fullName: service.fullName || service.name || "Valued Customer",
           serviceId: service._id,
           userEmail: customerEmail,
           serviceTitle: service.serviceTitle,
@@ -112,7 +113,7 @@ function ConfirmPaymentModal({ service, user, fetchAllServices }) {
             Please check the proof of payment before sending the payment
             confirmation email to the customer.
           </p>
-          <Form.Group controlId="customerEmail" className="mb-2">
+          <Form.Group controlId={user.userEmail} className="mb-2">
             <Form.Label><strong>Customer Email</strong></Form.Label>
             <Form.Control
               type="email"
@@ -124,6 +125,10 @@ function ConfirmPaymentModal({ service, user, fetchAllServices }) {
           </Form.Group>
           <Table bordered size="sm">
             <tbody>
+              <tr>
+                <th>Customer Name</th>
+                <td>{service.fullName}</td>
+              </tr>
               <tr>
                 <th>Service Title</th>
                 <td>{service.serviceTitle}</td>
