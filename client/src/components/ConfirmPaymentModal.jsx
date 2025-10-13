@@ -12,7 +12,7 @@ function ConfirmPaymentModal({ fullName, service, user, fetchAllServices }) {
   const [referenceId, setReferenceId] = useState("");
 
   const [customerEmail, setCustomerEmail] = useState(
-    service.fullName || service?.userEmail || service?.email || service?.user?.email || ""
+    service?.userEmail || service?.email || service?.user?.email || ""
   );
 
   const handleOpen = async () => {
@@ -42,7 +42,7 @@ function ConfirmPaymentModal({ fullName, service, user, fetchAllServices }) {
   const handleClose = () => setShow(false);
 
   const handleConfirmPayment = async () => {
-    if (!fullName || !amountPaid || !referenceId || !customerEmail) {
+    if (!amountPaid || !referenceId || !customerEmail) {
       alert("Please fill in Amount Paid, Payment Method, and Customer Email.");
       return;
     }
@@ -113,11 +113,11 @@ function ConfirmPaymentModal({ fullName, service, user, fetchAllServices }) {
             Please check the proof of payment before sending the payment
             confirmation email to the customer.
           </p>
-          <Form.Group controlId={user.userEmail} className="mb-2">
+          <Form.Group controlId={customerEmail} className="mb-2">
             <Form.Label><strong>Customer Email</strong></Form.Label>
             <Form.Control
               type="email"
-              value={service.customerEmail || ""}
+              value={customerEmail}
               onChange={(e) => setCustomerEmail(e.target.value)}
               placeholder="Enter customer email"
               required

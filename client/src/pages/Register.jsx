@@ -4,7 +4,7 @@ import { Form, Button, Container, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +20,7 @@ function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: name.trim(),
+          fullName: fullName.trim(),
           email: email.trim(),
           password,
         }),
@@ -30,7 +30,7 @@ function Register() {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        // ✅ redirect after successful signup
+        // Redirect after successful signup
         navigate("/dashboard");
       } else {
         // Show backend error or fallback
@@ -52,8 +52,8 @@ function Register() {
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               required
             />
           </Form.Group>
