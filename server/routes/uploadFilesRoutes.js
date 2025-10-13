@@ -1,6 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-// const router = require("./authRoutes");
 const path = require("path");
 
 const router = express.Router();

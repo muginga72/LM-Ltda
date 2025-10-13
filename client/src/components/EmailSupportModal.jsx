@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Modal, Button, Alert, Form } from "react-bootstrap";
 import axios from "axios";
 
-function EmailSupportModal({ show, handleClose, serviceId, userEmail }) {
+function EmailSupportModal({ fullName, show, handleClose, serviceId, userEmail }) {
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
   const [file, setFile] = useState(null);
@@ -13,7 +13,7 @@ function EmailSupportModal({ show, handleClose, serviceId, userEmail }) {
   };
 
   const handleSendEmail = async () => {
-    if (!userEmail || !serviceId || !file) {
+    if (!fullName || !userEmail || !serviceId || !file) {
       setStatus("Please provide all required information and attach a file.");
       return;
     }
@@ -22,6 +22,7 @@ function EmailSupportModal({ show, handleClose, serviceId, userEmail }) {
     setStatus("");
 
     const formData = new FormData();
+    formData.append("fullName", fullName);
     formData.append("userEmail", userEmail);
     formData.append("serviceId", serviceId);
     formData.append("attachment", file);
@@ -47,7 +48,7 @@ function EmailSupportModal({ show, handleClose, serviceId, userEmail }) {
       <Modal.Body>
         <p>
           Notify support that you've made a payment for service ID:{" "}
-          <strong>{serviceId}</strong>.
+          <strong>{serviceId}, {fullName}</strong>.
         </p>
         <Form.Group controlId="formFile">
           <Form.Label>Attach proof of payment (PDF, image, etc.):</Form.Label>

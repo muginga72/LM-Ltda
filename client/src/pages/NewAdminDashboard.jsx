@@ -2,7 +2,8 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 import ServiceStatusControl from "../components/ServiceStatusControl";
-import { Container, Table, Spinner, Alert, Badge } from "react-bootstrap";
+import { Container, Table, Spinner, Alert } from "react-bootstrap";
+import ConfirmPaymentModal from "../components/ConfirmPaymentModal";
 
 function NewAdminDashboard() {
   const { user } = useContext(AuthContext);
@@ -17,6 +18,47 @@ function NewAdminDashboard() {
   const [errorRequested, setErrorRequested] = useState("");
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
+
+  // inside NewAdminDashboard component
+  const fetchAllServices = async ({ headers }) => {
+    setLoading(true);
+    try {
+      const promises = [
+        axios.get("/api/requests", { headers }),
+        axios.get("/api/schedules", { headers }),
+        axios.get("/api/shares", { headers }),
+      ];
+
+      if (user?.role === "admin") {
+        promises.unshift(axios.get("/api/admin/users", { headers }));
+      }
+
+      const results = await Promise.all(promises);
+
+      let i = 0;
+      if (user?.role === "admin") {
+        setUsers(Array.isArray(results[i].data) ? results[i].data : []);
+        i++;
+      }
+      setRequestedServices(
+        Array.isArray(results[i].data) ? results[i].data : []
+      );
+      i++;
+      setScheduledServices(
+        Array.isArray(results[i].data) ? results[i].data : []
+      );
+      i++;
+      setSharedServices(Array.isArray(results[i].data) ? results[i].data : []);
+    } catch (err) {
+      console.error("Error fetching services:", err);
+      setErrorUsers("Failed to load users.");
+      setErrorRequested("Failed to load requested services.");
+      setErrorScheduled("Failed to load scheduled services.");
+      setErrorShared("Failed to load shared services.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const headers = {
@@ -121,6 +163,7 @@ function NewAdminDashboard() {
               <th>Details</th>
               <th>Requested On</th>
               <th>Status</th>
+              <th>Pay Received</th>
             </tr>
           </thead>
           <tbody>
@@ -159,6 +202,13 @@ function NewAdminDashboard() {
                     }}
                   />
                 </td>
+                <td className="text-center">
+                  <ConfirmPaymentModal
+                    service={item}
+                    user={user}
+                    fetchAllServices={fetchAllServices}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -186,6 +236,7 @@ function NewAdminDashboard() {
               <th>Time</th>
               <th>Scheduled On</th>
               <th>Status</th>
+              <th>Pay Received</th>
             </tr>
           </thead>
           <tbody>
@@ -225,6 +276,13 @@ function NewAdminDashboard() {
                     }}
                   />
                 </td>
+                <td className="text-center">
+                  <ConfirmPaymentModal
+                    service={item}
+                    user={user}
+                    fetchAllServices={fetchAllServices}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -246,6 +304,7 @@ function NewAdminDashboard() {
             <tr>
               <th>#</th>
               <th>Service Title</th>
+              <th>Fullname</th>
               <th>Email</th>
               <th>Shared On</th>
             </tr>
@@ -255,6 +314,7 @@ function NewAdminDashboard() {
               <tr key={item._id}>
                 <td>{index + 1}</td>
                 <td>{item.serviceTitle}</td>
+                <td>{item.fullName}</td>
                 <td>{item.email}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>

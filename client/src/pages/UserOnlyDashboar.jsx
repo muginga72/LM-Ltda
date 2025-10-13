@@ -52,7 +52,7 @@ function UserOnlyDashboard() {
       try {
         const res = await axios.get("/api/requests", { headers });
         const filtered = res.data.filter(
-          (item) => item.email === user.email || item.fullName === user.name
+          (item) => item.email === user.email || item.fullName === user.fullName
         );
         setRequestedServices(filtered);
       } catch (err) {
@@ -64,7 +64,9 @@ function UserOnlyDashboard() {
     const fetchScheduled = async () => {
       try {
         const res = await axios.get("/api/schedules", { headers });
-        const filtered = res.data.filter((item) => item.fullName === user.name);
+        const filtered = res.data.filter(
+          (item) => item.fullName === user.fullName
+        );
         setScheduledServices(filtered);
       } catch (err) {
         console.error("Scheduled services error:", err);
@@ -202,6 +204,7 @@ function UserOnlyDashboard() {
             <tr>
               <th>#</th>
               <th>Service Title</th>
+              <th>Fullname</th>
               <th>Email</th>
               <th>Shared On</th>
             </tr>
@@ -211,6 +214,7 @@ function UserOnlyDashboard() {
               <tr key={item._id}>
                 <td>{index + 1}</td>
                 <td>{item.serviceTitle}</td>
+                <td>{item.fullName}</td>
                 <td>{item.email}</td>
                 <td>{new Date(item.createdAt).toLocaleDateString()}</td>
               </tr>
@@ -235,7 +239,7 @@ function UserOnlyDashboard() {
     <>
       <Container style={{ padding: "2rem" }}>
         <h2 className="mb-2 text-center">User Dashboard</h2>
-        <h5 className="text-center mb-4">Welcome, {user.name}</h5>
+        <h5 className="text-center mb-4">Welcome, {user.fullName}</h5>
         <p>Email: {user.email}</p>
         <p>Role: {user.role}</p>
         <hr />
@@ -320,6 +324,10 @@ function UserOnlyDashboard() {
 
       <footer className="text-center py-2">
         <small>
+          <p>
+            Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola <br/>
+            Tel. : (+244) 222 022 351; (+244) 975 957 847
+          </p>
           &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
         </small>
       </footer>
