@@ -24,7 +24,7 @@ function UploadDocumentModal({ show, handleClose, serviceId, user }) {
       const formData = new FormData();
       formData.append("document", file);
       formData.append("serviceId", serviceId);
-      formData.append("userEmail", user.email);
+      formData.append("email", user.email);
 
       const res = await axios.post("/api/upload", formData, {
         headers: {

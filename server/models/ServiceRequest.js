@@ -9,6 +9,7 @@ const ServiceRequestSchema = new mongoose.Schema({
   email: String,
   paid: { type: Boolean, default: false },
   status: { type: String, enum: ["paid", "pending", "unpaid"], default: "unpaid" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true });
 
 module.exports = mongoose.model('ServiceRequest', ServiceRequestSchema);

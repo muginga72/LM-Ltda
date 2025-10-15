@@ -9,12 +9,12 @@ const ServiceRequest = require('../models/ServiceRequest');
  */
 router.post('/', async (req, res) => {
   try {
-    const { serviceTitle, fullName, userEmail, serviceType, details } = req.body;
+    const { serviceTitle, fullName, email, serviceType, details } = req.body;
 
     const request = await ServiceRequest.create({
       serviceTitle,
       fullName,
-      userEmail,
+      email,
       serviceType ,
       details,
       paid: false // default to unpaid; can be updated manually if needed

@@ -7,7 +7,7 @@ const uploadPaymentProof = async (req, res) => {
   try {
     const payment = new Payment({
       fullName: req.body.fullName,
-      userEmail: req.body.userEmail,
+      email: req.body.email,
       serviceId: req.body.serviceId,
       fileId: req.file.id,
       fileName: req.file.filename,
@@ -23,7 +23,7 @@ const uploadPaymentProof = async (req, res) => {
       html: `
         <h3>New Payment Proof Received</h3>
         <p><strong>User:</strong> ${payment.fullName}</p>
-        <p><strong>User:</strong> ${payment.userEmail}</p>
+        <p><strong>User:</strong> ${payment.email}</p>
         <p><strong>Service:</strong> ${payment.serviceId}</p>
         <p><strong>File:</strong> ${payment.fileName}</p>
         <p><strong>Status:</strong> ${payment.status}</p>
@@ -49,12 +49,12 @@ const updatePaymentStatus = async (req, res) => {
     if (payment.status === "paid") {
       await transporter.sendMail({
         from: `"LM Ltd Payments" <${process.env.ADMIN_EMAIL}>`,
-        to: payment.userEmail,
-        subject: "✅ Payment Verified",
+        to: payment.email,
+        subject: "Payment Verified",
         html: `
           <h3>Your payment has been verified</h3>
           <p>Dear ${payment.fullName}</p>
-          <p>Email: ${payment.userEmail}</p>
+          <p>Email: ${payment.email}</p>
           <p>Service: ${payment.serviceId}</p>
           <p>Status: Paid</p>
           <p>Thank you for your payment!</p>

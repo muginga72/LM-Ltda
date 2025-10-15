@@ -5,19 +5,19 @@ const ServiceSchedule = require("../models/ServiceSchedule.js");
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { fullname, email, avatar } = req.body;
+    const { fullName, email, avatar } = req.body;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.fullname = fullname || user.name;
+    user.userName = fullName || user.fullName;
     user.email = email || user.email;
     user.avatar = avatar || user.avatar;
 
     const updatedUser = await user.save();
 
     res.json({
-      fullname: updatedUser.fullname,
+      userName: updatedUser.fullName,
       email: updatedUser.email,
       avatar: updatedUser.avatar,
     });
