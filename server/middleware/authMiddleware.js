@@ -28,7 +28,7 @@ const adminOnly = (req, res, next) => {
   if (
     req.user &&
     req.user.role === 'admin' &&
-    (req.user.name === 'Laurindo Muginga' || req.user.email === process.env.ADMIN_EMAIL)
+    (req.user.fullName === 'Laurindo Muginga' || req.user.email === process.env.ADMIN_EMAIL)
   ) {
     return next();
   }
