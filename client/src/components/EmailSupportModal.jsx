@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Modal, Button, Alert, Form } from "react-bootstrap";
 import axios from "axios";
 
-function EmailSupportModal({ fullName, show, handleClose, serviceId, userEmail }) {
+function EmailSupportModal({ fullName, show, handleClose, serviceId, email }) {
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
   const [file, setFile] = useState(null);
@@ -13,7 +13,7 @@ function EmailSupportModal({ fullName, show, handleClose, serviceId, userEmail }
   };
 
   const handleSendEmail = async () => {
-    if (!fullName || !userEmail || !serviceId || !file) {
+    if (!fullName || !email || !serviceId || !file) {
       setStatus("Please provide all required information and attach a file.");
       return;
     }
@@ -23,7 +23,7 @@ function EmailSupportModal({ fullName, show, handleClose, serviceId, userEmail }
 
     const formData = new FormData();
     formData.append("fullName", fullName);
-    formData.append("userEmail", userEmail);
+    formData.append("userEmail", email);
     formData.append("serviceId", serviceId);
     formData.append("attachment", file);
 

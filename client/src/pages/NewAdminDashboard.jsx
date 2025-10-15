@@ -134,7 +134,7 @@ function NewAdminDashboard() {
             {users.map((u, index) => (
               <tr key={u._id}>
                 <td>{index + 1}</td>
-                <td>{u.name}</td>
+                <td>{u.fullName}</td>
                 <td>{u.email}</td>
                 <td>{u.role}</td>
               </tr>
@@ -331,7 +331,7 @@ function NewAdminDashboard() {
         <h2 className="mb-2 text-center">
           {user?.role === "admin" ? "Admin Dashboard" : "User Dashboard"}
         </h2>
-        <h5 className="text-center mb-4">Welcome, {user?.name}</h5>
+        <h5 className="text-center mb-4">Welcome, {user?.fullName}</h5>
         <p>Email: {user?.email}</p>
         <p>Role: {user?.role}</p>
         <hr />

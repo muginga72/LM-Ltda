@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, ButtonGroup, Modal, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const ServiceCardWithModals = ({ userEmail, title, description, image, price }) => {
+const ServiceCardWithModals = ({ email, title, description, image, price }) => {
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
     showModal: { request: false, schedule: false, share: false },
     selectedService: title,
     activeModalType: "",
-    requestData: { fullName: "", userEmail: "", serviceType: "", details: "" },
-    scheduleData: { fullName: "", userEmail: "", serviceType: "", date: "", time: "" },
+    requestData: { fullName: "", email: "", serviceType: "", details: "" },
+    scheduleData: { fullName: "", email: "", serviceType: "", date: "", time: "" },
     shareData: { fullName: "", email: "" },
   };
 
@@ -56,18 +56,18 @@ const ServiceCardWithModals = ({ userEmail, title, description, image, price }) 
     const { activeModalType } = state;
     if (activeModalType === "request") {
       if (field === "fullName") return "Your full name";
-      if (field === "userEmail") return `Enter email to share ${title}`;
+      if (field === "email") return `Enter email to share ${title}`;
       if (field === "serviceType") return `Type of ${title}`;
       if (field === "details") return `Describe your ${title} request...`;
     }
     if (activeModalType === "schedule") {
       if (field === "fullName") return "Your full name";
-      if (field === "userEmail") return `Enter email to share ${title}`;
+      if (field === "email") return `Enter email to share ${title}`;
       if (field === "serviceType") return `Scheduling for ${title}`;
     }
     if (activeModalType === "share") {
       if (field === "fullName") return "Your full name";
-      if (field === "userEmail") return `Enter email to share ${title}`;
+      if (field === "email") return `Enter email to share ${title}`;
     }
     return "";
   };
@@ -225,7 +225,7 @@ const ServiceCardWithModals = ({ userEmail, title, description, image, price }) 
               {type !== "share" && (
                 <>
                   <Form.Group controlId="fullName">
-                    <Form.Label>Full Name</Form.Label>
+                    <Form.Label>Fullname</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder={getPlaceholder("fullName")}
@@ -289,7 +289,7 @@ const ServiceCardWithModals = ({ userEmail, title, description, image, price }) 
 
               {type === "share" && (
                 <Form.Group controlId="fullName">
-                  <Form.Label>Full Name</Form.Label>
+                  <Form.Label>Fullname</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder={getPlaceholder("fullName")}
@@ -332,7 +332,7 @@ const ServiceCardWithModals = ({ userEmail, title, description, image, price }) 
                   (!state.requestData.serviceType || !state.requestData.details)) ||
                 (type === "schedule" &&
                   (!state.scheduleData.fullName ||
-                    !state.scheduleData.userEmail ||
+                    !state.scheduleData.email ||
                     !state.scheduleData.serviceType ||
                     !state.scheduleData.date ||
                     !state.scheduleData.time)) ||
