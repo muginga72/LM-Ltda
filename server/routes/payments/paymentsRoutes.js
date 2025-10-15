@@ -10,10 +10,10 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.post("/send-payment-email", upload.single("attachment"), async (req, res) => {
-  const { fullName, userEmail, serviceId } = req.body;
+  const { fullName, email, serviceId } = req.body;
   const file = req.file;
 
-  if (!fullName || !userEmail || !serviceId || !file) {
+  if (!fullName || !email || !serviceId || !file) {
     return res.status(400).json({ message: "Missing userEmail, serviceId, or attachment." });
   }
 
@@ -30,7 +30,7 @@ router.post("/send-payment-email", upload.single("attachment"), async (req, res)
       from: `"LM Ltd Services" <${process.env.SUPPORT_EMAIL}>`,
       to: process.env.ADMIN_EMAIL,
       subject: "Payment Proof Notification",
-      text: `Name: ${fullName}\n\nUser: ${userEmail}\n\nHas submitted payment for service ID: ${serviceId}.\n\nPlease verify and update the payment status on the dashboard.\n\nThank you!`,
+      text: `Name: ${fullName}\n\nUser: ${email}\n\nHas submitted payment for service ID: ${serviceId}.\n\nPlease verify and update the payment status on the dashboard.\n\nThank you!`,
       attachments: [
         {
           filename: file.originalname,

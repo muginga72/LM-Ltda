@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     const request = await ServiceRequest.create({
       serviceTitle,
       fullName,
-      userEmail,
+      email,
       serviceType ,
       details,
       paid: false // default to unpaid; can be updated manually if needed
