@@ -16,7 +16,7 @@ function EmailSupportModal({ show, handleClose, serviceId }) {
       if (!serviceId || !show) return;
       setLoading(true);
       try {
-        const res = await axios.get(`/api/service/${serviceId}`);
+        const res = await axios.get(`/api/${serviceId}`);
         setFullName(res.data.fullName);
         setEmail(res.data.email);
         setStatus(""); // clear any previous error

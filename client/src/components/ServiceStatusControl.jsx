@@ -25,7 +25,7 @@ function ServiceStatusControl({
   const handleChange = async (e) => {
     const newStatus = e.target.value;
     try {
-      const res = await axios.patch(
+      const response = await axios.patch(
         `/api/admin/update-status/${serviceId}`,
         { status: newStatus },
         {
@@ -36,8 +36,14 @@ function ServiceStatusControl({
         }
       );
 
-      if (onStatusUpdate) {
-        onStatusUpdate(serviceId, newStatus, type);
+      // Use the response or at least check it
+      if (response.status === 200) {
+        if (onStatusUpdate) {
+          onStatusUpdate(serviceId, newStatus, type);
+        }
+      } else {
+        console.warn("Unexpected response:", response);
+        alert("Unexpected server response while updating status.");
       }
     } catch (err) {
       console.error("Status update error:", err);

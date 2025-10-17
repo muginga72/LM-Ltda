@@ -4,7 +4,7 @@ import NavigationBar from "./components/NavigationBar";
 import ServicesPromo from "./components/ServicesPromo";
 import NewAdminDashboard from "./pages/NewAdminDashboard";
 import UserOnlyDashboard from "./pages/UserOnlyDashboar";
-import AdminRoute from "./components/AdminRoute";
+import AdminRoute from "./components/admin/AdminRoute";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminLogin from "./pages/AdminLogin";
 import LearnMore from "./pages/LearnMore";

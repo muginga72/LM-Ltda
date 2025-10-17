@@ -4,8 +4,10 @@ import { AuthContext } from "../contexts/AuthContext";
 import ServiceStatusControl from "../components/ServiceStatusControl";
 import { Container, Table, Spinner, Alert } from "react-bootstrap";
 import ConfirmPaymentModal from "../components/ConfirmPaymentModal";
+import AdminAddService from "../components/admin/AdminAddService";
+import ServicesGrid from "../components/ServicesGrid";
 
-function NewAdminDashboard() {
+function NewAdminDashboard({ token}) {
   const { user } = useContext(AuthContext);
 
   const [users, setUsers] = useState([]);
@@ -18,6 +20,8 @@ function NewAdminDashboard() {
   const [errorRequested, setErrorRequested] = useState("");
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
+
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // inside NewAdminDashboard component
   const fetchAllServices = async ({ headers }) => {
@@ -115,7 +119,7 @@ function NewAdminDashboard() {
 
   const renderUserTable = () => (
     <>
-      <h4 className="mb-3 text-center">👥 All Users</h4>
+      <h4 className="mb-3">👥 All Users</h4>
       {errorUsers ? (
         <Alert variant="danger">{errorUsers}</Alert>
       ) : users.length === 0 ? (
@@ -334,8 +338,25 @@ function NewAdminDashboard() {
         <h5 className="text-center mb-4">Welcome, {user?.fullName}</h5>
         <p>Email: {user?.email}</p>
         <p>Role: {user?.role}</p>
+
+        <div className="container py-4">
+          <div className="row mb-4">
+            <div className="col-md-6">
+              <AdminAddService
+                token={token}
+                onCreated={() => setRefreshKey((k) => k + 1)}
+              />
+            </div>
+            <div className="col-md-6">
+              <h5 className="mb-3">Preview / Current Services</h5>
+              <ServicesGrid key={refreshKey} />
+            </div>
+          </div>
+        </div>
+
         <hr />
-        <h4 className="mb-3 text-center">Your Service Overview</h4>
+
+        <h4 className="m-3 text-center">Your Service Overview</h4>
 
         {loading ? (
           <div className="text-center">
