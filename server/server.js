@@ -8,7 +8,7 @@ const path    = require('path');
 
 // Import routes
 const authRoutes    = require('./routes/authRoutes');
-const serviceRoutes = require('./routes/serviceRoutes');
+const servicesRoutes = require('./routes/servicesRoutes');
 const userRoutes = require('./routes/userRoutes');
 const requestRoutes  = require('./routes/requests');
 const scheduleRoutes = require('./routes/schedules');
@@ -41,7 +41,7 @@ app.use("/api/user", userRoutes);
 app.use('/api/users', userRoutes);
 app.use("/api", uploadRoutes);
 app.use('/api/cards', cardsRoutes);
-app.use('/api/services', serviceRoutes);
+app.use('/api/services', servicesRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares',    shareRoutes);
