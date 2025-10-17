@@ -3,40 +3,63 @@ import { Container, Row, Col } from "react-bootstrap";
 import ServiceCardWithModals from "../components/ServiceCardWithModals";
 import axios from "axios";
 
-export default function Services() {
+function Services() {
   const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("/api/services")
-      .then((res) => setServices(res.data.services))
-      .catch(console.error);
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/services");
+        if (Array.isArray(response.data)) {
+          setServices(response.data);
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (err) {
+        console.error("Error fetching services:", err);
+        setError("Failed to load services. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
   }, []);
+
+  if (loading) return <p>Loading services...</p>;
+  if (error) return <p className="error">{error}</p>;
 
   return (
     <>
       <Container className="mt-5 text-center">
         <h2 className="mb-4">Our Services</h2>
         <Row className="justify-content-center">
-          {services.map((service) => (
-            <Col
-              key={service.id}
-              xs="auto"
-              className="d-flex justify-content-center mb-4"
-            >
-              <div style={{ width: "350px" }}>
-                <ServiceCardWithModals
-                  title={service.title}
-                  description={service.description}
-                  image={`/images/${service.image}`}
-                  price={service.price}
-                  link={`/services/${service.id}`}
-                />
-              </div>
-            </Col>
-          ))}
+          {services.length === 0 ? (
+            <p>No services available.</p>
+          ) : (
+            services.map((service) => (
+              <Col
+                key={service._id} // ✅ use _id from MongoDB
+                xs="auto"
+                className="d-flex justify-content-center mb-4"
+              >
+                <div style={{ width: "350px" }}>
+                  <ServiceCardWithModals
+                    title={service.title}
+                    description={service.description}
+                    image={service.imageUrl || "/images/placeholder.png"} // ✅ use imageUrl
+                    price={service.price}
+                    link={`/services/${service._id}`} // ✅ use _id
+                  />
+                </div>
+              </Col>
+            ))
+          )}
         </Row>
       </Container>
+
       <div className="bg-warning text-dark text-center py-4">
         <Container>
           <h4 className="mb-2">
@@ -57,3 +80,5 @@ export default function Services() {
     </>
   );
 }
+
+export default Services;
