@@ -6,8 +6,7 @@ import {
   Modal,
   Form,
   Spinner,
-  Row,
-  Col,
+  Container,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -176,6 +175,7 @@ const ServiceCardWithModals = ({ service }) => {
                 objectFit: "cover",
                 width: "100%",
                 height: "100%",
+                display: "block",
                 borderRadius: "6px 6px 0 0",
               }}
             />
@@ -204,9 +204,9 @@ const ServiceCardWithModals = ({ service }) => {
           <Card.Title>{title}</Card.Title>
           <Card.Text>{description}</Card.Text>
         </Card.Body>
-        <div className="px-4 pb-3">
-          <ButtonGroup vertical className="w-100 px-3">
-            <div className="d-flex gap-3 mt-2 flex-wrap">
+        <div className="px-3 pb-3">
+          <ButtonGroup vertical className="w-100 px-4">
+            <div className="d-flex gap-4 mt-2 flex-wrap">
               <Button
                 variant="outline-primary"
                 onClick={() => handleShow("request")}
@@ -225,12 +225,6 @@ const ServiceCardWithModals = ({ service }) => {
               >
                 Share
               </Button>
-              {/* <Button
-                variant="danger"
-                onClick={() => onDelete(_id, isLocal)}
-              >
-                Delete
-              </Button> */}
             </div>
           </ButtonGroup>
         </div>
@@ -317,15 +311,15 @@ const ServiceGallery = () => {
   }
 
   return (
-    <Row xs={1} md={2} lg={3} className="g-4">
-      {services.map((service) => (
-        <Col key={service._id}>
-          <ServiceCardWithModals service={service} 
-            onDelete={handleDelete} 
-          />
-        </Col>
-      ))}
-    </Row>
+    <Container className="py-4">
+      <div className="row g-4">
+        {services.map((service) => (
+          <div key={service._id} className="col-12 col-md-6">
+            <ServiceCardWithModals service={service} onDelete={handleDelete} />
+          </div>
+        ))}
+      </div>
+    </Container>
   );
 };
 

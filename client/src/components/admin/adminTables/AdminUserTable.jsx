@@ -4,7 +4,7 @@ import { Table, Alert } from "react-bootstrap";
 function AdminUserTable({ users, error }) {
   return (
     <>
-      <h4 className="mb-3">👥 All Users</h4>
+      <h5 className="mb-3">👥 All Users</h5>
       {error ? (
         <Alert variant="danger">{error}</Alert>
       ) : users.length === 0 ? (
