@@ -1,54 +1,56 @@
 const Service = require("../models/Service");
 
-// List services (public)
+// GET all
 exports.listServices = async (req, res) => {
-  try {
-    const services = await Service.find({ enabled: true })
-      .sort({ createdAt: -1 })
-      .lean();
-    res.json(services);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch services" });
-  }
+  const services = await Service.find().sort({ createdAt: -1 });
+  res.json(services);
 };
 
+// GET one
+exports.getService = async (req, res) => {
+  const service = await Service.findById(req.params.id);
+  if (!service) return res.status(404).json({ error: "Service not found" });
+  res.json(service);
+};
+
+// CREATE
 exports.createService = async (req, res) => {
   try {
-    const { title, description, price, imagePath } = req.body;
+    const { title, description, price } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required" });
+    if (!req.file) return res.status(400).json({ error: "Image is required" });
+
+    const imagePath = `/uploads/${req.file.filename}`; // store relative path
 
     const service = new Service({
-      title,
+      title: title.trim(),
       description,
       price: price || 0,
-      imagePath: imagePath || "", // 👈 match schema
+      imagePath,
+      createdBy: req.user?._id,
     });
 
     await service.save();
     res.status(201).json(service);
   } catch (err) {
-    console.error("Error creating service:", err); // 👈 add this
+    console.error("Create service error:", err);
     res.status(500).json({ error: "Failed to create service" });
   }
 };
 
-// Optional: get single service
-exports.getService = async (req, res) => {
-  try {
-    const service = await Service.findById(req.params.id).lean();
-    if (!service) return res.status(404).json({ error: "Not found" });
-    res.json(service);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch service" });
-  }
+// UPDATE
+exports.updateService = async (req, res) => {
+  const service = await Service.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!service) return res.status(404).json({ error: "Service not found" });
+  res.json(service);
 };
 
-// Optional: delete service (admin)
+// DELETE
 exports.deleteService = async (req, res) => {
-  try {
-    await Service.findByIdAndDelete(req.params.id);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete service" });
-  }
+  const deleted = await Service.findByIdAndDelete(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Service not found" });
+  res.json({ message: "Service deleted" });
 };
