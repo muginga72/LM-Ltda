@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, ButtonGroup, Modal, Form } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  ButtonGroup,
+  Modal,
+  Form,
+  Spinner,
+  Row,
+  Col,
+} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const ServiceCardWithModals = ({ email, title, description, image, price }) => {
+const ServiceCardWithModals = ({ service }) => {
+  const { title, description, price, imagePath } = service;
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
@@ -10,7 +20,13 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
     selectedService: title,
     activeModalType: "",
     requestData: { fullName: "", email: "", serviceType: "", details: "" },
-    scheduleData: { fullName: "", email: "", serviceType: "", date: "", time: "" },
+    scheduleData: {
+      fullName: "",
+      email: "",
+      serviceType: "",
+      date: "",
+      time: "",
+    },
     shareData: { fullName: "", email: "" },
   };
 
@@ -54,20 +70,12 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
 
   const getPlaceholder = (field) => {
     const { activeModalType } = state;
-    if (activeModalType === "request") {
+    const base = activeModalType === "schedule" ? "Scheduling for" : "Type of";
+    if (["request", "schedule", "share"].includes(activeModalType)) {
       if (field === "fullName") return "Your full name";
       if (field === "email") return `Enter email to share ${title}`;
-      if (field === "serviceType") return `Type of ${title}`;
+      if (field === "serviceType") return `${base} ${title}`;
       if (field === "details") return `Describe your ${title} request...`;
-    }
-    if (activeModalType === "schedule") {
-      if (field === "fullName") return "Your full name";
-      if (field === "email") return `Enter email to share ${title}`;
-      if (field === "serviceType") return `Scheduling for ${title}`;
-    }
-    if (activeModalType === "share") {
-      if (field === "fullName") return "Your full name";
-      if (field === "email") return `Enter email to share ${title}`;
     }
     return "";
   };
@@ -75,46 +83,26 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
   const handleSubmit = async (type) => {
     setLoading(true);
     try {
-      if (type === "request") {
-        const res = await fetch("/api/requests", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            serviceTitle: title,
-            ...state.requestData,
-          }),
-        });
-        if (!res.ok) throw new Error("Failed to submit request");
-        alert("Service request submitted successfully.");
-      }
+      const endpoint = {
+        request: "/api/requests",
+        schedule: "/api/schedules",
+        share: "/api/shares",
+      }[type];
 
-      if (type === "schedule") {
-        const res = await fetch("/api/schedules", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            serviceTitle: title,
-            ...state.scheduleData,
-          }),
-        });
-        if (!res.ok) throw new Error("Failed to schedule service");
-        alert("Service scheduled successfully.");
-      }
+      const payload = {
+        serviceTitle: title,
+        ...state[`${type}Data`],
+      };
 
-      if (type === "share") {
-        const res = await fetch("/api/shares", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            serviceTitle: title,
-            ...state.shareData,
-          }),
-        });
-        if (!res.ok) throw new Error("Failed to share service");
-        alert(`Service shared with ${state.shareData.email}`);
-      }
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      // Reset form data
+      if (!res.ok) throw new Error(`Failed to ${type} service`);
+      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} successful.`);
+
       setState((prev) => ({
         ...prev,
         showModal: { ...prev.showModal, [type]: false },
@@ -128,10 +116,52 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
     }
   };
 
+  const renderModal = (type, fields) => (
+    <Modal
+      show={state.showModal[type]}
+      onHide={() => handleClose(type)}
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>
+          {type.charAt(0).toUpperCase() + type.slice(1)} {title}
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          {fields.map((field) => (
+            <Form.Group key={field} className="mb-3">
+              <Form.Label>{field}</Form.Label>
+              <Form.Control
+                id={field}
+                type={field === "details" ? "textarea" : "text"}
+                placeholder={getPlaceholder(field)}
+                value={state[`${type}Data`][field]}
+                onChange={(e) => handleChange(e, `${type}Data`)}
+              />
+            </Form.Group>
+          ))}
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => handleClose(type)}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => handleSubmit(type)}
+          disabled={loading}
+        >
+          {loading ? <Spinner animation="border" size="sm" /> : "Submit"}
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+
   return (
     <>
       <Card className="h-100 shadow-sm d-flex flex-column">
-        {image && (
+        {imagePath && (
           <div
             style={{
               position: "relative",
@@ -140,17 +170,16 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
             }}
           >
             <Card.Img
-              src={image}
+              src={imagePath}
               alt={title}
               style={{
                 objectFit: "cover",
                 width: "100%",
                 height: "100%",
-                display: "block",
                 borderRadius: "6px 6px 0 0",
               }}
             />
-            {price && price.trim() !== "" && (
+            {price && (
               <div
                 style={{
                   position: "absolute",
@@ -165,21 +194,19 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
                 }}
               >
                 <span className="badge bg-warning fs-6">
-                  ${price || "0.00"}
+                  ${price.toFixed(2)}
                 </span>
               </div>
             )}
           </div>
         )}
-
         <Card.Body>
           <Card.Title>{title}</Card.Title>
           <Card.Text>{description}</Card.Text>
         </Card.Body>
-
         <div className="px-4 pb-3">
           <ButtonGroup vertical className="w-100 px-3">
-            <div className="d-flex gap-3 mt-2">
+            <div className="d-flex gap-3 mt-2 flex-wrap">
               <Button
                 variant="outline-primary"
                 onClick={() => handleShow("request")}
@@ -198,158 +225,108 @@ const ServiceCardWithModals = ({ email, title, description, image, price }) => {
               >
                 Share
               </Button>
+              {/* <Button
+                variant="danger"
+                onClick={() => onDelete(_id, isLocal)}
+              >
+                Delete
+              </Button> */}
             </div>
           </ButtonGroup>
         </div>
       </Card>
 
-      {/* Modals */}
-      {["request", "schedule", "share"].map((type) => (
-        <Modal
-          key={type}
-          show={state.showModal[type]}
-          onHide={() => handleClose(type)}
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {type === "request"
-                ? "Request Services"
-                : type === "schedule"
-                ? "Schedule Services"
-                : "Share Service"}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              {type !== "share" && (
-                <>
-                  <Form.Group controlId="fullName">
-                    <Form.Label>Fullname</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={getPlaceholder("fullName")}
-                      value={state[`${type}Data`].fullName || ""}
-                      onChange={(e) => handleChange(e, `${type}Data`)}
-                      name="fullName"
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="serviceType">
-                    <Form.Label>Service Type</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder={getPlaceholder("serviceType")}
-                      value={state[`${type}Data`].serviceType || ""}
-                      onChange={(e) => handleChange(e, `${type}Data`)}
-                      name="serviceType"
-                    />
-                  </Form.Group>
-                </>
-              )}
-
-              {type === "request" && (
-                <Form.Group controlId="details" className="mt-3">
-                  <Form.Label>Details</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    placeholder={getPlaceholder("details")}
-                    value={state.requestData.details || ""}
-                    onChange={(e) => handleChange(e, "requestData")}
-                    name="details"
-                  />
-                </Form.Group>
-              )}
-
-              {type === "schedule" && price && (
-                <>
-                  <div className="alert alert-warning fw-bold text-center mt-3">
-                    Price for this service: ${price}
-                  </div>
-                  <Form.Group controlId="date" className="mt-3">
-                    <Form.Label>Date</Form.Label>
-                    <Form.Control
-                      type="date"
-                      value={state.scheduleData.date || ""}
-                      onChange={(e) => handleChange(e, "scheduleData")}
-                      name="date"
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="time" className="mt-3">
-                    <Form.Label>Time</Form.Label>
-                    <Form.Control
-                      type="time"
-                      value={state.scheduleData.time || ""}
-                      onChange={(e) => handleChange(e, "scheduleData")}
-                      name="time"
-                    />
-                  </Form.Group>
-                </>
-              )}
-
-              {type === "share" && (
-                <Form.Group controlId="fullName">
-                  <Form.Label>Fullname</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder={getPlaceholder("fullName")}
-                    value={state.shareData.fullName || ""}
-                    onChange={(e) => handleChange(e, "shareData")}
-                    name="fullName"
-                  />
-                </Form.Group>
-              )}
-
-              {/* Email for all types */}
-              <Form.Group controlId="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  placeholder={getPlaceholder("email")}
-                  value={state[`${type}Data`].email || ""}
-                  onChange={(e) => handleChange(e, `${type}Data`)}
-                  name="email"
-                />
-              </Form.Group>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => handleClose(type)}>
-              Close
-            </Button>
-            <Button
-              variant={
-                type === "request"
-                  ? "success"
-                  : type === "schedule"
-                  ? "primary"
-                  : "outline-secondary"
-              }
-              onClick={() => handleSubmit(type)}
-              disabled={
-                loading ||
-                (type === "request" &&
-                  (!state.requestData.serviceType || !state.requestData.details)) ||
-                (type === "schedule" &&
-                  (!state.scheduleData.fullName ||
-                    !state.scheduleData.email ||
-                    !state.scheduleData.serviceType ||
-                    !state.scheduleData.date ||
-                    !state.scheduleData.time)) ||
-                (type === "share" && !state.shareData.email)
-              }
-            >
-              {type === "request"
-                ? "Submit Request"
-                : type === "schedule"
-                ? "Confirm Schedule"
-                : "Share"}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      ))}
+      {renderModal("request", ["fullName", "email", "serviceType", "details"])}
+      {renderModal("schedule", [
+        "fullName",
+        "email",
+        "serviceType",
+        "date",
+        "time",
+      ])}
+      {renderModal("share", ["fullName", "email"])}
     </>
   );
 };
 
-export default ServiceCardWithModals;
+const ServiceGallery = () => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load from backend + localStorage
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch("/api/services");
+        const dbServices = await res.json();
+
+        // Load local-only services
+        const localServices =
+          JSON.parse(localStorage.getItem("localServices")) || [];
+
+        // Merge them
+        setServices([...dbServices, ...localServices]);
+      } catch (err) {
+        console.error("Failed to fetch services", err);
+      } finally {
+        setLoading(false); // ✅ stop loading after fetch
+      }
+    };
+    fetchServices();
+  }, []);
+
+  // Delete handler for both local-only and backend cards
+  const handleDelete = async (id, isLocal) => {
+    if (isLocal) {
+      // Remove from state and localStorage
+      const updated = services.filter((s) => s._id !== id);
+      setServices(updated);
+      const localServices = updated.filter((s) => s.isLocal);
+      localStorage.setItem("localServices", JSON.stringify(localServices));
+    } else {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete service");
+        const updated = services.filter((s) => s._id !== id);
+        setServices(updated);
+      } catch (err) {
+        console.error("Error deleting service:", err);
+        alert("Failed to delete service. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center my-5">
+        <Spinner animation="border" role="status" />
+        <p className="mt-3">Loading services...</p>
+      </div>
+    );
+  }
+
+  if (services.length === 0) {
+    return (
+      <div className="text-center my-5">
+        <p>No services available.</p>
+      </div>
+    );
+  }
+
+  return (
+    <Row xs={1} md={2} lg={3} className="g-4">
+      {services.map((service) => (
+        <Col key={service._id}>
+          <ServiceCardWithModals service={service} 
+            onDelete={handleDelete} 
+          />
+        </Col>
+      ))}
+    </Row>
+  );
+};
+
+export default ServiceGallery;
