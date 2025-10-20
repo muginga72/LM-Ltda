@@ -9,23 +9,36 @@ function Services() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // ✅ AbortController prevents duplicate fetches in StrictMode
+    const controller = new AbortController();
+
     const fetchServices = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/services");
+        const response = await axios.get("http://localhost:5000/api/services", {
+          signal: controller.signal,
+        });
+
         if (Array.isArray(response.data)) {
           setServices(response.data);
         } else {
           throw new Error("Invalid response format");
         }
       } catch (err) {
-        console.error("Error fetching services:", err);
-        setError("Failed to load services. Please try again later.");
+        if (axios.isCancel(err)) {
+          console.log("Fetch cancelled");
+        } else {
+          console.error("Error fetching services:", err);
+          setError("Failed to load services. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchServices();
+
+    // Cleanup cancels the duplicate fetch triggered by StrictMode
+    return () => controller.abort();
   }, []);
 
   if (loading) return <p>Loading services...</p>;
@@ -41,17 +54,17 @@ function Services() {
           ) : (
             services.map((service) => (
               <Col
-                key={service._id} // ✅ use _id from MongoDB
+                key={service._id}
                 xs="auto"
                 className="d-flex justify-content-center mb-4"
               >
-                <div style={{ width: "350px" }}>
+                <div style={{ width: "400px" }}>
                   <ServiceCardWithModals
                     title={service.title}
                     description={service.description}
-                    image={service.imageUrl || "/images/placeholder.png"} // ✅ use imageUrl
+                    imagePath={service.imagePath || "/images/placeholder.png"}
                     price={service.price}
-                    link={`/services/${service._id}`} // ✅ use _id
+                    link={`/services/${service._id}`}
                   />
                 </div>
               </Col>

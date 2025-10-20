@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ServiceCard({ service, onClick }) {
+function ServiceCard({ service, onClick }) {
   return (
     <div className="card h-100">
       {service.imagePath ? (
@@ -21,3 +21,5 @@ export default function ServiceCard({ service, onClick }) {
     </div>
   );
 }
+
+export default ServiceCard;

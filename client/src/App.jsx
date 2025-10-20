@@ -41,7 +41,7 @@ function App() {
             </PrivateRoute>
           }
         />
-
+        {/* Protected Admin Dashboard */}
         <Route
           path="/admin"
           element={
