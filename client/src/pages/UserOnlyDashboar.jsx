@@ -5,24 +5,35 @@ import EmailSupportModal from "../components/EmailSupportModal";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   Container,
-  Table,
   Spinner,
   Alert,
   Button,
   Modal,
+  Card,
+  Row,
+  Col,
 } from "react-bootstrap";
+import UserDashboard from "../components/UserDashboard";
 
-function UserOnlyDashboard() {
+function UserOnlyDashboard({
+  apiBaseUrl,
+  token,
+  initialServices,
+  onProofSubmitted,
+  onServiceSelect,
+}) {
   const { user } = useContext(AuthContext);
 
   const [requestedServices, setRequestedServices] = useState([]);
   const [scheduledServices, setScheduledServices] = useState([]);
   const [sharedServices, setSharedServices] = useState([]);
+  const [paidServices, setPaidServices] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [errorRequested, setErrorRequested] = useState("");
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
+  const [errorPaid, setErrorPaid] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -52,7 +63,8 @@ function UserOnlyDashboard() {
       try {
         const res = await axios.get("/api/requests", { headers });
         const filtered = res.data.filter(
-          (item) => item.email === user.email || item.fullName === user.fullName
+          (item) =>
+            item.email === user.email || item.fullName === user.fullName
         );
         setRequestedServices(filtered);
       } catch (err) {
@@ -85,142 +97,69 @@ function UserOnlyDashboard() {
       }
     };
 
-    Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(
-      () => setLoading(false)
-    );
+    const fetchPaid = async () => {
+      try {
+        const res = await axios.get("/api/paid-services", { headers });
+        const filtered = res.data.filter((item) => item.email === user.email);
+        setPaidServices(filtered);
+      } catch (err) {
+        console.error("Paid services error:", err);
+        setErrorPaid("Failed to load paid services.");
+      }
+    };
+
+    Promise.all([
+      fetchRequested(),
+      fetchScheduled(),
+      fetchShared(),
+      fetchPaid(),
+    ]).finally(() => setLoading(false));
   }, [user]);
 
-  const renderRequestedTable = () => (
+  const renderServiceCards = (title, services, error, type) => (
     <>
-      <h5 className="mt-4 mb-3">📝 Your Requested Services</h5>
-      {errorRequested ? (
-        <Alert variant="danger">{errorRequested}</Alert>
-      ) : requestedServices.length === 0 ? (
-        <Alert variant="info">You have no requested services.</Alert>
+      <h5 className="mt-4 mb-3">{title}</h5>
+      {error ? (
+        <Alert variant="danger">{error}</Alert>
+      ) : services.length === 0 ? (
+        <Alert variant="info">No {type} services found.</Alert>
       ) : (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Service Title</th>
-              <th>Type</th>
-              <th>Details</th>
-              <th>Requested On</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requestedServices.map((item, index) => (
-              <tr key={item._id}>
-                <td>{index + 1}</td>
-                <td>{item.serviceTitle}</td>
-                <td>{item.serviceType}</td>
-                <td>{item.details || "—"}</td>
-                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-                <td>
-                  {item.paid ? (
-                    <Button variant="success" disabled>
-                      Paid
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="warning"
-                      onClick={() => handlePayClick(item._id)}
-                    >
-                      Pay Now
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-    </>
-  );
-
-  const renderScheduledTable = () => (
-    <>
-      <h5 className="mt-4 mb-3">📅 Your Scheduled Services</h5>
-      {errorScheduled ? (
-        <Alert variant="danger">{errorScheduled}</Alert>
-      ) : scheduledServices.length === 0 ? (
-        <Alert variant="info">You have no scheduled services.</Alert>
-      ) : (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Service Title</th>
-              <th>Type</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Scheduled On</th>
-              <th>Status</th>
-              {/* <th>Upload/Email</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {scheduledServices.map((item, index) => (
-              <tr key={item._id}>
-                <td>{index + 1}</td>
-                <td>{item.serviceTitle}</td>
-                <td>{item.serviceType}</td>
-                <td>{item.date}</td>
-                <td>{item.time}</td>
-                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-                <td>
-                  {item.paid ? (
-                    <Button variant="success" disabled>
-                      Paid
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="warning"
-                      onClick={() => handlePayClick(item._id)}
-                    >
-                      Pay Now
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-    </>
-  );
-
-  const renderSharedTable = () => (
-    <>
-      <h5 className="mt-4 mb-3">📧 Your Shared Services</h5>
-      {errorShared ? (
-        <Alert variant="danger">{errorShared}</Alert>
-      ) : sharedServices.length === 0 ? (
-        <Alert variant="info">You have no shared services.</Alert>
-      ) : (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Service Title</th>
-              <th>Fullname</th>
-              <th>Email</th>
-              <th>Shared On</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sharedServices.map((item, index) => (
-              <tr key={item._id}>
-                <td>{index + 1}</td>
-                <td>{item.serviceTitle}</td>
-                <td>{item.fullName}</td>
-                <td>{item.email}</td>
-                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <Row>
+          {services.map((item) => (
+            <Col md={6} lg={4} key={item._id} className="mb-3">
+              <Card className="h-100">
+                <Card.Body className="d-flex flex-column">
+                  <Card.Title>{item.serviceTitle}</Card.Title>
+                  <Card.Subtitle className="mb-2 text-muted">
+                    {item.serviceType}
+                  </Card.Subtitle>
+                  <Card.Text>
+                    {item.details || item.date || "—"}
+                  </Card.Text>
+                  <Card.Text>
+                    <small className="text-muted">
+                      Created: {new Date(item.createdAt).toLocaleDateString()}
+                    </small>
+                  </Card.Text>
+                  <div className="mt-auto">
+                    {item.paid ? (
+                      <Button variant="success" disabled>
+                        Paid
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="warning"
+                        onClick={() => handlePayClick(item._id)}
+                      >
+                        Pay / Send Proof
+                      </Button>
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       )}
     </>
   );
@@ -242,18 +181,51 @@ function UserOnlyDashboard() {
         <h5 className="text-center mb-4">Welcome, {user.fullName}</h5>
         <p>Email: {user.email}</p>
         <p>Role: {user.role}</p>
-        <hr />
-        <h4 className="mb-3 text-center">Your Service Overview</h4>
 
+        <hr />
+
+        <UserDashboard
+          apiBaseUrl={apiBaseUrl}
+          user={user}
+          token={token}
+          initialServices={initialServices}
+          onProofSubmitted={onProofSubmitted}
+          onServiceSelect={onServiceSelect}
+        />
+
+        <hr />
+
+        <h4 className="mb-3 text-center">Your Service Overview</h4>
         {loading ? (
           <div className="text-center">
             <Spinner animation="border" />
           </div>
         ) : (
           <>
-            {renderRequestedTable()}
-            {renderScheduledTable()}
-            {renderSharedTable()}
+            {renderServiceCards(
+              "📝 Requested Services",
+              requestedServices,
+              errorRequested,
+              "requested"
+            )}
+            {renderServiceCards(
+              "📅 Scheduled Services",
+              scheduledServices,
+              errorScheduled,
+              "scheduled"
+            )}
+            {renderServiceCards(
+              "💳 Paid Services",
+              paidServices,
+              errorPaid,
+              "paid"
+            )}
+            {renderServiceCards(
+              "📧 Shared Services",
+              sharedServices,
+              errorShared,
+              "shared"
+            )}
           </>
         )}
         <hr />
@@ -269,18 +241,6 @@ function UserOnlyDashboard() {
           <ul>
             <li>
               <strong>Bank Name:</strong> BFA
-            </li>
-            <li>
-              <strong>Account Name:</strong> Maria Miguel
-            </li>
-            <li>
-              <strong>Account Number:</strong> 342295560 30 001
-            </li>
-            <li>
-              <strong>Routing Number:</strong> AO06 0006 0000 42295560301 25
-            </li>
-            <li>
-              <strong>Customer Name:</strong> Your full name or service ID
             </li>
           </ul>
           <hr />
@@ -313,7 +273,6 @@ function UserOnlyDashboard() {
           serviceId={uploadServiceId}
           user={user}
         />
-
         <EmailSupportModal
           show={emailSupportModal}
           handleClose={() => setEmailSupportModal(false)}
@@ -321,16 +280,6 @@ function UserOnlyDashboard() {
           serviceId={selectedServiceId}
         />
       </Modal>
-
-      <footer className="text-center py-2">
-        <small>
-          <p>
-            Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola <br/>
-            Tel. : (+244) 222 022 351; (+244) 975 957 847
-          </p>
-          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
-        </small>
-      </footer>
     </>
   );
 }
