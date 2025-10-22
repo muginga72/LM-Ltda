@@ -17,9 +17,7 @@ const testimonialsRoute = require("./routes/testimonials");
 const cardsRoutes = require('./routes/cardsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const uploadRoutes = require('./routes/uploadFilesRoutes');
-const paymentsRoutes = require('./routes/payments/paymentsRoutes');
-const proofPaymentRoutes = require('./routes/payments/proofPaymentRoutes');
-const adminPaymentsRoutes = require("./routes/payments/adminPaymentsRoutes");
+const paymentConfRoute = require("./routes/payments/payments"); 
 
 // Instantiate the Express application
 const app = express();
@@ -45,10 +43,8 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares',    shareRoutes);
+app.use('/api/payments', paymentConfRoute);
 app.use("/api/testimonials", testimonialsRoute);
-app.use("/api", paymentsRoutes);
-app.use("/api/payments", proofPaymentRoutes);
-app.use("/api/admin-payments", adminPaymentsRoutes);
 
 // Connect & start
 mongoose.connect(process.env.MONGO_URI, {
