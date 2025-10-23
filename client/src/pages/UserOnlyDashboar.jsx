@@ -15,6 +15,8 @@ import {
 } from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
 
+// const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function UserOnlyDashboard({
   apiBaseUrl,
   token,
@@ -63,8 +65,7 @@ function UserOnlyDashboard({
       try {
         const res = await axios.get("/api/requests", { headers });
         const filtered = res.data.filter(
-          (item) =>
-            item.email === user.email || item.fullName === user.fullName
+          (item) => item.email === user.email || item.fullName === user.fullName
         );
         setRequestedServices(filtered);
       } catch (err) {
@@ -99,7 +100,10 @@ function UserOnlyDashboard({
 
     const fetchPaid = async () => {
       try {
-        const res = await axios.get("/api/paid-services", { headers });
+        const res = await axios.get(
+          `${apiBaseUrl}/api/payments/paid-services`,
+          { headers }
+        );
         const filtered = res.data.filter((item) => item.email === user.email);
         setPaidServices(filtered);
       } catch (err) {
@@ -114,7 +118,7 @@ function UserOnlyDashboard({
       fetchShared(),
       fetchPaid(),
     ]).finally(() => setLoading(false));
-  }, [user]);
+  }, [user, apiBaseUrl]);
 
   const renderServiceCards = (title, services, error, type) => (
     <>
@@ -128,33 +132,60 @@ function UserOnlyDashboard({
           {services.map((item) => (
             <Col md={6} lg={4} key={item._id} className="mb-3">
               <Card className="h-100">
-                <Card.Body className="d-flex flex-column">
-                  <Card.Title>{item.serviceTitle}</Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">
-                    {item.serviceType}
-                  </Card.Subtitle>
-                  <Card.Text>
-                    {item.details || item.date || "—"}
-                  </Card.Text>
-                  <Card.Text>
-                    <small className="text-muted">
-                      Created: {new Date(item.createdAt).toLocaleDateString()}
-                    </small>
-                  </Card.Text>
-                  <div className="mt-auto">
-                    {item.paid ? (
-                      <Button variant="success" disabled>
-                        Paid
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="warning"
-                        onClick={() => handlePayClick(item._id)}
-                      >
-                        Pay / Send Proof
-                      </Button>
-                    )}
-                  </div>
+                <Card.Body>
+                  <Row className="h-100">
+                    {/* Left: Text Content */}
+                    <Col xs={6} className="d-flex flex-column">
+                      <Card.Title>{item.serviceTitle}</Card.Title>
+                      <Card.Subtitle className="mb-2 text-muted">
+                        {item.serviceType}
+                      </Card.Subtitle>
+                      <Card.Text>{item.details || item.date || "—"}</Card.Text>
+                      <Card.Text>
+                        <small className="text-muted">
+                          Created:{" "}
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </small>
+                      </Card.Text>
+                      <div className="mt-auto">
+                        {item.paid ? (
+                          <Button variant="success" disabled>
+                            Paid
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="warning"
+                            onClick={() => handlePayClick(item._id)}
+                          >
+                            Pay / Send Proof
+                          </Button>
+                        )}
+                      </div>
+                    </Col>
+
+                    {/* Right: Service Image */}
+                    <Col
+                      xs={6}
+                      className="d-flex align-items-center justify-content-center"
+                    >
+                      {item.imagePath ? (
+                        <img
+                          src={`/api/images/${item.imagePath}`}
+                          alt={item.serviceTitle}
+                          className="img-fluid rounded"
+                          style={{
+                            maxHeight: "120px",
+                            objectFit: "cover",
+                            width: "100%",
+                          }}
+                        />
+                      ) : (
+                        <div className="text-muted text-center">
+                          No image available
+                        </div>
+                      )}
+                    </Col>
+                  </Row>
                 </Card.Body>
               </Card>
             </Col>
@@ -228,8 +259,14 @@ function UserOnlyDashboard({
             )}
           </>
         )}
-        <hr />
       </Container>
+      <hr />
+    {/* ---------------------------  FOOTER  ---------------------------- */}
+      <footer className="text-center py-1">
+        <small>
+          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+        </small>
+      </footer>
 
       {/* Payment Instructions Modal */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -241,6 +278,18 @@ function UserOnlyDashboard({
           <ul>
             <li>
               <strong>Bank Name:</strong> BFA
+            </li>
+            <li>
+              <strong>Account Name:</strong> Maria Miguel
+            </li>
+            <li>
+              <strong>Account Number:</strong> 342295560 30 001
+            </li>
+            <li>
+              <strong>Routing Number:</strong> AO06 0006 0000 42295560301 25
+            </li>
+            <li>
+              <strong>Customer Name:</strong> Your full name or service ID
             </li>
           </ul>
           <hr />

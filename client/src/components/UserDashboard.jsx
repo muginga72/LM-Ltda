@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UploadProofModal from "./UploadProofModal";
+import ProofAttachment from "./ProofAttachment";
 
-function UserDashboard({ apiBaseUrl, user }) {
+function UserDashboard({ apiBaseUrl, user, userPayment}) {
   const API =
     apiBaseUrl || process.env.REACT_APP_API_URL || "http://localhost:5000";
   const [services, setServices] = useState([]);
@@ -28,7 +29,7 @@ function UserDashboard({ apiBaseUrl, user }) {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3>Your Services</h3>
+        <h3>Available Services</h3>
         {/* <small className="text-muted">Logged in as: {user?.email}</small> */}
       </div>
 
@@ -53,7 +54,21 @@ function UserDashboard({ apiBaseUrl, user }) {
                   <p className="mb-1">
                     <strong>${(s.price || 0).toFixed(2)}</strong>
                   </p>
-                  <p className="mb-2">Status: {s.status}</p>
+                  <p className="mb-2">
+                    <strong>Status: </strong>
+                    <span
+                      className={
+                        s.status === "paid_full"
+                          ? "text-success"
+                          : s.status === "paid_half"
+                          ? "text-primary"
+                          : "text-muted"
+                      }
+                    >
+                      {s.status}
+                    </span>
+                  </p>
+
                   <div className="mt-auto">
                     <button
                       className="btn btn-primary btn-sm"
@@ -80,6 +95,7 @@ function UserDashboard({ apiBaseUrl, user }) {
             .catch(console.error);
         }}
       />
+      <ProofAttachment filePath={userPayment?.proofFile} serviceTitle={userPayment?.serviceTitle} />
     </>
   );
 }
