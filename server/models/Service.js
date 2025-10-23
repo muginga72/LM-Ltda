@@ -6,10 +6,11 @@ const serviceSchema = new mongoose.Schema(
     description: { type: String },
     price: { type: Number, default: 0 },
     imagePath: { type: String, required: true },
-    status: { type: String, enum: ["unpaid", "pending", "paid"], default: "unpaid" },
+    status: { type: String, enum: ["unpaid", "paid_half", "paid_full"], default: "unpaid" },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Service", serviceSchema);
+module.exports =
+  mongoose.models.Service || mongoose.model("Service", serviceSchema);

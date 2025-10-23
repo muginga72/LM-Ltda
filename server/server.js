@@ -30,7 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Stripe webhook must get raw body
 app.use('/api/requests/webhook', requestRoutes);
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Mount API (lightblue API name check the router)
 app.use('/api/admin', adminRoutes);

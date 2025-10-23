@@ -1,4 +1,3 @@
-// routes/payments/payments.js
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -25,7 +24,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Upload proof (user dashboard). Accepts multipart form:
+// Upload proof (user dashboard)
 router.post("/upload-proof", upload.single("proof"), async (req, res) => {
   try {
     const {
@@ -38,20 +37,17 @@ router.post("/upload-proof", upload.single("proof"), async (req, res) => {
       referenceId,
     } = req.body;
 
-    // Validate required fields
     if (!serviceId || !payerEmail) {
       return res
         .status(400)
         .json({ error: "serviceId and payerEmail are required" });
     }
 
-    // Validate service exists
     const service = await Service.findById(serviceId);
     if (!service) {
       return res.status(404).json({ error: "Service not found" });
     }
 
-    // Create new payment record
     const payment = new Payment({
       serviceId: service._id,
       payerName: payerName || "",
@@ -66,12 +62,6 @@ router.post("/upload-proof", upload.single("proof"), async (req, res) => {
 
     await payment.save();
 
-    router.get("/paid-services", async (req, res) => {
-      const paid = await Payment.find({ status: "paid" });
-      res.json(paid);
-    });
-
-    // Try sending admin email (non-blocking)
     try {
       await sendAdminProofEmail({ payment, service });
     } catch (e) {
@@ -81,6 +71,35 @@ router.post("/upload-proof", upload.single("proof"), async (req, res) => {
     return res.json({ ok: true, payment });
   } catch (err) {
     console.error("Upload-proof error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+// Fetch all fully or half paid services
+router.get("/paid-services", async (req, res) => {
+  try {
+    const paidServices = await Payment.find({
+      status: { $in: ["paid_full", "paid_half"] },
+    }).populate("serviceId");
+
+    return res.json(paidServices);
+  } catch (err) {
+    console.error("Error fetching paid services:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Fetch all unpaid services
+router.get("/unpaid-services", async (req, res) => {
+  try {
+    const unpaidServices = await Payment.find({
+      status: { $in: ["pending", "unpaid"] },
+    }).populate("serviceId");
+
+    return res.json(unpaidServices);
+  } catch (err) {
+    console.error("Error fetching unpaid services:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
