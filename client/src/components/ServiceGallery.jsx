@@ -74,7 +74,9 @@ const ServiceGallery = () => {
       <div className="row g-4">
         {services.map((service) => (
           <div key={service._id} className="col-12 col-md-6">
-            <ServiceCardWithModals service={service} onDelete={handleDelete} />
+            <ServiceCardWithModals 
+            service={service} 
+            onDelete={handleDelete} />
           </div>
         ))}
       </div>
