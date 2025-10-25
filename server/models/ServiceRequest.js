@@ -7,6 +7,7 @@ const ServiceRequestSchema = new mongoose.Schema({
   fullName: String,
   details: String,
   email: String,
+  imagePath: { type: String, required: false, default: '' },
   paid: { type: Boolean, default: false },
   status: { type: String, enum: ["paid", "pending", "unpaid"], default: "unpaid" },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
