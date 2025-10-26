@@ -32,6 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/requests/webhook', requestRoutes);
 // app.use("/uploads", express.static("uploads"));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/requests/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/schedules/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/images', express.static(path.join(__dirname, 'assets', 'images')));
 
 // Mount API (lightblue API name check the router)
 app.use('/api/admin', adminRoutes);

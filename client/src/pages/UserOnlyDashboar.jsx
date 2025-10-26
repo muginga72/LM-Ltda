@@ -3,27 +3,10 @@ import axios from "axios";
 import UploadDocumentModal from "../components/UploadDocumentModal";
 import EmailSupportModal from "../components/EmailSupportModal";
 import { AuthContext } from "../contexts/AuthContext";
-import {
-  Container,
-  Spinner,
-  Alert,
-  Button,
-  Modal,
-  Card,
-  Row,
-  Col,
-} from "react-bootstrap";
+import {Container, Spinner, Alert, Button, Modal, Card, Row, Col } from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
 
-// const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-function UserOnlyDashboard({
-  apiBaseUrl,
-  token,
-  initialServices,
-  onProofSubmitted,
-  onServiceSelect,
-}) {
+function UserOnlyDashboard({apiBaseUrl, token, initialServices, onProofSubmitted, onServiceSelect}) {
   const { user } = useContext(AuthContext);
 
   const [requestedServices, setRequestedServices] = useState([]);
@@ -39,7 +22,7 @@ function UserOnlyDashboard({
 
   const [showModal, setShowModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [uploadServiceId, setUploadServiceId] = useState(null);
+  // const [uploadServiceId, setUploadServiceId] = useState(null);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [emailSupportModal, setEmailSupportModal] = useState(false);
 
@@ -112,12 +95,7 @@ function UserOnlyDashboard({
       }
     };
 
-    Promise.all([
-      fetchRequested(),
-      fetchScheduled(),
-      fetchShared(),
-      fetchPaid(),
-    ]).finally(() => setLoading(false));
+    Promise.all([ fetchRequested(), fetchScheduled(), fetchShared(), fetchPaid()]).finally(() => setLoading(false));
   }, [user, apiBaseUrl]);
 
   const renderServiceCards = (title, services, error, type) => (
@@ -157,7 +135,7 @@ function UserOnlyDashboard({
                             variant="warning"
                             onClick={() => handlePayClick(item._id)}
                           >
-                            Pay / Send Proof
+                            Pay Instructions
                           </Button>
                         )}
                       </div>
@@ -170,13 +148,17 @@ function UserOnlyDashboard({
                     >
                       {item.imagePath ? (
                         <img
-                          src={`/api/images/${item.imagePath}`}
-                          alt={item.serviceTitle}
+                          // src={`${item.imagePath}`} // Source of error: Assuming imagePath is a full URL
+                          src="/api/requests/uploads/default.png"
+                          alt="Default"
+                          // alt={item.serviceTitle}  // Source of error: Assuming imagePath is a full URL
                           className="img-fluid rounded"
                           style={{
-                            maxHeight: "120px",
+                            maxHeight: "180px",
                             objectFit: "cover",
                             width: "100%",
+                            borderRadius: "12px",
+                            border: "1px solid #ddd",
                           }}
                         />
                       ) : (
@@ -226,6 +208,9 @@ function UserOnlyDashboard({
 
         <hr />
 
+        {/* 
+          This section renders the Requests, Schedules, Shares, and Paid Services for the USER 
+        */}
         <h4 className="mb-3 text-center">Your Service Overview</h4>
         {loading ? (
           <div className="text-center">
@@ -260,8 +245,10 @@ function UserOnlyDashboard({
           </>
         )}
       </Container>
+
       <hr />
-    {/* ---------------------------  FOOTER  ---------------------------- */}
+
+      {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-1">
         <small>
           &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
@@ -295,9 +282,10 @@ function UserOnlyDashboard({
           <hr />
           <p>
             Once you've completed the payment, please upload the support
-            document or send it via email to confirm.
+            document or send it via email to confirm "SEND PAYMENT PROOF"
+            button.
           </p>
-          <div className="d-flex justify-content-between mt-3">
+          {/* <div className="d-flex justify-content-between mt-3">
             <Button
               variant="outline-primary"
               onClick={() => {
@@ -313,13 +301,13 @@ function UserOnlyDashboard({
             >
               Send Email
             </Button>
-          </div>
+          </div> */}
         </Modal.Body>
 
         <UploadDocumentModal
           show={showUploadModal}
           handleClose={() => setShowUploadModal(false)}
-          serviceId={uploadServiceId}
+          // serviceId={uploadServiceId}
           user={user}
         />
         <EmailSupportModal

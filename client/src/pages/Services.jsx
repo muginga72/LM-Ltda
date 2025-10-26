@@ -9,7 +9,7 @@ function Services() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // ✅ AbortController prevents duplicate fetches in StrictMode
+    // AbortController prevents duplicate fetches in StrictMode
     const controller = new AbortController();
 
     const fetchServices = async () => {
@@ -60,6 +60,7 @@ function Services() {
               >
                 <div style={{ width: "400px" }}>
                   <ServiceCardWithModals
+                    serviceId={service._id}
                     title={service.title}
                     description={service.description}
                     imagePath={service.imagePath || "/images/placeholder.png"}

@@ -1,36 +1,28 @@
-// routes/schedules.js
 const express = require('express');
-const router  = express.Router();
-const ServiceSchedule = require('../models/ServiceSchedule');
+const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const scheduleController = require('../controllers/scheduleController');
 
-// Create
-router.post('/', async (req, res) => {
-  const sched = await ServiceSchedule.create(req.body);
-  res.json(sched);
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '';
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
 });
 
-// Read all
-router.get('/', async (req, res) => {
-  const list = await ServiceSchedule.find().sort('-createdAt');
-  res.json(list);
-});
+const upload = multer({ storage });
 
-// Read one
-router.get('/:id', async (req, res) => {
-  const doc = await ServiceSchedule.findById(req.params.id);
-  res.json(doc);
-});
+// Serve uploads (including default.png) before dynamic routes
+router.use('/uploads', express.static(uploadsDir));
 
-// Update
-router.patch('/:id', async (req, res) => {
-  const updated = await ServiceSchedule.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
-});
-
-// Delete
-router.delete('/:id', async (req, res) => {
-  await ServiceSchedule.findByIdAndDelete(req.params.id);
-  res.json({ deleted: true });
-});
+router.post('/', upload.single('image'), scheduleController.createSchedule);
+router.get('/', scheduleController.listSchedules);
+router.get('/:id', scheduleController.getScheduleById);
+// router.patch('/:id', scheduleController.updateSchedule);
+router.delete('/:id', scheduleController.deleteSchedule);
+router.post('/:id/image', upload.single('image'), scheduleController.uploadScheduleImage);
 
 module.exports = router;

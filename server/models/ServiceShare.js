@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 
 const ServiceShareSchema = new mongoose.Schema({
+  serviceType: String,
   fullName: { type: String, required: true },
   serviceTitle: { type: String, required: true },
   email:        { type: String, required: true },

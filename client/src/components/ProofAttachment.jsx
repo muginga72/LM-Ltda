@@ -1,4 +1,4 @@
-// ✅ src/components/ProofAttachment.jsx — no react-pdf needed
+// src/components/ProofAttachment.jsx — no react-pdf needed
 import React from 'react';
 
 const ProofAttachment = ({ filePath, serviceTitle }) => {

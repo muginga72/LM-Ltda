@@ -11,7 +11,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const ServiceCardWithModals = ({ title, description, price, imagePath }) => {
+const ServiceCardWithModals = ({ serviceId, title, description, price, imagePath }) => {
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
@@ -88,10 +88,19 @@ const ServiceCardWithModals = ({ title, description, price, imagePath }) => {
         share: "/api/shares",
       }[type];
 
+      const formData = state[`${type}Data`];
       const payload = {
+        ...formData,
         serviceTitle: title,
-        ...state[`${type}Data`],
+        serviceId,
       };
+
+      // Validate required fields
+      const requiredFields = ["serviceId", "fullName", "email"];
+      const missing = requiredFields.filter((field) => !payload[field]);
+      if (missing.length > 0) {
+        throw new Error(`${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} required.`);
+      }
 
       const res = await fetch(`${BASE_URL}${endpoint}`, {
         method: "POST",
@@ -99,7 +108,11 @@ const ServiceCardWithModals = ({ title, description, price, imagePath }) => {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`Failed to ${type} service`);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || `Failed to ${type} service`);
+      }
+
       alert(`${type.charAt(0).toUpperCase() + type.slice(1)} successful.`);
 
       setState((prev) => ({
@@ -109,7 +122,7 @@ const ServiceCardWithModals = ({ title, description, price, imagePath }) => {
       }));
     } catch (err) {
       console.error(err);
-      alert("Something went wrong. Please try again.");
+      alert(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -136,7 +149,7 @@ const ServiceCardWithModals = ({ title, description, price, imagePath }) => {
                 as={field === "details" ? "textarea" : "input"}
                 type={field === "details" ? undefined : "text"}
                 placeholder={getPlaceholder(field)}
-                value={state[`${type}Data`][field]}
+                value={state[`${type}Data`][field] || ""}
                 onChange={(e) => handleChange(e, `${type}Data`)}
               />
             </Form.Group>
@@ -158,7 +171,6 @@ const ServiceCardWithModals = ({ title, description, price, imagePath }) => {
     </Modal>
   );
 
-  // The full image URL for MongoDB-stored path
   const fullImageUrl = imagePath
     ? `${BASE_URL}${imagePath.startsWith("/") ? imagePath : `/${imagePath}`}`
     : "https://via.placeholder.com/400x300";

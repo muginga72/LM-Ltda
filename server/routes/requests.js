@@ -1,93 +1,30 @@
-// routes/requests.js
 const express = require('express');
 const router = express.Router();
-const ServiceRequest = require('../models/ServiceRequest');
+const multer = require('multer');
+const path = require('path');
+const requestController = require('../controllers/requestController');
 
-/**
- * POST /api/requests
- * Create a new service request (no payment required).
- */
-router.post('/', async (req, res) => {
-  try {
-    const { serviceTitle, fullName, email, serviceType, details } = req.body;
-
-    const request = await ServiceRequest.create({
-      serviceTitle,
-      fullName,
-      email,
-      serviceType ,
-      details,
-      paid: false // default to unpaid; can be updated manually if needed
-    });
-
-    res.status(201).json(request);
-  } catch (err) {
-    console.error('POST /api/requests error:', err);
-    res.status(500).json({ error: 'Failed to create service request.' });
-  }
+// Setup multer for image uploads
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '';
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
 });
 
-/**
- * GET /api/requests
- * List all service requests.
- */
-router.get('/', async (req, res) => {
-  try {
-    const list = await ServiceRequest.find().sort('-createdAt');
-    res.json(list);
-  } catch (err) {
-    console.error('GET /api/requests error:', err);
-    res.status(500).json({ error: 'Failed to fetch requests.' });
-  }
-});
+const upload = multer({ storage });
 
-/**
- * GET /api/requests/:id
- * Fetch a single service request by ID.
- */
-router.get('/:id', async (req, res) => {
-  try {
-    const reqDoc = await ServiceRequest.findById(req.params.id);
-    if (!reqDoc) return res.status(404).json({ error: 'Request not found.' });
-    res.json(reqDoc);
-  } catch (err) {
-    console.error(`GET /api/requests/${req.params.id} error:`, err);
-    res.status(500).json({ error: 'Failed to fetch request.' });
-  }
-});
+// Serve uploaded images (including default.png)
+router.use('/uploads', express.static(uploadsDir));
 
-/**
- * PATCH /api/requests/:id
- * Update fields of an existing service request.
- */
-router.patch('/:id', async (req, res) => {
-  try {
-    const updated = await ServiceRequest.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!updated) return res.status(404).json({ error: 'Request not found.' });
-    res.json(updated);
-  } catch (err) {
-    console.error(`PATCH /api/requests/${req.params.id} error:`, err);
-    res.status(500).json({ error: 'Failed to update request.' });
-  }
-});
-
-/**
- * DELETE /api/requests/:id
- * Remove a service request by ID.
- */
-router.delete('/:id', async (req, res) => {
-  try {
-    const deleted = await ServiceRequest.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Request not found.' });
-    res.json({ deleted: true });
-  } catch (err) {
-    console.error(`DELETE /api/requests/${req.params.id} error:`, err);
-    res.status(500).json({ error: 'Failed to delete request.' });
-  }
-});
+// Routes
+router.post('/', upload.single('image'), requestController.createRequest);
+router.get('/', requestController.listRequests);
+router.get('/:id', requestController.getRequestById);
+router.patch('/:id', requestController.updateRequest);
+router.delete('/:id', requestController.deleteRequest);
+router.post('/:id/image', upload.single('image'), requestController.uploadRequestImage);
 
 module.exports = router;

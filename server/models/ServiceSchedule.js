@@ -2,15 +2,16 @@
 const mongoose = require('mongoose');
 
 const ServiceScheduleSchema = new mongoose.Schema({
-  serviceTitle: String,
   serviceType: String,
   fullName: String,
-  date: String,
-  time: String,
   email: String,
+  date: { type: String, required: true },       // original string (YYYY-MM-DD)
+  time: { type: String, default: '' },          // optional time string HH:mm
+  scheduledAt: { type: Date },                  // normalized date for querying
+  imagePath: { type: String, required: false, default: '' },
   paid: { type: Boolean, default: false },
-  status: { type: String, enum: ["paid", "pending", "unpaid"], default: "unpaid" },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  status: { type: String, default: "unpaid" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('ServiceSchedule', ServiceScheduleSchema);
