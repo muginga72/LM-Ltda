@@ -13,9 +13,10 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   },
 });
+
 const upload = multer({ storage });
 
-// Serve uploaded images
+// Serve uploaded images (including default.png)
 router.use('/uploads', express.static(uploadsDir));
 
 // Routes

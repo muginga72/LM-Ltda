@@ -1,16 +1,21 @@
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose'); // <-- make sure this is present
 const ServiceRequest = require('../models/ServiceRequest');
 
 // Directory for uploaded images
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-// Helper to safely delete an image file
+// Ensure a default.png exists under /uploads
+// Place a real default.png file in the uploads directory.
+const DEFAULT_FILENAME = 'default.png';
+const DEFAULT_PUBLIC_PATH = `/api/requests/uploads/${DEFAULT_FILENAME}`;
+
 const deleteImageFile = (imagePath) => {
   if (!imagePath) return;
   const filename = imagePath.split('/').pop();
-  if (!filename) return;
+  if (!filename || filename === DEFAULT_FILENAME) return;
   const filePath = path.join(uploadsDir, filename);
   fs.unlink(filePath, (err) => {
     if (err && err.code !== 'ENOENT') {
@@ -39,11 +44,9 @@ module.exports = {
         return res.status(400).json({ error: 'serviceId, fullName and email are required' });
       }
 
-      // If your schema requires imagePath, provide a placeholder path when no file is uploaded.
-      // Ensure a placeholder exists at uploads/default.png if using this value.
       const imagePath = req.file
         ? `/api/requests/uploads/${req.file.filename}`
-        : '/api/requests/uploadefault.png';
+        : DEFAULT_PUBLIC_PATH;
 
       const newRequest = new ServiceRequest({
         serviceId,
@@ -88,7 +91,13 @@ module.exports = {
   // Get a single request by ID
   getRequestById: async (req, res) => {
     try {
-      const request = await ServiceRequest.findById(req.params.id);
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid request ID format' });
+      }
+
+      const request = await ServiceRequest.findById(id);
       if (!request) return res.status(404).json({ error: 'Request not found.' });
       return res.json(request);
     } catch (err) {
@@ -100,11 +109,16 @@ module.exports = {
   // Update request fields
   updateRequest: async (req, res) => {
     try {
-      const updated = await ServiceRequest.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid request ID format' });
+      }
+
+      const updated = await ServiceRequest.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true,
+      });
       if (!updated) return res.status(404).json({ error: 'Request not found.' });
       return res.json(updated);
     } catch (err) {
@@ -123,11 +137,16 @@ module.exports = {
   // Delete a request and its image
   deleteRequest: async (req, res) => {
     try {
-      const deleted = await ServiceRequest.findByIdAndDelete(req.params.id);
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid request ID format' });
+      }
+
+      const deleted = await ServiceRequest.findByIdAndDelete(id);
       if (!deleted) return res.status(404).json({ error: 'Request not found.' });
 
-      // remove uploaded file if it's not the placeholder
-      if (deleted.imagePath && !deleted.imagePath.includes('default.png')) {
+      if (deleted.imagePath) {
         deleteImageFile(deleted.imagePath);
       }
 
@@ -141,17 +160,21 @@ module.exports = {
   // Replace or add image to existing request
   uploadRequestImage: async (req, res) => {
     try {
-      const request = await ServiceRequest.findById(req.params.id);
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: 'Invalid request ID format' });
+      }
+
+      const request = await ServiceRequest.findById(id);
       if (!request) return res.status(404).json({ error: 'Request not found.' });
 
       // remove previous image file if it's not the default placeholder
-      if (request.imagePath && !request.imagePath.includes('default.png')) {
-        deleteImageFile(request.imagePath);
-      }
+      deleteImageFile(request.imagePath);
 
       const newImagePath = req.file
         ? `/api/requests/uploads/${req.file.filename}`
-        : '/images/default.png';
+        : DEFAULT_PUBLIC_PATH;
 
       request.imagePath = newImagePath;
       const saved = await request.save();

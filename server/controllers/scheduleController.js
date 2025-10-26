@@ -5,10 +5,15 @@ const ServiceSchedule = require('../models/ServiceSchedule');
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
+// Ensure a default.png exists under /uploads
+// Place a real default.png file in the uploads directory.
+const DEFAULT_FILENAME = 'default.png';
+const DEFAULT_PUBLIC_PATH = `/api/schedules/uploads/${DEFAULT_FILENAME}`;
+
 const deleteImageFile = (imagePath) => {
   if (!imagePath) return;
   const filename = imagePath.split('/').pop();
-  if (!filename) return;
+  if (!filename || filename === DEFAULT_FILENAME) return;
   const filePath = path.join(uploadsDir, filename);
   fs.unlink(filePath, (err) => {
     if (err && err.code !== 'ENOENT') {
@@ -40,7 +45,7 @@ module.exports = {
       // Ensure a placeholder exists at uploads/default.png or change this default to your preferred path.
       const imagePath = req.file
         ? `/api/schedules/uploads/${req.file.filename}`
-        : '/api/schedules/uploads/default.png';
+        : DEFAULT_PUBLIC_PATH;
 
       const sched = new ServiceSchedule({
         serviceTitle,
@@ -138,7 +143,7 @@ module.exports = {
 
       const newImagePath = req.file
         ? `/api/schedules/uploads/${req.file.filename}`
-        : 'images/default.png';
+        : DEFAULT_PUBLIC_PATH;
 
       doc.imagePath = newImagePath;
       await doc.save();
