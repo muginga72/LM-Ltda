@@ -277,11 +277,12 @@ const ServiceCardWithModals = ({
   const defaultState = {
     showModal: { request: false, schedule: false, share: false },
     activeModalType: "",
-    requestData: { fullName: "", email: "", serviceType: title, details: "" },
+    requestData: { fullName: "", email: "", serviceType: title, serviceTitle: title, details: "" },
     scheduleData: {
       fullName: "",
       email: "",
       serviceType: title,
+      serviceTitle: title,
       date: "",
       time: "",
     },
@@ -340,6 +341,7 @@ const ServiceCardWithModals = ({
     if (field === "fullName") return "Your full name";
     if (field === "email") return "Your email address";
     if (field === "serviceType") return `Service: ${title}`;
+    if (field === "serviceTitle") return `Service: ${title}`;
     if (field === "details") return `Describe your ${title} request...`;
     if (field === "date") return "Preferred date";
     if (field === "time") return "Preferred time";
@@ -386,7 +388,7 @@ const ServiceCardWithModals = ({
 
       // build payload carefully (backend expects serviceId plus form fields)
       const payload = {
-        serviceId,
+        serviceId, 
         ...state[`${type}Data`],
       };
 

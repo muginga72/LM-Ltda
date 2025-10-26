@@ -16,7 +16,7 @@ function AdminScheduledServicesTable({ services, error, token, onStatusUpdate })
             <tr>
               <th>#</th>
               <th>Service Title</th>
-              <th>Type</th>
+              <th>Service Type</th>
               <th>Fullname</th>
               <th>Date</th>
               <th>Time</th>

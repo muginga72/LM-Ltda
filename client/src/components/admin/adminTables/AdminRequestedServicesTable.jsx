@@ -16,7 +16,7 @@ function AdminRequestedServicesTable({ services, error, token, onStatusUpdate })
             <tr>
               <th>#</th>
               <th>Service Title</th>
-              <th>Type</th>
+              <th>Service Type</th>
               <th>Fullname</th>
               <th>Details</th>
               <th>Requested On</th>

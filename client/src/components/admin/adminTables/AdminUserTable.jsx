@@ -14,7 +14,7 @@ function AdminUserTable({ users, error }) {
           <thead>
             <tr>
               <th>#</th>
-              <th>Name</th>
+              <th>Fullname</th>
               <th>Email</th>
               <th>Role</th>
             </tr>
@@ -23,7 +23,7 @@ function AdminUserTable({ users, error }) {
             {users.map((u, index) => (
               <tr key={u._id}>
                 <td>{index + 1}</td>
-                <td>{u.name}</td>
+                <td>{u.fullName}</td>
                 <td>{u.email}</td>
                 <td>{u.role}</td>
               </tr>

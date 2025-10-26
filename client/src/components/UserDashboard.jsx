@@ -28,6 +28,9 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
 
   return (
     <>
+      {/* 
+        This section allow user to see the available services and send payment proof
+      */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3>Available Services</h3>
         {/* <small className="text-muted">Logged in as: {user?.email}</small> */}
@@ -84,6 +87,7 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
         </div>
       )}
 
+      {/* Render the payment modal with attachment */}
       <UploadProofModal
         service={selected}
         user={user}
@@ -95,7 +99,12 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
             .catch(console.error);
         }}
       />
-      <ProofAttachment filePath={userPayment?.proofFile} serviceTitle={userPayment?.serviceTitle} />
+
+      {/* This section display the proof of payment made */}
+      <ProofAttachment 
+        filePath={userPayment?.proofFile} 
+        serviceTitle={userPayment?.serviceTitle} 
+      />
     </>
   );
 }
