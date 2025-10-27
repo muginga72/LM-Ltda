@@ -17,6 +17,7 @@ const testimonialsRoute = require("./routes/testimonials");
 const cardsRoutes = require('./routes/cardsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const uploadRoutes = require('./routes/uploadFilesRoutes');
+const paymentsRouter = require("./routes/payments/payments"); // adjust path as needed
 const paymentConfRoute = require("./routes/payments/payments"); 
 
 // Instantiate the Express application
@@ -47,7 +48,8 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/requests',  requestRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares',    shareRoutes);
-app.use('/api/payments', paymentConfRoute);
+app.use("/api/payments", paymentsRouter);
+// app.use('/api/payments', paymentConfRoute);
 app.use("/api/testimonials", testimonialsRoute);
 
 // Connect & start
