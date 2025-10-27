@@ -3,10 +3,10 @@ import axios from "axios";
 import UploadDocumentModal from "../components/UploadDocumentModal";
 import EmailSupportModal from "../components/EmailSupportModal";
 import { AuthContext } from "../contexts/AuthContext";
-import {Container, Spinner, Alert, Button, Modal, Card, Row, Col } from "react-bootstrap";
+import { Container, Spinner, Alert, Button, Modal, Card, Row, Col } from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
 
-function UserOnlyDashboard({apiBaseUrl, token, initialServices, onProofSubmitted, onServiceSelect}) {
+function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitted, onServiceSelect }) {
   const { user } = useContext(AuthContext);
 
   const [requestedServices, setRequestedServices] = useState([]);
@@ -83,11 +83,17 @@ function UserOnlyDashboard({apiBaseUrl, token, initialServices, onProofSubmitted
 
     const fetchPaid = async () => {
       try {
-        const res = await axios.get(
-          `${apiBaseUrl}/api/payments/paid-services`,
-          { headers }
-        );
-        const filtered = res.data.filter((item) => item.email === user.email);
+        const base = (apiBaseUrl || "").replace(/\/+$/, ""); // remove trailing slash
+        const url = `${base}/api/payments/paid-services`;
+
+        const res = await axios.get(url, { headers });
+
+        const all = Array.isArray(res.data) ? res.data : [];
+
+        const filtered = user?.email
+          ? all.filter((item) => item.payerEmail === user.email)
+          : [];
+
         setPaidServices(filtered);
       } catch (err) {
         console.error("Paid services error:", err);
@@ -95,7 +101,12 @@ function UserOnlyDashboard({apiBaseUrl, token, initialServices, onProofSubmitted
       }
     };
 
-    Promise.all([ fetchRequested(), fetchScheduled(), fetchShared(), fetchPaid()]).finally(() => setLoading(false));
+    Promise.all([
+      fetchRequested(),
+      fetchScheduled(),
+      fetchShared(),
+      fetchPaid(),
+    ]).finally(() => setLoading(false));
   }, [user, apiBaseUrl]);
 
   const renderServiceCards = (title, services, error, type) => (
@@ -132,7 +143,7 @@ function UserOnlyDashboard({apiBaseUrl, token, initialServices, onProofSubmitted
                           </Button>
                         ) : (
                           <Button
-                            variant="warning"
+                            variant="outline-primary"
                             onClick={() => handlePayClick(item._id)}
                           >
                             Pay Instructions
@@ -150,8 +161,8 @@ function UserOnlyDashboard({apiBaseUrl, token, initialServices, onProofSubmitted
                         <img
                           // src={`${item.imagePath}`} // Source of error: Assuming imagePath is a full URL
                           src="/api/requests/uploads/default.png"
-                          alt="Default"
                           // alt={item.serviceTitle}  // Source of error: Assuming imagePath is a full URL
+                          alt="Default"
                           className="img-fluid rounded"
                           style={{
                             maxHeight: "180px",
