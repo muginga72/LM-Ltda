@@ -18,7 +18,7 @@ const cardsRoutes = require('./routes/cardsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const uploadRoutes = require('./routes/uploadFilesRoutes');
 const paymentsRouter = require("./routes/payments/payments"); // adjust path as needed
-const paymentConfRoute = require("./routes/payments/payments"); 
+// const paymentConfRoute = require("./routes/payments/payments"); 
 
 // Instantiate the Express application
 const app = express();
