@@ -5,14 +5,6 @@ import axios from "axios";
 const RAW_API = process.env.REACT_APP_API_URL || "";
 const API = RAW_API.replace(/\/+$/, "");
 
-/**
- * Props
- * - service: object (required) — the service being paid for
- * - onHide: function (optional) — called when modal closes
- * - refresh: function (optional) — called after successful upload
- * - currentUser: object (optional) — { email, fullName } used to auto-fill payerEmail/payerName
- */
-
 function UploadProofModal({ service, onHide, refresh, currentUser }) {
   const [show, setShow] = useState(!!service);
   useEffect(() => setShow(!!service), [service]);
@@ -31,12 +23,10 @@ function UploadProofModal({ service, onHide, refresh, currentUser }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Auto-fill from currentUser when modal opens
     if (show && currentUser) {
       if (currentUser.email) setPayerEmail(currentUser.email);
       if (currentUser.fullName) setPayerName((n) => n || currentUser.fullName);
     }
-    // reset small state when opening
     if (show) {
       setStatus("");
       setProgress(0);
@@ -44,7 +34,6 @@ function UploadProofModal({ service, onHide, refresh, currentUser }) {
   }, [show, currentUser]);
 
   useEffect(() => {
-    // cleanup preview URL on unmount or file change
     return () => {
       if (filePreview) URL.revokeObjectURL(filePreview);
     };
@@ -71,7 +60,6 @@ function UploadProofModal({ service, onHide, refresh, currentUser }) {
       setStatus("Invalid file. Accepts PNG/JPEG/PDF up to 10MB.");
       setFile(null);
       setFilePreview(null);
-      // clear file input
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -123,7 +111,6 @@ function UploadProofModal({ service, onHide, refresh, currentUser }) {
       setTimeout(() => {
         setShow(false);
         onHide && onHide();
-        // reset form state
         setFile(null);
         setFilePreview(null);
         setPayerName("");
@@ -193,14 +180,14 @@ function UploadProofModal({ service, onHide, refresh, currentUser }) {
 
           <Form.Group className="mb-2">
             <Form.Control
-              placeholder="e.g. Bank transfer, PayPal, etc."
+              placeholder="e.g. Bank transfer, Bank deposit, etc."
               value={method}
               onChange={(e) => setMethod(e.target.value)}
             />
           </Form.Group>
 
           <Form.Group className="mb-2">
-            <Form.Label>Date received</Form.Label>
+            <Form.Label>Submission Date</Form.Label>
             <Form.Control
               type="date"
               value={dateReceived}

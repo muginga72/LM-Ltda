@@ -145,9 +145,10 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token }) {
             onCreated={handleServiceCreated}
             token={token}
           />
+          <hr />
         </Container>
 
-        <div className="container py-4">
+        <div className="container py-3">
           <div className="row mb-4">
             <div className="col-md-12">
               <h3 className="mb-3 text-center">Preview Current Services</h3>

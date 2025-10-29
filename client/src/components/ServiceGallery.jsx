@@ -12,12 +12,8 @@ const ServiceGallery = () => {
       try {
         const res = await fetch("/api/services");
         const dbServices = await res.json();
-
-        // Load local-only services
         const localServices =
           JSON.parse(localStorage.getItem("localServices")) || [];
-
-        // Merge them
         setServices([...dbServices, ...localServices]);
       } catch (err) {
         console.error("Failed to fetch services", err);
@@ -31,7 +27,6 @@ const ServiceGallery = () => {
   // Delete handler for both local-only and backend cards
   const handleDelete = async (id, isLocal) => {
     if (isLocal) {
-      // Remove from state and localStorage
       const updated = services.filter((s) => s._id !== id);
       setServices(updated);
       const localServices = updated.filter((s) => s.isLocal);

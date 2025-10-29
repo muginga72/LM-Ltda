@@ -118,7 +118,7 @@ const ProofAttachment = ({ filePath, serviceTitle }) => {
 
           <div style={{ fontSize: 13, color: "#555" }}>
             <strong>File:</strong> {filename || "attachment"}{" "}
-            {isPDF && <span style={{ marginLeft: 8, color: "#777" }}>PDF</span>}
+            {isPDF && <span style={{ marginLeft: 8, color: "#777" }}></span>}
           </div>
         </>
       )}

@@ -5,8 +5,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const ServicesPromo = () => {
   const products = [
     {
-      name: "Beauty Promotion",
-      image: "/images/beautyPromo.jpg",
+      name: "Wedding Salon",
+      image: "/images/salao-de-festas-00.jpg",
     },
     {
       name: "Dinner",

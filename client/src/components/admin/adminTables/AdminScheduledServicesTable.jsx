@@ -15,7 +15,7 @@ function AdminScheduledServicesTable({ services, error, token, onStatusUpdate })
           <thead>
             <tr>
               <th>#</th>
-              <th>Service Title</th>
+              {/* <th>Service Title</th> */}
               <th>Service Type</th>
               <th>Fullname</th>
               <th>Date</th>
@@ -28,7 +28,7 @@ function AdminScheduledServicesTable({ services, error, token, onStatusUpdate })
             {services.map((item, index) => (
               <tr key={item._id}>
                 <td>{index + 1}</td>
-                <td>{item.serviceTitle}</td>
+                {/* <td>{item.serviceTitle}</td> */}
                 <td>{item.serviceType}</td>
                 <td>{item.fullName}</td>
                 <td>{item.date}</td>

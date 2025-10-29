@@ -3,10 +3,25 @@ import axios from "axios";
 import UploadDocumentModal from "../components/UploadDocumentModal";
 import EmailSupportModal from "../components/EmailSupportModal";
 import { AuthContext } from "../contexts/AuthContext";
-import { Container, Spinner, Alert, Button, Modal, Card, Row, Col } from "react-bootstrap";
+import {
+  Container,
+  Spinner,
+  Alert,
+  Button,
+  Modal,
+  Card,
+  Row,
+  Col,
+} from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
 
-function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitted, onServiceSelect }) {
+function UserOnlyDashboard({
+  apiBaseUrl,
+  token,
+  initialServices,
+  onProofSubmitted,
+  onServiceSelect,
+}) {
   const { user } = useContext(AuthContext);
 
   const [requestedServices, setRequestedServices] = useState([]);
@@ -22,7 +37,6 @@ function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitte
 
   const [showModal, setShowModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  // const [uploadServiceId, setUploadServiceId] = useState(null);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [emailSupportModal, setEmailSupportModal] = useState(false);
 
@@ -85,15 +99,11 @@ function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitte
       try {
         const base = (apiBaseUrl || "").replace(/\/+$/, ""); // remove trailing slash
         const url = `${base}/api/payments/paid-services`;
-
         const res = await axios.get(url, { headers });
-
         const all = Array.isArray(res.data) ? res.data : [];
-
         const filtered = user?.email
           ? all.filter((item) => item.payerEmail === user.email)
           : [];
-
         setPaidServices(filtered);
       } catch (err) {
         console.error("Paid services error:", err);
@@ -129,7 +139,7 @@ function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitte
                       <Card.Subtitle className="mb-2 text-muted">
                         {item.serviceType}
                       </Card.Subtitle>
-                      <Card.Text>{item.details || item.date || "—"}</Card.Text>
+                      <Card.Text>{item.details || item.date || item.email}</Card.Text>
                       <Card.Text>
                         <small className="text-muted">
                           Created:{" "}
@@ -159,9 +169,7 @@ function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitte
                     >
                       {item.imagePath ? (
                         <img
-                          // src={`${item.imagePath}`} // Source of error: Assuming imagePath is a full URL
                           src="/api/requests/uploads/default.png"
-                          // alt={item.serviceTitle}  // Source of error: Assuming imagePath is a full URL
                           alt="Default"
                           className="img-fluid rounded"
                           style={{
@@ -293,26 +301,9 @@ function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitte
           <hr />
           <p>
             Once you've completed the payment, please upload the support
-            document or send it via email to confirm "SEND PAYMENT PROOF"
-            button.
+            document or send it via <strong>email</strong> or <strong>"SEND PAYMENT PROOF" </strong>
+            button related to requested, scheduled or shared service.
           </p>
-          {/* <div className="d-flex justify-content-between mt-3">
-            <Button
-              variant="outline-primary"
-              onClick={() => {
-                setUploadServiceId(selectedServiceId);
-                setShowUploadModal(true);
-              }}
-            >
-              Upload Document
-            </Button>
-            <Button
-              variant="outline-success"
-              onClick={() => setEmailSupportModal(true)}
-            >
-              Send Email
-            </Button>
-          </div> */}
         </Modal.Body>
 
         <UploadDocumentModal

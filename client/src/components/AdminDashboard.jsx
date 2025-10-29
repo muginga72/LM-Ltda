@@ -159,7 +159,7 @@ function AdminDashboard() {
                       <th>Email</th>
                       <th>Amount</th>
                       <th>Status</th>
-                      <th>Proof</th>
+                      {/* <th>Proof</th> */}
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -190,7 +190,7 @@ function AdminDashboard() {
                             >
                               {p.status}
                             </td>
-                            <td>
+                            {/* <td>
                               {p.proofPath ? (
                                 <a href={p.proofPath} target="_blank" rel="noreferrer">
                                   View
@@ -198,7 +198,7 @@ function AdminDashboard() {
                               ) : (
                                 "-"
                               )}
-                            </td>
+                            </td> */}
                             <td>
                               <Button
                                 size="sm"
@@ -236,7 +236,7 @@ function AdminDashboard() {
                 </Button>
               </>
             ) : (
-              <div className="text-muted py-4">Select a service to view payments</div>
+              <div className="text-muted py-4"><strong>Select a service to view payments</strong></div>
             )}
           </div>
         </div>

@@ -1,6 +1,9 @@
 import React from 'react';
 
-function ServiceCard({ service, onClick }) {
+function ServiceCard({ 
+  service, 
+  // onClick 
+}) {
   return (
     <div className="card h-100">
       {service.imagePath ? (
@@ -15,7 +18,7 @@ function ServiceCard({ service, onClick }) {
         <p className="card-text flex-grow-1">{service.description}</p>
         <div className="d-flex justify-content-between align-items-center mt-2">
           <strong>${service.price?.toFixed(2) ?? '0.00'}</strong>
-          <button className="btn btn-sm btn-outline-primary" onClick={() => onClick && onClick(service)}>View</button>
+          {/* <button className="btn btn-sm btn-outline-primary" onClick={() => onClick && onClick(service)}>View</button> */}
         </div>
       </div>
     </div>
