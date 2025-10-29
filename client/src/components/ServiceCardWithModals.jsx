@@ -11,7 +11,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const ServiceCardWithModals = ({ serviceId, title, description, price, imagePath }) => {
+const ServiceCardWithModals = ({
+  serviceId,
+  title,
+  description,
+  price,
+  imagePath,
+}) => {
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
@@ -75,6 +81,10 @@ const ServiceCardWithModals = ({ serviceId, title, description, price, imagePath
       if (field === "email") return `Enter email to share ${title}`;
       if (field === "serviceType") return `${base} ${title}`;
       if (field === "details") return `Describe your ${title} request...`;
+
+      // new placeholders for scheduling
+      if (field === "date") return "Enter the date, e.g. mm/dd/yyy";
+      if (field === "time") return "Enter the time, e.g. 10:30 AM";
     }
     return "";
   };
@@ -99,7 +109,9 @@ const ServiceCardWithModals = ({ serviceId, title, description, price, imagePath
       const requiredFields = ["serviceId", "fullName", "email"];
       const missing = requiredFields.filter((field) => !payload[field]);
       if (missing.length > 0) {
-        throw new Error(`${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} required.`);
+        throw new Error(
+          `${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} required.`
+        );
       }
 
       const res = await fetch(`${BASE_URL}${endpoint}`, {
@@ -210,9 +222,7 @@ const ServiceCardWithModals = ({ serviceId, title, description, price, imagePath
                 zIndex: 2,
               }}
             >
-              <span className="badge bg-warning fs-6">
-                ${price.toFixed(2)}
-              </span>
+              <span className="badge bg-warning fs-6">${price.toFixed(2)}</span>
             </div>
           )}
         </div>
@@ -221,7 +231,7 @@ const ServiceCardWithModals = ({ serviceId, title, description, price, imagePath
           <Card.Title>{title}</Card.Title>
           <Card.Text>{description}</Card.Text>
         </Card.Body>
-        <div className="px-3 pb-3">
+        <div className="px-4 pb-3">
           <ButtonGroup vertical className="w-100 px-4">
             <div className="d-flex gap-4 mt-2 flex-wrap">
               <Button

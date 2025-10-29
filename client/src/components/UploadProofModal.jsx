@@ -1,15 +1,16 @@
-// components/UploadProofModal.js
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, Alert, Spinner } from "react-bootstrap";
+import React, { useState, useEffect, useRef } from "react";
+import { Modal, Button, Form, Alert, Spinner, ProgressBar, Image } from "react-bootstrap";
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const RAW_API = process.env.REACT_APP_API_URL || "";
+const API = RAW_API.replace(/\/+$/, "");
 
-function UploadProofModal({ service, onHide, refresh }) {
+function UploadProofModal({ service, onHide, refresh, currentUser }) {
   const [show, setShow] = useState(!!service);
   useEffect(() => setShow(!!service), [service]);
 
   const [file, setFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
   const [payerName, setPayerName] = useState("");
   const [payerEmail, setPayerEmail] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
@@ -18,12 +19,65 @@ function UploadProofModal({ service, onHide, refresh }) {
   const [referenceId, setReferenceId] = useState("");
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState("");
+  const [progress, setProgress] = useState(0);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (show && currentUser) {
+      if (currentUser.email) setPayerEmail(currentUser.email);
+      if (currentUser.fullName) setPayerName((n) => n || currentUser.fullName);
+    }
+    if (show) {
+      setStatus("");
+      setProgress(0);
+    }
+  }, [show, currentUser]);
+
+  useEffect(() => {
+    return () => {
+      if (filePreview) URL.revokeObjectURL(filePreview);
+    };
+  }, [filePreview]);
 
   if (!service) return null;
+
+  // Validate accepted types and max size (10MB)
+  const isValidFile = (f) => {
+    if (!f) return false;
+    const allowed = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
+    const maxBytes = 10 * 1024 * 1024;
+    return allowed.includes(f.type) && f.size <= maxBytes;
+  };
+
+  const handleFileChange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) {
+      setFile(null);
+      setFilePreview(null);
+      return;
+    }
+    if (!isValidFile(f)) {
+      setStatus("Invalid file. Accepts PNG/JPEG/PDF up to 10MB.");
+      setFile(null);
+      setFilePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    setFile(f);
+    setStatus("");
+    if (f.type.startsWith("image/")) {
+      const url = URL.createObjectURL(f);
+      setFilePreview(url);
+    } else {
+      setFilePreview(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!payerEmail) return setStatus("Please provide an email.");
+    if (!file) return setStatus("Please attach proof (image or PDF).");
+
     const fd = new FormData();
     fd.append("serviceId", service._id);
     fd.append("payerName", payerName);
@@ -32,25 +86,49 @@ function UploadProofModal({ service, onHide, refresh }) {
     fd.append("submissionMethod", method);
     fd.append("dateReceived", dateReceived || new Date().toISOString());
     fd.append("referenceId", referenceId);
-    if (file) fd.append("proof", file);
+    fd.append("proof", file);
 
     setSending(true);
     setStatus("");
+    setProgress(0);
+
     try {
       await axios.post(`${API}/api/payments/upload-proof`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (evt) => {
+          if (!evt.total) return;
+          const pct = Math.round((evt.loaded * 100) / evt.total);
+          setProgress(pct);
+        },
+        timeout: 120000,
       });
 
       setStatus("Proof uploaded and admin notified.");
       if (typeof refresh === "function") refresh();
 
+      // small success UX: keep progress at 100% briefly
+      setProgress(100);
       setTimeout(() => {
         setShow(false);
         onHide && onHide();
-      }, 900);
+        setFile(null);
+        setFilePreview(null);
+        setPayerName("");
+        setPayerEmail(currentUser?.email || "");
+        setAmountPaid("");
+        setMethod("");
+        setDateReceived("");
+        setReferenceId("");
+        setStatus("");
+        setProgress(0);
+      }, 800);
     } catch (err) {
-      console.error(err);
-      setStatus("Upload failed.");
+      console.error("Upload error:", err);
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Upload failed, please try again.";
+      setStatus(message);
     } finally {
       setSending(false);
     }
@@ -64,11 +142,13 @@ function UploadProofModal({ service, onHide, refresh }) {
         onHide && onHide();
       }}
       centered
+      // size="lg"
     >
       <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton>
           <Modal.Title>Upload Payment Proof — {service.title}</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           <Form.Group className="mb-2">
             <Form.Control
@@ -77,6 +157,7 @@ function UploadProofModal({ service, onHide, refresh }) {
               onChange={(e) => setPayerName(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-2">
             <Form.Control
               type="email"
@@ -86,6 +167,7 @@ function UploadProofModal({ service, onHide, refresh }) {
               required
             />
           </Form.Group>
+
           <Form.Group className="mb-2">
             <Form.Control
               type="number"
@@ -95,21 +177,24 @@ function UploadProofModal({ service, onHide, refresh }) {
               onChange={(e) => setAmountPaid(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-2">
             <Form.Control
-              placeholder="e.g. Bank transfer, PayPal, etc."
+              placeholder="e.g. Bank transfer, Bank deposit, etc."
               value={method}
               onChange={(e) => setMethod(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-2">
-            <Form.Label>Date received</Form.Label>
+            <Form.Label>Submission Date</Form.Label>
             <Form.Control
               type="date"
               value={dateReceived}
               onChange={(e) => setDateReceived(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-2">
             <Form.Label>Reference/transaction ID</Form.Label>
             <Form.Control
@@ -118,20 +203,42 @@ function UploadProofModal({ service, onHide, refresh }) {
               onChange={(e) => setReferenceId(e.target.value)}
             />
           </Form.Group>
+
           <Form.Group className="mb-2">
-            <Form.Label>Proof file (image or PDF)</Form.Label>
+            <Form.Label>Proof file (PNG, JPG, or PDF; max 10MB)</Form.Label>
             <Form.Control
+              ref={fileInputRef}
               type="file"
               accept="image/*,application/pdf"
-              onChange={(e) => setFile(e.target.files[0])}
+              onChange={handleFileChange}
             />
           </Form.Group>
+
+          {filePreview && (
+            <div className="mb-3">
+              <Form.Label>Preview</Form.Label>
+              <div>
+                <Image src={filePreview} thumbnail style={{ maxHeight: 240 }} />
+              </div>
+            </div>
+          )}
+
+          {progress > 0 && (
+            <div className="mb-2">
+              <ProgressBar now={progress} label={`${progress}%`} />
+            </div>
+          )}
+
           {status && (
-            <Alert variant="info" className="mt-2">
+            <Alert
+              variant={status.toLowerCase().includes("failed") ? "danger" : "info"}
+              className="mt-2"
+            >
               {status}
             </Alert>
           )}
         </Modal.Body>
+
         <Modal.Footer>
           <Button
             variant="secondary"
@@ -139,9 +246,11 @@ function UploadProofModal({ service, onHide, refresh }) {
               setShow(false);
               onHide && onHide();
             }}
+            disabled={sending}
           >
             Close
           </Button>
+
           <Button variant="primary" type="submit" disabled={sending}>
             {sending ? (
               <>
