@@ -1,3 +1,5 @@
+// client/src/pages/NewAdminDashboard.jsx
+
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
@@ -5,13 +7,15 @@ import AdminUserTable from "../components/admin/adminTables/AdminUserTable";
 import AdminRequestedServicesTable from "../components/admin/adminTables/AdminRequestedServicesTable.jsx";
 import AdminScheduledServicesTable from "../components/admin/adminTables/AdminScheduledServicesTable.jsx";
 import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
-import { Container, Spinner, Alert, Button } from "react-bootstrap";
+import { Container, Spinner, Alert, Button, Col, Row } from "react-bootstrap";
 import AdminAddService from "../components/admin/AdminAddService";
 import ServicesGrid from "../components/ServicesGrid";
 import { fetchServices } from "../api/servicesApi";
-import AdminDashboard from "../components/AdminDashboard";
+import AdminDashboard from "../components/admin/AdminDashboard.jsx";
+import AdminScheduleForm from "../components/admin/AdminScheduleForm.jsx";
+import ServiceCalendar from "../components/ServiceCalendar.jsx";
 
-function NewAdminDashboard({ apiBaseUrl, isAdmin, token }) {
+function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
   const { user } = useContext(AuthContext);
 
   const [users, setUsers] = useState([]);
@@ -173,6 +177,30 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token }) {
 
         <hr />
 
+        <div className="admin-dashboard-wrapper">
+          <Row className="g-3 align-items-start">
+            {/* Form column: 40% on md+, full width on small */}
+            <Col xs={12} md={5} className="admin-form-col">
+              <div className="card h-100 shadow-sm">
+                <div className="card-body">
+                  <AdminScheduleForm />
+                </div>
+              </div>
+            </Col>
+
+            {/* Calendar column: 60% on md+, full width on small */}
+            <Col xs={12} md={7} className="admin-calendar-col">
+              <div className="card h-100 shadow-sm">
+                <div className="card-body calendar-card-body">
+                  <ServiceCalendar userId={userId} />
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </div>
+
+        <hr />
+
         <h4 className="m-3 text-center">Customer Service Overview</h4>
 
         {user?.role === "admin" && (
@@ -198,9 +226,8 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token }) {
 
         {errorShared && <Alert variant="danger">{errorShared}</Alert>}
         <AdminSharedServicesTable services={sharedServices} />
-
-        <hr />
       </Container>
+      <hr />
       <footer className="text-center py-2">
         <small>
           &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.

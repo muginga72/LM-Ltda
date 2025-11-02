@@ -1,3 +1,5 @@
+// client/src/pages/UserOnlyDashboard.jsx
+
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import UploadDocumentModal from "../components/UploadDocumentModal";
@@ -14,6 +16,7 @@ import {
   Col,
 } from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
+import ServiceCalendar from "../components/ServiceCalendar";
 
 function UserOnlyDashboard({
   apiBaseUrl,
@@ -21,6 +24,7 @@ function UserOnlyDashboard({
   initialServices,
   onProofSubmitted,
   onServiceSelect,
+  userId,
 }) {
   const { user } = useContext(AuthContext);
 
@@ -139,7 +143,9 @@ function UserOnlyDashboard({
                       <Card.Subtitle className="mb-2 text-muted">
                         {item.serviceType}
                       </Card.Subtitle>
-                      <Card.Text>{item.details || item.date || item.email}</Card.Text>
+                      <Card.Text>
+                        {item.details || item.date || item.email}
+                      </Card.Text>
                       <Card.Text>
                         <small className="text-muted">
                           Created:{" "}
@@ -225,6 +231,10 @@ function UserOnlyDashboard({
           onServiceSelect={onServiceSelect}
         />
 
+        <div className="dashboard-container">
+          <ServiceCalendar userId={userId} />
+        </div>
+
         <hr />
 
         {/* 
@@ -301,7 +311,8 @@ function UserOnlyDashboard({
           <hr />
           <p>
             Once you've completed the payment, please upload the support
-            document or send it via <strong>email</strong> or <strong>"SEND PAYMENT PROOF" </strong>
+            document or send it via <strong>email</strong> or{" "}
+            <strong>"SEND PAYMENT PROOF" </strong>
             button related to requested, scheduled or shared service.
           </p>
         </Modal.Body>
