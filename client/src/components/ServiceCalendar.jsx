@@ -79,7 +79,7 @@ const ServiceCalendar = () => {
 
   return (
     <div className="p-3">
-      <h5>Service Availability</h5>
+      <h5>Available Services Dates</h5>
 
       {loading && (
         <div className="my-3">
