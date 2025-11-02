@@ -1,7 +1,6 @@
-// src/components/AdminDashboard.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Table, Button, Spinner, Alert } from "react-bootstrap";
+import { Table, Button, Spinner, Alert, Row, Col } from "react-bootstrap";
 import ProofAttachment from "./ProofAttachment";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -20,7 +19,6 @@ function AdminDashboard() {
       const fetched = Array.isArray(res.data) ? res.data : [];
       setServices(fetched);
 
-      // If selectedService was removed server-side, clear selection
       if (selectedService) {
         const stillExists = fetched.some((s) => s._id === selectedService._id);
         if (!stillExists) {
@@ -45,14 +43,11 @@ function AdminDashboard() {
       .map((p) => {
         const referencesService =
           p.serviceId &&
-          (typeof p.serviceId === "string" ? p.serviceId === serviceId : p.serviceId._id === serviceId);
-
+          (typeof p.serviceId === "string"
+            ? p.serviceId === serviceId
+            : p.serviceId._id === serviceId);
         const safeStatus = referencesService ? p.status || "unpaid" : "unpaid";
-
-        return {
-          ...p,
-          status: safeStatus,
-        };
+        return { ...p, status: safeStatus };
       });
 
   const openService = async (s) => {
@@ -86,15 +81,12 @@ function AdminDashboard() {
       );
 
       setActionStatus("Payment confirmed and user notified.");
-
-      // Refresh services then payments defensively
       await fetchServices();
 
       const returnedService = res?.data?.service;
       if (returnedService && returnedService._id) {
         await openService(returnedService);
       } else {
-        // re-open selectedService if still exists
         const stillExists = services.some((s) => s._id === selectedService._id);
         if (stillExists) {
           await openService(selectedService);
@@ -112,16 +104,17 @@ function AdminDashboard() {
   };
 
   return (
-    <>
+    <div className="admin-dashboard-wrapper">
       {loading ? (
-        <div className="text-center">
+        <div className="text-center py-5">
           <Spinner animation="border" />
         </div>
       ) : (
-        <div className="row">
-          <div className="col-md-6">
-            <h5 className="py-4">Payment Services</h5>
-            <Table hover bordered size="sm">
+        <Row className="g-3">
+          {/* Left Column: Service List */}
+          <Col xs={12} md={6}>
+            <h5 className="py-3">Payment Services</h5>
+            <Table hover bordered size="sm" responsive>
               <thead>
                 <tr>
                   <th>Title</th>
@@ -145,30 +138,28 @@ function AdminDashboard() {
                 ))}
               </tbody>
             </Table>
-          </div>
+          </Col>
 
-          <div className="col-md-6">
+          {/* Right Column: Payments or Calendar */}
+          <Col xs={12} md={6}>
             {selectedService ? (
               <>
-                <h5>Payments for: {selectedService.title}</h5>
+                <h5 className="py-3">Payments for: {selectedService.title}</h5>
                 {actionStatus && <Alert variant="info">{actionStatus}</Alert>}
-                <Table size="sm" bordered>
+                <Table size="sm" bordered responsive>
                   <thead>
                     <tr>
                       <th>Payer</th>
                       <th>Email</th>
                       <th>Amount</th>
                       <th>Status</th>
-                      {/* <th>Proof</th> */}
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {payments.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="text-center">
-                          No payments
-                        </td>
+                        <td colSpan="5" className="text-center">No payments</td>
                       </tr>
                     ) : (
                       payments.map((p) => (
@@ -177,33 +168,18 @@ function AdminDashboard() {
                             <td>{p.payerName || "-"}</td>
                             <td>{p.payerEmail}</td>
                             <td>${(p.amountPaid || 0).toFixed(2)}</td>
-                            <td
-                              className={
-                                p.status === "paid_full"
-                                  ? "text-success"
-                                  : p.status === "paid_half"
-                                  ? "text-warning"
-                                  : p.status === "unpaid"
-                                  ? "text-danger"
-                                  : ""
-                              }
-                            >
+                            <td className={
+                              p.status === "paid_full" ? "text-success" :
+                              p.status === "paid_half" ? "text-warning" :
+                              p.status === "unpaid" ? "text-danger" : ""
+                            }>
                               {p.status}
                             </td>
-                            {/* <td>
-                              {p.proofPath ? (
-                                <a href={p.proofPath} target="_blank" rel="noreferrer">
-                                  View
-                                </a>
-                              ) : (
-                                "-"
-                              )}
-                            </td> */}
                             <td>
                               <Button
                                 size="sm"
                                 variant="success"
-                                className="me-1"
+                                className="me-1 mb-2"
                                 onClick={() => confirmPayment(p._id, "full")}
                                 disabled={p.status === "paid_full"}
                               >
@@ -212,16 +188,15 @@ function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="warning"
-                                onClick={() => confirmPayment(p._1d, "half")}
+                                onClick={() => confirmPayment(p._id, "half")}
                                 disabled={p.status === "paid_half"}
                               >
                                 Confirm Half
                               </Button>
                             </td>
                           </tr>
-
                           <tr>
-                            <td colSpan="6">
+                            <td colSpan="5">
                               <ProofAttachment filePath={p.proofPath} serviceTitle={selectedService.title} />
                             </td>
                           </tr>
@@ -230,18 +205,26 @@ function AdminDashboard() {
                     )}
                   </tbody>
                 </Table>
-
-                <Button variant="secondary" size="sm" onClick={() => { setSelectedService(null); setPayments([]); }}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedService(null);
+                    setPayments([]);
+                  }}
+                >
                   Close
                 </Button>
               </>
             ) : (
-              <div className="text-muted py-4"><strong>Select a service to view payments</strong></div>
+              <div className="text-muted py-5 text-center">
+                <strong>Select a service to view payments</strong>
+              </div>
             )}
-          </div>
-        </div>
+          </Col>
+        </Row>
       )}
-    </>
+    </div>
   );
 }
 

@@ -10,7 +10,7 @@ const ServicesPromo = () => {
     },
     {
       name: "Dinner",
-      image: "/images/dinner.png",
+      image: "/images/order-the-meal.jpg",
     },
     {
       name: "Buffet",
@@ -22,11 +22,11 @@ const ServicesPromo = () => {
     },
     {
       name: "Wedding",
-      image: "/images/wedding.png",
+      image: "/images/wedding-bsket-ring.jpg",
     },
     {
       name: "Benerage",
-      image: "/images/cocktail.png",
+      image: "/images/cocktail-drinks.jpg",
     },
   ];
 

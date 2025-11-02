@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UploadProofModal from "./UploadProofModal";
-import ProofAttachment from "./ProofAttachment";
+import ProofAttachment from "./admin/ProofAttachment";
 
 function UserDashboard({ apiBaseUrl, user, userPayment}) {
   const API =
