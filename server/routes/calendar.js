@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { getAvailability } = require('../controllers/calendarAvailabilityController');
 
 // Import verifyToken correctly (supports both default and named export)
 let verifyToken = require('../middleware/authenticate');
@@ -13,6 +14,9 @@ if (typeof verifyToken !== 'function') {
 }
 
 const Event = require('../models/Event');
+
+// GET /api/calendar/availability
+router.get('/availability', getAvailability);
 
 // GET /api/calendar/events — user’s events
 router.get('/events', verifyToken, async (req, res) => {

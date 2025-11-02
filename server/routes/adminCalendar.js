@@ -1,26 +1,32 @@
+// // server/routes/adminCalendar.js
+// const express = require('express');
+// const calendarController = require('../controllers/calendarController');
+
+// module.exports = (io) => {
+//   const router = express.Router();
+//   const controller = calendarController(io);
+
+//   router.post('/', controller.createEvent);
+//   router.get('/', controller.getEvents);
+//   router.put('/:id', controller.updateEvent);
+//   router.delete('/:id', controller.deleteEvent);
+
+//   return router;
+// };
+
+
+// routes/adminCalendar.js
 const express = require('express');
-const router = express.Router();
-const { verifyAdmin } = require('../middleware/auth');
-const db = require('../models');
+const calendarControllerFactory = require('../controllers/calendarController');
 
 module.exports = (io) => {
-  router.post('/schedule', verifyAdmin, async (req, res) => {
-    const { title, date, time, userId } = req.body;
-    try {
-      const event = await db.Event.create({
-        title,
-        date,
-        time,
-        userId,
-        createdByAdmin: true,
-      });
+  const router = express.Router();
+  const controller = calendarControllerFactory(io);
 
-      io.to(`user-${userId}`).emit('calendarUpdate', event);
-      res.json({ success: true, event });
-    } catch (err) {
-      res.status(500).json({ error: 'Failed to schedule event' });
-    }
-  });
+  router.post('/', controller.createEvent);
+  router.get('/', controller.getEvents);
+  router.put('/:id', controller.updateEvent);
+  router.delete('/:id', controller.deleteEvent);
 
   return router;
 };
