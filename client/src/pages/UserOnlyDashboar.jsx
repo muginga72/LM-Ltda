@@ -17,6 +17,7 @@ import {
 } from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
+import UserCalendar from "../components/UserCalendar";
 
 function UserOnlyDashboard({
   apiBaseUrl,
@@ -25,20 +26,18 @@ function UserOnlyDashboard({
   onProofSubmitted,
   onServiceSelect,
   userId,
+  headers,
 }) {
   const { user } = useContext(AuthContext);
 
   const [requestedServices, setRequestedServices] = useState([]);
   const [scheduledServices, setScheduledServices] = useState([]);
   const [sharedServices, setSharedServices] = useState([]);
-  const [paidServices, setPaidServices] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [errorRequested, setErrorRequested] = useState("");
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
-  const [errorPaid, setErrorPaid] = useState("");
-
   const [showModal, setShowModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -99,27 +98,10 @@ function UserOnlyDashboard({
       }
     };
 
-    const fetchPaid = async () => {
-      try {
-        const base = (apiBaseUrl || "").replace(/\/+$/, ""); // remove trailing slash
-        const url = `${base}/api/payments/paid-services`;
-        const res = await axios.get(url, { headers });
-        const all = Array.isArray(res.data) ? res.data : [];
-        const filtered = user?.email
-          ? all.filter((item) => item.payerEmail === user.email)
-          : [];
-        setPaidServices(filtered);
-      } catch (err) {
-        console.error("Paid services error:", err);
-        setErrorPaid("Failed to load paid services.");
-      }
-    };
-
     Promise.all([
       fetchRequested(),
       fetchScheduled(),
       fetchShared(),
-      fetchPaid(),
     ]).finally(() => setLoading(false));
   }, [user, apiBaseUrl]);
 
@@ -230,13 +212,15 @@ function UserOnlyDashboard({
           onProofSubmitted={onProofSubmitted}
           onServiceSelect={onServiceSelect}
         />
-
+        <hr />
         <div className="dashboard-container">
           <ServiceCalendar userId={userId} />
         </div>
-
         <hr />
-
+        <div>
+          <UserCalendar apiBaseUrl={apiBaseUrl} headers={headers} user={user} />
+        </div>
+        <hr />
         {/* 
           This section renders the Requests, Schedules, Shares, and Paid Services for the USER 
         */}
@@ -258,12 +242,6 @@ function UserOnlyDashboard({
               scheduledServices,
               errorScheduled,
               "scheduled"
-            )}
-            {renderServiceCards(
-              "💳 Paid Services",
-              paidServices,
-              errorPaid,
-              "paid"
             )}
             {renderServiceCards(
               "📧 Shared Services",
@@ -320,7 +298,6 @@ function UserOnlyDashboard({
         <UploadDocumentModal
           show={showUploadModal}
           handleClose={() => setShowUploadModal(false)}
-          // serviceId={uploadServiceId}
           user={user}
         />
         <EmailSupportModal
