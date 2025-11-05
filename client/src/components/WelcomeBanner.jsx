@@ -1,6 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 const WelcomeBanner = () => {
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    // Optional: force language to browser language if not already set
+    const browserLang = navigator.language.split("-")[0];
+    if (i18n.language !== browserLang) {
+      i18n.changeLanguage(browserLang);
+    }
+  }, [i18n]);
+
   return (
     <section
       style={{
@@ -43,12 +55,13 @@ const WelcomeBanner = () => {
       </style>
 
       <h1 className="welcome-headline">
-        <span className="welcome-prefix">Welcome to</span>{" "}
-        <span className="welcome-brand">LM Ltd</span>
+        <span className="welcome-prefix">{t("welcomeTo")}</span>{" "}
+        <span className="welcome-brand">{t("lmLtd")}</span>
       </h1>
 
       <p className="welcome-subtitle">
-        Explore our mission, values, and what makes us different.
+        {/* Explore our mission, values, and what makes us different. */}
+        {t("welcomeToSubt")}
       </p>
     </section>
   );
