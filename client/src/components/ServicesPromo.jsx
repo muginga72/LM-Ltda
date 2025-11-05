@@ -1,31 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Row, Col, Carousel, Image, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 const ServicesPromo = () => {
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    // Optional: force language to browser language if not already set
+    const browserLang = navigator.language.split("-")[0];
+    if (i18n.language !== browserLang) {
+      i18n.changeLanguage(browserLang);
+    }
+  }, [i18n]);
+
   const products = [
     {
-      name: "Wedding Salon",
+      name: t("product1"),
       image: "/images/salao-de-festas-00.jpg",
     },
     {
-      name: "Dinner",
+      name: t("product2"),
       image: "/images/order-the-meal.jpg",
     },
     {
-      name: "Buffet",
+      name: t("product3"),
       image: "/images/buffet.png",
     },
     {
-      name: "Chemistry Tutor",
+      name: t("product4"),
       image: "/images/tutor-chemistry.png",
     },
     {
-      name: "Wedding",
+      name: t("product5"),
       image: "/images/wedding-bsket-ring.jpg",
     },
     {
-      name: "Benerage",
+      name: t("product6"),
       image: "/images/cocktail-drinks.jpg",
     },
   ];
@@ -35,8 +47,8 @@ const ServicesPromo = () => {
       <Container fluid className="bg-light px-5 shadow-sm">
         <Row className="align-items-center">
           <Col md={4} className="text-center text-md-start mb-4 mb-md-0">
-            <h2 className="fw-bold text-danger">Buy for Half Price</h2>
-            <p className="lead text-muted">Select from our Products List</p>
+            <h2 className="fw-bold text-danger">{t("promoText1")}</h2>
+            <p className="lead text-muted">{t("promoText2")}</p>
             <Button
               onClick={() => window.open("/learn-more", "_blank")}
               style={{
@@ -45,7 +57,7 @@ const ServicesPromo = () => {
               }}
               variant="primary"
             >
-              Learn More
+              {t("learnMoreBtn")}
             </Button>
           </Col>
           <Col md={8} className="d-flex justify-content-center">
