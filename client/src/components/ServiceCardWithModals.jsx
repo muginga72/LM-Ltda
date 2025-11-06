@@ -8,6 +8,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useTranslation } from "react-i18next";
 
 const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -18,6 +19,8 @@ const ServiceCardWithModals = ({
   price,
   imagePath,
 }) => {
+  const { t, i18n } = useTranslation();
+
   const localKey = `serviceCardState-${title}`;
 
   const defaultState = {
@@ -41,8 +44,13 @@ const ServiceCardWithModals = ({
   useEffect(() => {
     const saved = localStorage.getItem(localKey);
     if (saved) {
-      setState(JSON.parse(saved));
+      try {
+        setState(JSON.parse(saved));
+      } catch {
+        setState(defaultState);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localKey]);
 
   useEffect(() => {
@@ -75,18 +83,40 @@ const ServiceCardWithModals = ({
 
   const getPlaceholder = (field) => {
     const { activeModalType } = state;
-    const base = activeModalType === "schedule" ? "Scheduling for" : "Type of";
+    const base = activeModalType === "schedule" ? t("button.schedule") : t("button.request");
     if (["request", "schedule", "share"].includes(activeModalType)) {
-      if (field === "fullName") return "Your full name";
-      if (field === "email") return `Enter email to share ${title}`;
-      if (field === "serviceType") return `${base} ${title}`;
-      if (field === "details") return `Describe your ${title} request...`;
-
-      // new placeholders for scheduling
-      if (field === "date") return "Enter the date, e.g. mm/dd/yyy";
-      if (field === "time") return "Enter the time, e.g. 10:30 AM";
+      if (field === "fullName") return t("placeholder.fullName") || "Your full name";
+      if (field === "email") return t("placeholder.email") || `Enter email for ${title}`;
+      if (field === "serviceType") return `${base} ${translateTitle(title)}`;
+      if (field === "details") return t("placeholder.details") || `Describe your ${title} request...`;
+      if (field === "date") return t("placeholder.date") || "mm/dd/yyyy";
+      if (field === "time") return t("placeholder.time") || "10:30 AM";
     }
     return "";
+  };
+
+  // Translate title/description using service title as key; fallback to raw value
+  const translateTitle = (rawTitle) =>
+    t(`service.${rawTitle}.title`, { defaultValue: rawTitle });
+
+  const translateDescription = (rawTitle, rawDescription) =>
+    t(`service.${rawTitle}.description`, { defaultValue: rawDescription });
+
+  // Format price using current i18n language
+  const formatPrice = (value) => {
+    if (value == null || value === "") return "";
+    try {
+      // attempt to detect currency from locale mapping; default to USD
+      const locale = i18n.language || "en-US";
+      const currency = locale.startsWith("pt") ? "AOA" : locale.startsWith("fr") ? "EUR" : "USD";
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 2,
+      }).format(Number(value));
+    } catch {
+      return `$${Number(value).toFixed(2)}`;
+    }
   };
 
   const handleSubmit = async (type) => {
@@ -121,11 +151,18 @@ const ServiceCardWithModals = ({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        let errorData = {};
+        try {
+          errorData = await res.json();
+        } catch {}
         throw new Error(errorData.error || `Failed to ${type} service`);
       }
 
-      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} successful.`);
+      alert(
+        t("notification.success", {
+          defaultValue: `${type.charAt(0).toUpperCase() + type.slice(1)} successful.`,
+        })
+      );
 
       setState((prev) => ({
         ...prev,
@@ -148,14 +185,15 @@ const ServiceCardWithModals = ({
     >
       <Modal.Header closeButton>
         <Modal.Title>
-          {type.charAt(0).toUpperCase() + type.slice(1)} {title}
+          {t(`button.${type}`, { defaultValue: type.charAt(0).toUpperCase() + type.slice(1) })}{" "}
+          {translateTitle(title)}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           {fields.map((field) => (
             <Form.Group key={field} className="mb-3">
-              <Form.Label>{field}</Form.Label>
+              <Form.Label>{t(`form.${field}`, { defaultValue: field })}</Form.Label>
               <Form.Control
                 id={field}
                 as={field === "details" ? "textarea" : "input"}
@@ -170,14 +208,14 @@ const ServiceCardWithModals = ({
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => handleClose(type)}>
-          Cancel
+          {t("button.cancel")}
         </Button>
         <Button
           variant="primary"
           onClick={() => handleSubmit(type)}
           disabled={loading}
         >
-          {loading ? <Spinner animation="border" size="sm" /> : "Submit"}
+          {loading ? <Spinner animation="border" size="sm" /> : t("button.submit")}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -222,35 +260,37 @@ const ServiceCardWithModals = ({
                 zIndex: 2,
               }}
             >
-              <span className="badge bg-warning fs-6">${price.toFixed(2)}</span>
+              <span className="badge bg-warning fs-6">
+                {formatPrice(price)}
+              </span>
             </div>
           )}
         </div>
 
         <Card.Body>
-          <Card.Title>{title}</Card.Title>
-          <Card.Text>{description}</Card.Text>
+          <Card.Title>{translateTitle(title)}</Card.Title>
+          <Card.Text>{translateDescription(title, description)}</Card.Text>
         </Card.Body>
-        <div className="px-4 pb-3">
-          <ButtonGroup vertical className="w-100 px-4">
+        <div className="px-2 pb-3">
+          <ButtonGroup vertical className="w-100 px-3">
             <div className="d-flex gap-4 mt-2 flex-wrap">
               <Button
                 variant="outline-primary"
                 onClick={() => handleShow("request")}
               >
-                Request
+                {t("button.request")}
               </Button>
               <Button
                 variant="outline-secondary"
                 onClick={() => handleShow("schedule")}
               >
-                Schedule
+                {t("button.schedule")}
               </Button>
               <Button
                 variant="outline-info"
                 onClick={() => handleShow("share")}
               >
-                Share
+                {t("button.share")}
               </Button>
             </div>
           </ButtonGroup>

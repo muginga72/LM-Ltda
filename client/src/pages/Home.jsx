@@ -52,22 +52,20 @@ function HomePage() {
       </section>
 
       {/* Seasonal Banner */}
-      <section className="bg-warning text-dark text-center py-4">
+      <div className="bg-warning text-dark text-center py-4">
         <Container>
-          <h4 className="mb-2">
-            {t("seasonMessage")}
-          </h4>
+          <h4 className="mb-2">{t("season.message")}</h4>
           <footer className="text-center py-1">
             <small>
               <p>
                 Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola <br />
-                Tel. : (+244) 222 022 351; (+244) 975 957 847
+                {t("footer.phone")}
               </p>
-              &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+              &copy; {new Date().getFullYear()} LM Ltd. {t("footer.rights")}
             </small>
           </footer>
         </Container>
-      </section>
+      </div>
     </>
   );
 }
