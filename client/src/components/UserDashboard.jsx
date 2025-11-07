@@ -1,10 +1,12 @@
-// components/UserDashboard.js
+// components/UserDashboard.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UploadProofModal from "./UploadProofModal";
 import ProofAttachment from "./admin/ProofAttachment";
+import { useTranslation } from "react-i18next";
 
-function UserDashboard({ apiBaseUrl, user, userPayment}) {
+function UserDashboard({ apiBaseUrl, user, userPayment }) {
+  const { t, i18n } = useTranslation();
   const API =
     apiBaseUrl || process.env.REACT_APP_API_URL || "http://localhost:5000";
   const [services, setServices] = useState([]);
@@ -18,7 +20,6 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
       .catch(console.error);
   }, [API, user]);
 
-  // Filter services relevant to this user
   const relevantServices = services.filter(
     (s) =>
       s.requestedBy === user?.id ||
@@ -26,20 +27,35 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
       (Array.isArray(s.sharedWith) && s.sharedWith.includes(user?.id))
   );
 
+  const formatPrice = (value) => {
+    if (!value) return "";
+    const locale = i18n.language || "en-US";
+    const currency = locale.startsWith("pt")
+      ? "AOA"
+      : locale.startsWith("fr")
+      ? "EUR"
+      : "USD";
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(Number(value));
+  };
+
+  const translateTitle = (rawTitle) =>
+    t(`service.${rawTitle}.title`, { defaultValue: rawTitle });
+
+  const translateDescription = (rawTitle, rawDescription) =>
+    t(`service.${rawTitle}.description`, { defaultValue: rawDescription });
+
   return (
     <>
-      {/* 
-        This section allow user to see the available services and send payment proof
-      */}
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3>Available Services</h3>
-        {/* <small className="text-muted">Logged in as: {user?.email}</small> */}
+        <h3>{t("dashboard.availableServices")}</h3>
       </div>
 
       {relevantServices.length === 0 ? (
-        <div className="alert alert-info">
-          No requests, schedules, or shared services yet.
-        </div>
+        <div className="alert alert-info">{t("dashboard.noServices")}</div>
       ) : (
         <div className="row">
           {relevantServices.map((s) => (
@@ -52,13 +68,15 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
                   style={{ height: 180, objectFit: "cover" }}
                 />
                 <div className="card-body d-flex flex-column">
-                  <h5>{s.title}</h5>
-                  <p className="mb-1 text-muted">{s.description}</p>
+                  <h5>{translateTitle(s.title)}</h5>
+                  <p className="mb-1 text-muted">
+                    {translateDescription(s.title, s.description)}
+                  </p>
                   <p className="mb-1">
-                    <strong>${(s.price || 0).toFixed(2)}</strong>
+                    <strong>{formatPrice(s.price || 0)}</strong>
                   </p>
                   <p className="mb-2">
-                    <strong>Status: </strong>
+                    <strong>{t("dashboard.status")}: </strong>
                     <span
                       className={
                         s.status === "paid_full"
@@ -68,7 +86,7 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
                           : "text-muted"
                       }
                     >
-                      {s.status}
+                      {t(`status.${s.status}`, { defaultValue: s.status })}
                     </span>
                   </p>
 
@@ -77,7 +95,7 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
                       className="btn btn-primary btn-sm"
                       onClick={() => setSelected(s)}
                     >
-                      Send Payment Proof
+                      {t("dashboard.sendProof")}
                     </button>
                   </div>
                 </div>
@@ -87,7 +105,6 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
         </div>
       )}
 
-      {/* Render the payment modal with attachment */}
       <UploadProofModal
         service={selected}
         user={user}
@@ -100,10 +117,10 @@ function UserDashboard({ apiBaseUrl, user, userPayment}) {
         }}
       />
 
-      {/* This section display the proof of payment made */}
-      <ProofAttachment 
-        filePath={userPayment?.proofFile} 
-        serviceTitle={userPayment?.serviceTitle} 
+      {/* Proof of payment */}
+      <ProofAttachment
+        filePath={userPayment?.proofFile}
+        serviceTitle={userPayment?.serviceTitle}
       />
     </>
   );

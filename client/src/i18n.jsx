@@ -100,6 +100,49 @@ i18n
           "service.🍽️ Buffet services.title": "🍽️ Buffet services",
           "service.🍽️ Buffet services.description":
             'Delicious self-serve meals for events and gatherings "per person."',
+
+          // --------- User Dashboard --------------
+          "dashboard.availableServices": "Available Services",
+          "dashboard.noServices":
+            "No requests, schedules, or shared services yet.",
+          "dashboard.sendProof": "Send Payment Proof",
+          "dashboard.status": "Status",
+          "status.paid_full": "Paid in Full",
+          "status.paid_half": "Partially Paid",
+          "status.unpaid": "Unpaid",
+
+          // ----- Payment Instructions Modal -----
+          "modal.paymentInstructions.title": "Payment Instructions",
+          "modal.paymentInstructions.intro":
+            "Please pay using the bank details below by deposit or transfer:",
+          "modal.paymentInstructions.bankName": "Bank Name",
+          "modal.paymentInstructions.accountName": "Account Name",
+          "modal.paymentInstructions.accountNumber": "Account Number",
+          "modal.paymentInstructions.routingNumber": "Routing Number",
+          "modal.paymentInstructions.customerName": "Customer Name",
+          "modal.paymentInstructions.footer":
+            "Once you've completed the payment, please upload the support document or send it via email or 'SEND PAYMENT PROOF' button related to requested, scheduled or shared service.",
+
+          // ---------- UserOnlyDashboard -----------
+          "dashboard.title": "User Dashboard",
+          "dashboard.welcome": "Welcome, {{name}}",
+          "dashboard.email": "Email",
+          "dashboard.role": "Role",
+          "dashboard.overview": "Your Service Overview",
+          "dashboard.accessDenied":
+            "Access denied. This dashboard is for regular users only.",
+          "dashboard.loading": "Loading...",
+          "dashboard.failedRequested": "Failed to load requested services.",
+          "dashboard.failedScheduled": "Failed to load scheduled services.",
+          "dashboard.failedShared": "Failed to load shared services.",
+          "dashboard.requested": "📝 Requested Services",
+          "dashboard.scheduled": "📅 Scheduled Services",
+          "dashboard.shared": "📧 Shared Services",
+          "dashboard.created": "Created",
+          "dashboard.paid": "Paid",
+          "dashboard.payInstructions": "Pay Instructions",
+          "dashboard.noImage": "No image available",
+          "footer.rights": "All rights reserved.",
         },
       },
       pt: {
@@ -182,13 +225,58 @@ i18n
             "Hambúrgueres clássicos feitos sob encomenda.",
           "service.🎉 Party Salon.title": "🎉 Salão de Festas",
           "service.🎉 Party Salon.description":
-            "Um salão de festas vibrante projetado para celebrações como aniversários e eventos.",
+            "Um salão de festas vibrante projetado para celebrações como aniversários e outros eventos.",
           "service.🍹 Retail Beverages.title": "🍹 Bebidas",
           "service.🍹 Retail Beverages.description":
             "Oferecendo uma grande variedade de bebidas e refrescos.",
           "service.🍽️ Buffet services.title": "🍽️ Serviço de Buffet",
           "service.🍽️ Buffet services.description":
             "Refeições self-service deliciosas para eventos e reuniões por pessoa.",
+
+          // --------- User Dashboard --------------
+          "dashboard.availableServices": "Serviços Disponíveis",
+          "dashboard.noServices":
+            "Nenhum pedido, agendamento ou serviço compartilhado ainda.",
+          "dashboard.sendProof": "Envie Comprovativo de Pagamento",
+          "dashboard.status": "Condição",
+          "status.paid_full": "Pago",
+          "status.paid_half": "Pago parcialmente",
+          "status.unpaid": "Não pago",
+
+          // ----- Payment Instructions Modal -----
+          "modal.paymentInstructions.title": "Instruções de Pagamento",
+          "modal.paymentInstructions.intro":
+            "Por favor, pague usando os dados bancários abaixo por depósito ou transferência:",
+          "modal.paymentInstructions.bankName": "Nome do Banco",
+          "modal.paymentInstructions.accountName": "Nome da Conta",
+          "modal.paymentInstructions.accountNumber": "Número da Conta",
+          "modal.paymentInstructions.routingNumber": "Número de Roteamento",
+          "modal.paymentInstructions.customerName": "Nome do Cliente",
+          "modal.paymentInstructions.footer":
+            "Após concluir o pagamento, envie em anexo o comprovante por e-mail ou aperta no botão 'ENVIAR COMPROVATIVO DE PAGAMENTO' relacionado ao serviço solicitado, agendado ou compartilhado.",
+
+          // ---------- UserOnlyDashboard -----------
+          "dashboard.title": "Painel do Usuário",
+          "dashboard.welcome": "Bem-vindo, {{name}}",
+          "dashboard.email": "Email",
+          "dashboard.role": "Função",
+          "dashboard.overview": "Visão Geral dos Seus Serviços",
+          "dashboard.accessDenied":
+            "Acesso negado. Este painel é apenas para usuários regulares.",
+          "dashboard.loading": "Carregando...",
+          "dashboard.failedRequested":
+            "Falha ao carregar serviços solicitados.",
+          "dashboard.failedScheduled": "Falha ao carregar serviços agendados.",
+          "dashboard.failedShared":
+            "Falha ao carregar serviços compartilhados.",
+          "dashboard.requested": "📝 Serviços Solicitados",
+          "dashboard.scheduled": "📅 Serviços Agendados",
+          "dashboard.shared": "📧 Serviços Compartilhados",
+          "dashboard.created": "Criado",
+          "dashboard.paid": "Pago",
+          "dashboard.payInstructions": "Instruções de Pagamento",
+          "dashboard.noImage": "Nenhuma imagem disponível",
+          "footer.rights": "Todos os direitos reservados.",
         },
       },
       fr: {
@@ -278,9 +366,56 @@ i18n
           "service.🍽️ Buffet services.title": "🍽️ Service Buffet",
           "service.🍽️ Buffet services.description":
             "Repas en self-service délicieux pour événements et réunions par personne.",
+
+          // --------- User Dashboard --------------
+          "dashboard.availableServices": "Services Disponibles",
+          "dashboard.noServices":
+            "Aucune demande, planification ou service partagé pour l'instant.",
+          "dashboard.sendProof": "Envoyer la Preuve de Paiement",
+          "dashboard.status": "État",
+          "status.paid_full": "Payé",
+          "status.paid_half": "Payé partiellement",
+          "status.unpaid": "Non payé",
+
+          // ----- Payment Instructions Modal -----
+          "modal.paymentInstructions.title": "Instructions de Paiement",
+          "modal.paymentInstructions.intro":
+            "Veuillez payer en utilisant les coordonnées bancaires ci-dessous par dépôt ou virement :",
+          "modal.paymentInstructions.bankName": "Nom de la Banque",
+          "modal.paymentInstructions.accountName": "Nom du Compte",
+          "modal.paymentInstructions.accountNumber": "Numéro de Compte",
+          "modal.paymentInstructions.routingNumber": "Numéro de Routage",
+          "modal.paymentInstructions.customerName": "Nom du Client",
+          "modal.paymentInstructions.footer":
+            "Une fois le paiement effectué, veuillez télécharger le document justificatif ou l'envoyer par e-mail ou via le bouton 'ENVOYER LA PREUVE DE PAIEMENT' lié au service demandé, planifié ou partagé.",
+
+          // ---------- UserOnlyDashboard -----------
+          "dashboard.title": "Tableau de Bord Utilisateur",
+          "dashboard.welcome": "Bienvenue, {{name}}",
+          "dashboard.email": "Email",
+          "dashboard.role": "Rôle",
+          "dashboard.overview": "Aperçu de Vos Services",
+          "dashboard.accessDenied":
+            "Accès refusé. Ce tableau de bord est réservé aux utilisateurs réguliers.",
+          "dashboard.loading": "Chargement...",
+          "dashboard.failedRequested":
+            "Échec du chargement des services demandés.",
+          "dashboard.failedScheduled":
+            "Échec du chargement des services planifiés.",
+          "dashboard.failedShared":
+            "Échec du chargement des services partagés.",
+          "dashboard.requested": "📝 Services Demandés",
+          "dashboard.scheduled": "📅 Services Planifiés",
+          "dashboard.shared": "📧 Services Partagés",
+          "dashboard.created": "Créé",
+          "dashboard.paid": "Payé",
+          "dashboard.payInstructions": "Instructions de Paiement",
+          "dashboard.noImage": "Aucune image disponible",
+          "footer.rights": "Tous droits réservés.",
         },
       },
     },
-  });
+  }
+);
 
 export default i18n;
