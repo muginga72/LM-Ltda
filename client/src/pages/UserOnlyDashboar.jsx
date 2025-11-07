@@ -10,14 +10,15 @@ import {
   Spinner,
   Alert,
   Button,
-  Modal,
   Card,
   Row,
   Col,
+  Modal,
 } from "react-bootstrap";
 import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
+import { useTranslation } from "react-i18next";
 
 function UserOnlyDashboard({
   apiBaseUrl,
@@ -29,6 +30,7 @@ function UserOnlyDashboard({
   headers,
 }) {
   const { user } = useContext(AuthContext);
+  const { t } = useTranslation();
 
   const [requestedServices, setRequestedServices] = useState([]);
   const [scheduledServices, setScheduledServices] = useState([]);
@@ -70,7 +72,7 @@ function UserOnlyDashboard({
         setRequestedServices(filtered);
       } catch (err) {
         console.error("Requested services error:", err);
-        setErrorRequested("Failed to load requested services.");
+        setErrorRequested(t("dashboard.failedRequested"));
       }
     };
 
@@ -83,7 +85,7 @@ function UserOnlyDashboard({
         setScheduledServices(filtered);
       } catch (err) {
         console.error("Scheduled services error:", err);
-        setErrorScheduled("Failed to load scheduled services.");
+        setErrorScheduled(t("dashboard.failedScheduled"));
       }
     };
 
@@ -94,24 +96,24 @@ function UserOnlyDashboard({
         setSharedServices(filtered);
       } catch (err) {
         console.error("Shared services error:", err);
-        setErrorShared("Failed to load shared services.");
+        setErrorShared(t("dashboard.failedShared"));
       }
     };
 
-    Promise.all([
-      fetchRequested(),
-      fetchScheduled(),
-      fetchShared(),
-    ]).finally(() => setLoading(false));
-  }, [user, apiBaseUrl]);
+    Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(
+      () => setLoading(false)
+    );
+  }, [user, apiBaseUrl, t]);
 
-  const renderServiceCards = (title, services, error, type) => (
+  const renderServiceCards = (titleKey, services, error, typeKey) => (
     <>
-      <h5 className="mt-4 mb-3">{title}</h5>
+      <h5 className="mt-4 mb-3">{t(titleKey)}</h5>
       {error ? (
         <Alert variant="danger">{error}</Alert>
       ) : services.length === 0 ? (
-        <Alert variant="info">No {type} services found.</Alert>
+        <Alert variant="info">
+          {t("dashboard.noServices", { type: t(typeKey) })}
+        </Alert>
       ) : (
         <Row>
           {services.map((item) => (
@@ -130,21 +132,21 @@ function UserOnlyDashboard({
                       </Card.Text>
                       <Card.Text>
                         <small className="text-muted">
-                          Created:{" "}
+                          {t("dashboard.created")}:{" "}
                           {new Date(item.createdAt).toLocaleDateString()}
                         </small>
                       </Card.Text>
                       <div className="mt-auto">
                         {item.paid ? (
                           <Button variant="success" disabled>
-                            Paid
+                            {t("dashboard.paid")}
                           </Button>
                         ) : (
                           <Button
                             variant="outline-primary"
                             onClick={() => handlePayClick(item._id)}
                           >
-                            Pay Instructions
+                            {t("dashboard.payInstructions")}
                           </Button>
                         )}
                       </div>
@@ -170,7 +172,7 @@ function UserOnlyDashboard({
                         />
                       ) : (
                         <div className="text-muted text-center">
-                          No image available
+                          {t("dashboard.noImage")}
                         </div>
                       )}
                     </Col>
@@ -188,7 +190,7 @@ function UserOnlyDashboard({
     return (
       <Container style={{ padding: "2rem" }}>
         <Alert variant="warning" className="text-center">
-          Access denied. This dashboard is for regular users only.
+          {t("dashboard.accessDenied")}
         </Alert>
       </Container>
     );
@@ -197,10 +199,16 @@ function UserOnlyDashboard({
   return (
     <>
       <Container style={{ padding: "2rem" }}>
-        <h2 className="mb-2 text-center">User Dashboard</h2>
-        <h5 className="text-center mb-4">Welcome, {user.fullName}</h5>
-        <p>Email: {user.email}</p>
-        <p>Role: {user.role}</p>
+        <h2 className="mb-2 text-center">{t("dashboard.title")}</h2>
+        <h5 className="text-center mb-4">
+          {t("dashboard.welcome", { name: user.fullName })}
+        </h5>
+        <p>
+          {t("dashboard.email")}: {user.email}
+        </p>
+        <p>
+          {t("dashboard.role")}: {user.role}
+        </p>
 
         <hr />
 
@@ -221,33 +229,31 @@ function UserOnlyDashboard({
           <UserCalendar apiBaseUrl={apiBaseUrl} headers={headers} user={user} />
         </div>
         <hr />
-        {/* 
-          This section renders the Requests, Schedules, Shares, and Paid Services for the USER 
-        */}
-        <h4 className="mb-3 text-center">Your Service Overview</h4>
+        <h4 className="mb-3 text-center">{t("dashboard.overview")}</h4>
         {loading ? (
           <div className="text-center">
             <Spinner animation="border" />
+            <p>{t("dashboard.loading")}</p>
           </div>
         ) : (
           <>
             {renderServiceCards(
-              "📝 Requested Services",
+              "dashboard.requested",
               requestedServices,
               errorRequested,
-              "requested"
+              "dashboard.requested"
             )}
             {renderServiceCards(
-              "📅 Scheduled Services",
+              "dashboard.scheduled",
               scheduledServices,
               errorScheduled,
-              "scheduled"
+              "dashboard.scheduled"
             )}
             {renderServiceCards(
-              "📧 Shared Services",
+              "dashboard.shared",
               sharedServices,
               errorShared,
-              "shared"
+              "dashboard.shared"
             )}
           </>
         )}
@@ -258,41 +264,40 @@ function UserOnlyDashboard({
       {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-1">
         <small>
-          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+          &copy; {new Date().getFullYear()} LM Ltd. {t("footer.rights")}
         </small>
       </footer>
 
       {/* Payment Instructions Modal */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Payment Instructions</Modal.Title>
+          <Modal.Title>{t("modal.paymentInstructions.title")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Please pay using the bank details below by deposit or transfer:</p>
+          <p>{t("modal.paymentInstructions.intro")}</p>
           <ul>
             <li>
-              <strong>Bank Name:</strong> BFA
+              <strong>{t("modal.paymentInstructions.bankName")}:</strong> BFA
             </li>
             <li>
-              <strong>Account Name:</strong> Maria Miguel
+              <strong>{t("modal.paymentInstructions.accountName")}:</strong>{" "}
+              Maria Miguel
             </li>
             <li>
-              <strong>Account Number:</strong> 342295560 30 001
+              <strong>{t("modal.paymentInstructions.accountNumber")}:</strong>{" "}
+              342295560 30 001
             </li>
             <li>
-              <strong>Routing Number:</strong> AO06 0006 0000 42295560301 25
+              <strong>{t("modal.paymentInstructions.routingNumber")}:</strong>{" "}
+              AO06 0006 0000 42295560301 25
             </li>
             <li>
-              <strong>Customer Name:</strong> Your full name or service ID
+              <strong>{t("modal.paymentInstructions.customerName")}:</strong>{" "}
+              Your full name or service ID
             </li>
           </ul>
           <hr />
-          <p>
-            Once you've completed the payment, please upload the support
-            document or send it via <strong>email</strong> or{" "}
-            <strong>"SEND PAYMENT PROOF" </strong>
-            button related to requested, scheduled or shared service.
-          </p>
+          <p>{t("modal.paymentInstructions.footer")}</p>
         </Modal.Body>
 
         <UploadDocumentModal
