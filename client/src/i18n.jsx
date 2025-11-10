@@ -143,6 +143,16 @@ i18n
           "dashboard.payInstructions": "Pay Instructions",
           "dashboard.noImage": "No image available",
           "footer.rights": "All rights reserved.",
+
+          // ------------- NewAdminDashboard --------------
+          adminDashboardTitle: "Administrator Dashboard",
+          welcomeUser: "Welcome",
+          adminRole: "Role",
+          adminAddService: "➕ Service",
+          dashboardPreview: "Preview Current Services",
+          AdmiNoServices: "No services available.",
+          dashboardOverview: "Customer Service Overview",
+
         },
       },
       pt: {
@@ -170,7 +180,7 @@ i18n
           promoText2: "Acesse a nossa lista de produtos disponíveis.",
           learnMoreBtn: "Explore Mais",
 
-          // ---------- Card Sets ------------
+          // ---------------- Card Sets ------------------
           "button.explore": "Explorar",
           "card.left.🍹 Beverages Service": "🍹 Bebidas a Retalho",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet para Você",
@@ -179,7 +189,7 @@ i18n
           "card.right.📚 Tutoring": "📚 Aulas Particulares",
           "card.right.🍔 Hamburgers": "🍔 Hambúrgueres",
 
-          // ----------- Services Page ---------------
+          // -------------- Services Page ------------------
           services: {
             title: "Os Nossos Serviços",
             empty: "Nenhum serviço disponível.",
@@ -277,6 +287,15 @@ i18n
           "dashboard.payInstructions": "Instruções de Pagamento",
           "dashboard.noImage": "Nenhuma imagem disponível",
           "footer.rights": "Todos os direitos reservados.",
+
+          // ------------- NewAdminDashboard --------------
+          adminDashboardTitle: "Painel de Administração",
+          welcomeUser: "Bem-vindo",
+          adminRole: "Função",
+          adminAddService: "➕ Serviço",
+          dashboardPreview: "Pré-visualização dos Serviços Atuais",
+          admiNoServices: "Nenhum serviço disponível.",
+          dashboardOverview: "Visão Geral dos Usuários",
         },
       },
       fr: {
@@ -412,6 +431,15 @@ i18n
           "dashboard.payInstructions": "Instructions de Paiement",
           "dashboard.noImage": "Aucune image disponible",
           "footer.rights": "Tous droits réservés.",
+
+          // ------------- NewAdminDashboard --------------
+          adminDashboardTitle: "Tableau de Bord Administrateur",
+          welcomeUser: "Bienvenue",
+          adminRole: "Rôle",
+          adminAddService: "➕ Service",
+          dashboardPreview: "Aperçu des Services Actuels",
+          AdmiNoServices: "Aucun service disponible.",
+          dashboardOverview: "Aperçu de l'utilisateur",
         },
       },
     },

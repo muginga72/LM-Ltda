@@ -14,8 +14,10 @@ import { fetchServices } from "../api/servicesApi";
 import AdminDashboard from "../components/admin/AdminDashboard.jsx";
 import AdminScheduleForm from "../components/admin/AdminScheduleForm.jsx";
 import ServiceCalendar from "../components/ServiceCalendar.jsx";
+import { useTranslation } from "react-i18next";
 
 function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
+  const { t } = useTranslation();
   const { user } = useContext(AuthContext);
 
   const [users, setUsers] = useState([]);
@@ -127,11 +129,15 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
     <>
       <Container style={{ padding: "2rem" }}>
         <h2 className="mb-2 text-center">
-          {user?.role === "admin" ? "Admin Dashboard" : "User Dashboard"}
+          {user?.role === "admin" ? t("adminDashboardTitle") : "User Dashboard"}
         </h2>
-        <h5 className="text-center mb-4">Welcome, {user?.fullName}</h5>
+        <h5 className="text-center mb-4">
+          {t("welcomeUser")}, {user?.fullName}
+        </h5>
         <p>Email: {user?.email}</p>
-        <p>Role: {user?.role}</p>
+        <p>
+          {t("adminRole")}: {user?.role}
+        </p>
 
         <Container className="py-2">
           <div className="d-flex justify-content-between align-items-center mb-2">
@@ -139,7 +145,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
               variant="outline-success"
               onClick={() => setShowAddModal(true)}
             >
-              ➕ Service
+              {t("adminAddService")}
             </Button>
           </div>
 
@@ -155,9 +161,9 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
         <div className="container py-3">
           <div className="row mb-4">
             <div className="col-md-12">
-              <h3 className="mb-3 text-center">Preview Current Services</h3>
+              <h3 className="mb-3 text-center">{t("dashboardPreview")}</h3>
               {services.length === 0 ? (
-                <Alert variant="info">No services available.</Alert>
+                <Alert variant="info">{t("admiNoServices")}</Alert>
               ) : (
                 <ServicesGrid services={services} />
               )}
@@ -201,9 +207,9 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
 
         <hr />
 
-        <h4 className="m-3 text-center">Customer Service Overview</h4>
+        <h4 className="m-3 text-center">{t("dashboardOverview")}</h4>
 
-        {user?.role === "admin" && (
+        {user?.role === t("adminRole") && (
           <>
             {errorUsers && <Alert variant="danger">{errorUsers}</Alert>}
             <AdminUserTable users={users} />
@@ -230,7 +236,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
       <hr />
       <footer className="text-center py-2">
         <small>
-          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+          &copy; {new Date().getFullYear()} {t("lmLtd")}. {t("footer.rights")}
         </small>
       </footer>
     </>
