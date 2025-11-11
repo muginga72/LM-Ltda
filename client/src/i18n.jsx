@@ -320,7 +320,7 @@ i18n
           addServiceError: "Algo deu errado. Tente novamente.",
 
           // --------------- ServiceCard -----------------
-          
+
         },
       },
       fr: {
