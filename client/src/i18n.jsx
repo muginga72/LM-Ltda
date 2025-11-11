@@ -153,6 +153,18 @@ i18n
           AdmiNoServices: "No services available.",
           dashboardOverview: "Customer Service Overview",
 
+          // --------------- AdminAddService ----------------
+          addServiceTitle: "Add New Service",
+          addServiceFieldTitle: "Enter service title",
+          addServiceFieldDescription: "Enter a short description",
+          addServiceFieldPrice: "e.g. 49.99",
+          addServiceFieldImage: "Upload image",
+          addServiceButtonCancel: "Cancel",
+          addServiceButtonSubmit: "➕ Service",
+          addServiceError: "Something went wrong. Please try again.",
+
+          // --------------- ServiceCard -----------------
+          
         },
       },
       pt: {
@@ -247,7 +259,7 @@ i18n
           "dashboard.availableServices": "Serviços Disponíveis",
           "dashboard.noServices":
             "Nenhum pedido, agendamento ou serviço compartilhado ainda.",
-          "dashboard.sendProof": "Envie Comprovativo de Pagamento",
+          "dashboard.sendProof": "Envie o Comprovativo de Pagamento",
           "dashboard.status": "Condição",
           "status.paid_full": "Pago",
           "status.paid_half": "Pago parcialmente",
@@ -296,6 +308,19 @@ i18n
           dashboardPreview: "Pré-visualização dos Serviços Atuais",
           admiNoServices: "Nenhum serviço disponível.",
           dashboardOverview: "Visão Geral dos Usuários",
+
+          // --------------- AdminAddService ----------------
+          addServiceTitle: "Adicionar Novo Serviço",
+          addServiceFieldTitle: "Insira o título do serviço",
+          addServiceFieldDescription: "Insira uma breve descrição",
+          addServiceFieldPrice: "ex: 49.99",
+          addServiceFieldImage: "Enviar imagem",
+          addServiceButtonCancel: "Cancelar",
+          addServiceButtonSubmit: "➕ Serviço",
+          addServiceError: "Algo deu errado. Tente novamente.",
+
+          // --------------- ServiceCard -----------------
+          
         },
       },
       fr: {
@@ -440,10 +465,22 @@ i18n
           dashboardPreview: "Aperçu des Services Actuels",
           AdmiNoServices: "Aucun service disponible.",
           dashboardOverview: "Aperçu de l'utilisateur",
+
+          // --------------- AdminAddService ----------------
+          addServiceTitle: "Ajouter un Nouveau Service",
+          addServiceFieldTitle: "Entrez le titre du service",
+          addServiceFieldDescription: "Entrez une brève description",
+          addServiceFieldPrice: "ex : 49.99",
+          addServiceFieldImage: "Télécharger une image",
+          addServiceButtonCancel: "Annuler",
+          addServiceButtonSubmit: "➕ Service",
+          addServiceError: "Une erreur s'est produite. Veuillez réessayer.",
+
+          // --------------- ServiceCard -----------------
+          
         },
       },
     },
-  }
-);
+  });
 
 export default i18n;

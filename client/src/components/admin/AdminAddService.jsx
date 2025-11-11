@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { createService } from "../../api/servicesApi";
 
 function AdminAddService({ show, onHide, onCreated, token }) {
+  const { t } = useTranslation();
+
   const [form, setForm] = useState({ title: "", description: "", price: "" });
   const [imageFile, setImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -23,7 +26,7 @@ function AdminAddService({ show, onHide, onCreated, token }) {
       payload.append("title", form.title.trim());
       payload.append("description", form.description.trim());
       payload.append("price", parseFloat(form.price) || 0);
-      if (imageFile) payload.append("image", imageFile); // 👈 must be "image"
+      if (imageFile) payload.append("image", imageFile);
 
       const created = await createService(payload, token, true);
       setForm({ title: "", description: "", price: "" });
@@ -31,7 +34,7 @@ function AdminAddService({ show, onHide, onCreated, token }) {
       if (onCreated) onCreated(created);
       onHide();
     } catch (err) {
-      setError(err.message);
+      setError(t("addServiceError"));
     } finally {
       setSaving(false);
     }
@@ -41,7 +44,7 @@ function AdminAddService({ show, onHide, onCreated, token }) {
     <Modal show={show} onHide={onHide} centered>
       <Form onSubmit={handleSubmit} encType="multipart/form-data">
         <Modal.Header closeButton>
-          <Modal.Title>Add New Service</Modal.Title>
+          <Modal.Title>{t("addServiceTitle")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {error && <div className="alert alert-danger">{error}</div>}
@@ -51,7 +54,7 @@ function AdminAddService({ show, onHide, onCreated, token }) {
               name="title"
               value={form.title}
               onChange={handleChange}
-              placeholder="Enter service title"
+              placeholder={t("addServiceFieldTitle")}
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -61,7 +64,7 @@ function AdminAddService({ show, onHide, onCreated, token }) {
               name="description"
               value={form.description}
               onChange={handleChange}
-              placeholder="Enter a short description"
+              placeholder={t("addServiceFieldDescription")}
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -71,7 +74,7 @@ function AdminAddService({ show, onHide, onCreated, token }) {
               name="price"
               value={form.price}
               onChange={handleChange}
-              placeholder="e.g. 49.99"
+              placeholder={t("addServiceFieldPrice")}
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -84,10 +87,10 @@ function AdminAddService({ show, onHide, onCreated, token }) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={onHide} disabled={saving}>
-            Cancel
+            {t("addServiceButtonCancel")}
           </Button>
           <Button type="submit" variant="outline-primary" disabled={saving}>
-            {saving ? <Spinner animation="border" size="sm" /> : "➕ Service"}
+            {saving ? <Spinner animation="border" size="sm" /> : t("addServiceButtonSubmit")}
           </Button>
         </Modal.Footer>
       </Form>
