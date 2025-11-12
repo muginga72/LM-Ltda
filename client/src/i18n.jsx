@@ -188,6 +188,27 @@ i18n
             full: "Confirm Full",
             half: "Confirm Half",
           },
+
+          // ------------- ProofAttachment --------------
+          proofTitle: "Proof of Payment",
+          proofNoService: "this service",
+          proofNotFound: 'Proof not found for "{{service}}"',
+          proofTipPrefix: "Tip:",
+          proofTip:
+            "Re-upload your proof using the Upload Proof button on the service card.",
+          proofImageAlt: "Promo image {{index}}",
+          proofImageForService: "Proof image for {{service}}",
+          proofViewPdf: "View PDF Proof",
+          proofDownload: "Download Attachment",
+          proofFileLabel: "File",
+          proofUnknownFile: "attachment",
+          proofUploadedAt: "Uploaded",
+          proofNoDate: "—",
+          service: {
+            Test: { title: "Test" },
+            Wedding: { title: "Wedding" },
+            Tutoring: { title: "Tutoring" },
+          },
         },
       },
       pt: {
@@ -366,6 +387,27 @@ i18n
           dashboardConfirm: {
             full: "Confirmar integral",
             half: "Confirmar parcial",
+          },
+
+          // ------------- ProofAttachment --------------
+          proofTitle: "Comprovativo de Pagamento",
+          proofNoService: "este serviço",
+          proofNotFound: 'Comprovativo não encontrado para "{{service}}"',
+          proofTipPrefix: "Dica:",
+          proofTip:
+            "Reenvie o comprovativo usando o botão Enviar Comprovativo no cartão do serviço.",
+          proofImageAlt: "Imagem promocional {{index}}",
+          proofImageForService: "Imagem do comprovativo para {{service}}",
+          proofViewPdf: "Ver comprovativo PDF",
+          proofDownload: "Descarregar Anexo",
+          proofFileLabel: "Arquivo",
+          proofUnknownFile: "anexo",
+          proofUploadedAt: "Enviado",
+          proofNoDate: "—",
+          service: {
+            Test: { title: "Teste" },
+            Wedding: { title: "Casamento" },
+            Tutoring: { title: "Aulas particulares" },
           },
         },
       },
@@ -547,6 +589,27 @@ i18n
           dashboardConfirm: {
             full: "Confirmer complet",
             half: "Confirmer partiel",
+          },
+
+          // ------------- ProofAttachment --------------
+          proofTitle: "Preuve de paiement",
+          proofNoService: "ce service",
+          proofNotFound: 'Preuve introuvable pour "{{service}}"',
+          proofTipPrefix: "Astuce :",
+          proofTip:
+            "Ré-uploadez votre preuve en utilisant le bouton Téléverser la preuve sur la carte du service.",
+          proofImageAlt: "Image promo {{index}}",
+          proofImageForService: "Image de la preuve pour {{service}}",
+          proofViewPdf: "Voir la preuve PDF",
+          proofDownload: "Télécharger la pièce jointe",
+          proofFileLabel: "Fichier",
+          proofUnknownFile: "pièce jointe",
+          proofUploadedAt: "Téléversé",
+          proofNoDate: "—",
+          service: {
+            Test: { title: "Test" },
+            Wedding: { title: "Mariage" },
+            Tutoring: { title: "Cours particuliers" },
           },
         },
       },
