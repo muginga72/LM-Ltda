@@ -163,8 +163,31 @@ i18n
           addServiceButtonSubmit: "➕ Service",
           addServiceError: "Something went wrong. Please try again.",
 
-          // --------------- ServiceCard -----------------
-          
+          // --------------- AdminDashboard -----------------
+          dashboardTitle: "Services",
+          dashboardTableServiceTitle: "Service",
+          dashboardTablePrice: "Price",
+          dashboardStatusLabel: "Status",
+          dashboardTableActions: "Actions",
+          dashboardOpen: "Open",
+          dashboardNoPayments: "No payments found.",
+          dashboardPaymentsFor: "Payments for",
+          dashboardTablePayer: "Payer",
+          dashboardTableEmail: "Email",
+          dashboardTableAmount: "Amount",
+          dashboardClose: "Close",
+          dashboardViewPayments: "Select a service to view payments",
+          dashboardActionStatusFailed: "Action failed",
+          dashboardStatus: {
+            paid_full: "Paid in Full",
+            paid_half: "Half Paid",
+            unpaid: "Unpaid",
+            other: "Other",
+          },
+          dashboardConfirm: {
+            full: "Confirm Full",
+            half: "Confirm Half",
+          },
         },
       },
       pt: {
@@ -319,8 +342,31 @@ i18n
           addServiceButtonSubmit: "➕ Serviço",
           addServiceError: "Algo deu errado. Tente novamente.",
 
-          // --------------- ServiceCard -----------------
-
+          // --------------- AdminDashboard -----------------
+          dashboardTitle: "Serviços",
+          dashboardTableServiceTitle: "Serviço",
+          dashboardTablePrice: "Preço",
+          dashboardStatusLabel: "Estado",
+          dashboardTableActions: "Ações",
+          dashboardOpen: "Abrir",
+          dashboardNoPayments: "Nenhum pagamento encontrado.",
+          dashboardPaymentsFor: "Pagamentos de",
+          dashboardTablePayer: "Pagador",
+          dashboardTableEmail: "Email",
+          dashboardTableAmount: "Valor",
+          dashboardClose: "Fechar",
+          dashboardViewPayments: "Selecione um serviço para ver pagamentos",
+          dashboardActionStatusFailed: "A ação falhou",
+          dashboardStatus: {
+            paid_full: "Pago integralmente",
+            paid_half: "Pago parcialmente",
+            unpaid: "Não pago",
+            other: "Outro",
+          },
+          dashboardConfirm: {
+            full: "Confirmar integral",
+            half: "Confirmar parcial",
+          },
         },
       },
       fr: {
@@ -476,8 +522,32 @@ i18n
           addServiceButtonSubmit: "➕ Service",
           addServiceError: "Une erreur s'est produite. Veuillez réessayer.",
 
-          // --------------- ServiceCard -----------------
-          
+          // --------------- AdminDashboard -----------------
+          dashboardTitle: "Services",
+          dashboardTableServiceTitle: "Service",
+          dashboardTablePrice: "Prix",
+          dashboardStatusLabel: "Statut",
+          dashboardTableActions: "Actions",
+          dashboardOpen: "Ouvrir",
+          dashboardNoPayments: "Aucun paiement trouvé.",
+          dashboardPaymentsFor: "Paiements pour",
+          dashboardTablePayer: "Payeur",
+          dashboardTableEmail: "Email",
+          dashboardTableAmount: "Montant",
+          dashboardClose: "Fermer",
+          dashboardViewPayments:
+            "Sélectionnez un service pour voir les paiements",
+          dashboardActionStatusFailed: "Action échouée",
+          dashboardStatus: {
+            paid_full: "Payé en totalité",
+            paid_half: "Payé partiellement",
+            unpaid: "Non payé",
+            other: "Autre",
+          },
+          dashboardConfirm: {
+            full: "Confirmer complet",
+            half: "Confirmer partiel",
+          },
         },
       },
     },
