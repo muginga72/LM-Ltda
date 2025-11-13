@@ -122,6 +122,7 @@ i18n
           "modal.paymentInstructions.customerName": "Customer Name",
           "modal.paymentInstructions.footer":
             "Once you've completed the payment, please upload the support document or send it via email or 'SEND PAYMENT PROOF' button related to requested, scheduled or shared service.",
+          fullNameId: "Your full name or service ID associated with the payment",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "User Dashboard",
@@ -143,6 +144,114 @@ i18n
           "dashboard.payInstructions": "Pay Instructions",
           "dashboard.noImage": "No image available",
           "footer.rights": "All rights reserved.",
+
+          // ------------- NewAdminDashboard --------------
+          adminDashboardTitle: "Administrator Dashboard",
+          welcomeUser: "Welcome",
+          adminRole: "Role",
+          adminAddService: "➕ Service",
+          dashboardPreview: "Preview Current Services",
+          AdmiNoServices: "No services available.",
+          dashboardOverview: "Customer Service Overview",
+
+          // --------------- AdminAddService ----------------
+          addServiceTitle: "Add New Service",
+          addServiceFieldTitle: "Enter service title",
+          addServiceFieldDescription: "Enter a short description",
+          addServiceFieldPrice: "e.g. 49.99",
+          addServiceFieldImage: "Upload image",
+          addServiceButtonCancel: "Cancel",
+          addServiceButtonSubmit: "➕ Service",
+          addServiceError: "Something went wrong. Please try again.",
+
+          // --------------- AdminDashboard -----------------
+          dashboardTitle: "Services",
+          dashboardTableServiceTitle: "Service",
+          dashboardTablePrice: "Price",
+          dashboardStatusLabel: "Status",
+          dashboardTableActions: "Actions",
+          dashboardOpen: "Open",
+          dashboardNoPayments: "No payments found.",
+          dashboardPaymentsFor: "Payments for",
+          dashboardTablePayer: "Payer",
+          dashboardTableEmail: "Email",
+          dashboardTableAmount: "Amount",
+          dashboardClose: "Close",
+          dashboardViewPayments: "Select a service to view payments",
+          dashboardActionStatusFailed: "Action failed",
+          dashboardStatus: {
+            paid_full: "Paid in Full",
+            paid_half: "Half Paid",
+            unpaid: "Unpaid",
+            other: "Other",
+          },
+          dashboardConfirm: {
+            full: "Confirm Full",
+            half: "Confirm Half",
+          },
+
+          // ------------- ProofAttachment --------------
+          proofTitle: "Proof of Payment",
+          proofNoService: "this service",
+          proofNotFound:
+            'Proof not found for "{{service}}". While you re-upload here are a few highlights from LM-Ltd Services.',
+          proofTipPrefix: "Tip:",
+          proofTip:
+            "Re-upload your proof using the Upload Proof button on the service card.",
+          proofImageAlt: "Promo image {{index}}",
+          proofImageForService: "Proof image for {{service}}",
+          proofViewPdf: "View PDF Proof",
+          proofDownload: "Download Attachment",
+          proofFileLabel: "File",
+          proofUnknownFile: "attachment",
+          proofUploadedAt: "Uploaded",
+          proofNoDate: "—",
+          service: {
+            Test: { title: "Test" },
+            Wedding: { title: "Wedding" },
+            Tutoring: { title: "Tutoring" },
+          },
+
+          // ---------- User Calendar -----------
+          "calendar.myEvents": "My Events",
+          "calendar.loading": "Loading events…",
+          "calendar.error": "Failed to load calendar events.",
+          "calendar.noEvents": "No events found for this user.",
+          "calendar.untitled": "Untitled",
+          "calendar.eventId": "Event ID",
+          "calendar.created": "Created",
+          "calendar.title": "Title",
+          "calendar.date": "Date",
+          "calendar.time": "Time",
+
+          "service.Test.title": "Test",
+          "service.Wedding.title": "Wedding",
+          "service.Tutoring.title": "Tutoring",
+
+          // ------------- Service Calendat ----------------
+          calendar: {
+            heading: "Available slots",
+            loading: "Loading availability…",
+            noAvailability: "No availability found.",
+            lastTried: "Last tried endpoint",
+            endpointHint: "Tried endpoints: {{endpoints}}",
+            retry: "Retry",
+            reload: "Reload page",
+            error: {
+              not_found:
+                "Availability endpoint not found. Tried: {{endpoints}}",
+              server: "Server error: {{message}}",
+              unknown: "Failed to fetch availability: {{message}}",
+            },
+            table: {
+              date: "Date",
+              time: "Time",
+              available: "Available",
+              yes: "Yes",
+              no: "No",
+              allDay: "All day",
+            },
+          },
         },
       },
       pt: {
@@ -170,7 +279,7 @@ i18n
           promoText2: "Acesse a nossa lista de produtos disponíveis.",
           learnMoreBtn: "Explore Mais",
 
-          // ---------- Card Sets ------------
+          // ---------------- Card Sets ------------------
           "button.explore": "Explorar",
           "card.left.🍹 Beverages Service": "🍹 Bebidas a Retalho",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet para Você",
@@ -179,7 +288,7 @@ i18n
           "card.right.📚 Tutoring": "📚 Aulas Particulares",
           "card.right.🍔 Hamburgers": "🍔 Hambúrgueres",
 
-          // ----------- Services Page ---------------
+          // -------------- Services Page ------------------
           services: {
             title: "Os Nossos Serviços",
             empty: "Nenhum serviço disponível.",
@@ -237,7 +346,7 @@ i18n
           "dashboard.availableServices": "Serviços Disponíveis",
           "dashboard.noServices":
             "Nenhum pedido, agendamento ou serviço compartilhado ainda.",
-          "dashboard.sendProof": "Envie Comprovativo de Pagamento",
+          "dashboard.sendProof": "Envie o Comprovativo de Pagamento",
           "dashboard.status": "Condição",
           "status.paid_full": "Pago",
           "status.paid_half": "Pago parcialmente",
@@ -254,6 +363,7 @@ i18n
           "modal.paymentInstructions.customerName": "Nome do Cliente",
           "modal.paymentInstructions.footer":
             "Após concluir o pagamento, envie em anexo o comprovante por e-mail ou aperta no botão 'ENVIAR COMPROVATIVO DE PAGAMENTO' relacionado ao serviço solicitado, agendado ou compartilhado.",
+          fullNameId: "Nome completo associado ao pagamento ou seu ID associado ao serviço",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Painel do Usuário",
@@ -277,6 +387,114 @@ i18n
           "dashboard.payInstructions": "Instruções de Pagamento",
           "dashboard.noImage": "Nenhuma imagem disponível",
           "footer.rights": "Todos os direitos reservados.",
+
+          // ------------- NewAdminDashboard --------------
+          adminDashboardTitle: "Painel de Administração",
+          welcomeUser: "Bem-vindo",
+          adminRole: "Função",
+          adminAddService: "➕ Serviço",
+          dashboardPreview: "Pré-visualização dos Serviços Atuais",
+          admiNoServices: "Nenhum serviço disponível.",
+          dashboardOverview: "Visão Geral dos Usuários",
+
+          // --------------- AdminAddService ----------------
+          addServiceTitle: "Adicionar Novo Serviço",
+          addServiceFieldTitle: "Insira o título do serviço",
+          addServiceFieldDescription: "Insira uma breve descrição",
+          addServiceFieldPrice: "ex: 49.99",
+          addServiceFieldImage: "Enviar imagem",
+          addServiceButtonCancel: "Cancelar",
+          addServiceButtonSubmit: "➕ Serviço",
+          addServiceError: "Algo deu errado. Tente novamente.",
+
+          // --------------- AdminDashboard -----------------
+          dashboardTitle: "Serviços",
+          dashboardTableServiceTitle: "Serviço",
+          dashboardTablePrice: "Preço",
+          dashboardStatusLabel: "Estado",
+          dashboardTableActions: "Ações",
+          dashboardOpen: "Abrir",
+          dashboardNoPayments: "Nenhum pagamento encontrado.",
+          dashboardPaymentsFor: "Pagamentos de",
+          dashboardTablePayer: "Pagador",
+          dashboardTableEmail: "Email",
+          dashboardTableAmount: "Valor",
+          dashboardClose: "Fechar",
+          dashboardViewPayments: "Selecione um serviço para ver pagamentos",
+          dashboardActionStatusFailed: "A ação falhou",
+          dashboardStatus: {
+            paid_full: "Pago integralmente",
+            paid_half: "Pago parcialmente",
+            unpaid: "Não pago",
+            other: "Outro",
+          },
+          dashboardConfirm: {
+            full: "Confirmar integral",
+            half: "Confirmar parcial",
+          },
+
+          // ------------- ProofAttachment --------------
+          proofTitle: "Comprovativo de Pagamento",
+          proofNoService: "este serviço",
+          proofNotFound:
+            'Comprovativo não encontrado para "{{service}}". Enquanto aguarda o recarregamento, aqui estão alguns destaques dos serviços da LM-Ltda.',
+          proofTipPrefix: "Dica:",
+          proofTip:
+            "Reenvie o comprovativo usando o botão Enviar Comprovativo no cartão do serviço.",
+          proofImageAlt: "Imagem promocional {{index}}",
+          proofImageForService: "Imagem do comprovativo para {{service}}",
+          proofViewPdf: "Ver comprovativo PDF",
+          proofDownload: "Descarregar Anexo",
+          proofFileLabel: "Arquivo",
+          proofUnknownFile: "anexo",
+          proofUploadedAt: "Enviado",
+          proofNoDate: "—",
+          service: {
+            Test: { title: "Teste" },
+            Wedding: { title: "Casamento" },
+            Tutoring: { title: "Aulas particulares" },
+          },
+
+          // ---------- User Calendar -----------
+          "calendar.myEvents": "Meus Eventos",
+          "calendar.loading": "Carregando eventos…",
+          "calendar.error": "Falha ao carregar eventos do calendário.",
+          "calendar.noEvents": "Nenhum evento encontrado para este usuário.",
+          "calendar.untitled": "Sem título",
+          "calendar.eventId": "ID do Evento",
+          "calendar.created": "Criado",
+          "calendar.title": "Título",
+          "calendar.date": "Data",
+          "calendar.time": "Hora",
+
+          "service.Test.title": "Teste",
+          "service.Wedding.title": "Casamento",
+          "service.Tutoring.title": "Aulas Particulares",
+
+          // ------------- Service Calendat ----------------
+          calendar: {
+            heading: "Horários disponíveis",
+            loading: "Carregando disponibilidade…",
+            noAvailability: "Nenhuma disponibilidade encontrada.",
+            lastTried: "Último endpoint tentado",
+            endpointHint: "Endpoints tentados: {{endpoints}}",
+            retry: "Tentar novamente",
+            reload: "Recarregar página",
+            error: {
+              not_found:
+                "Ponto de extremidade de disponibilidade não encontrado. Tentado: {{endpoints}}",
+              server: "Erro do servidor: {{message}}",
+              unknown: "Falha ao obter disponibilidade: {{message}}",
+            },
+            table: {
+              date: "Data",
+              time: "Hora",
+              available: "Disponível",
+              yes: "Sim",
+              no: "Não",
+              allDay: "Todo dia",
+            },
+          },
         },
       },
       fr: {
@@ -388,6 +606,7 @@ i18n
           "modal.paymentInstructions.customerName": "Nom du Client",
           "modal.paymentInstructions.footer":
             "Une fois le paiement effectué, veuillez télécharger le document justificatif ou l'envoyer par e-mail ou via le bouton 'ENVOYER LA PREUVE DE PAIEMENT' lié au service demandé, planifié ou partagé.",
+          fullNameId: "Votre nom complet ou l'ID du service associé au paiement",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Tableau de Bord Utilisateur",
@@ -412,10 +631,119 @@ i18n
           "dashboard.payInstructions": "Instructions de Paiement",
           "dashboard.noImage": "Aucune image disponible",
           "footer.rights": "Tous droits réservés.",
+
+          // ------------- NewAdminDashboard --------------
+          adminDashboardTitle: "Tableau de Bord Administrateur",
+          welcomeUser: "Bienvenue",
+          adminRole: "Rôle",
+          adminAddService: "➕ Service",
+          dashboardPreview: "Aperçu des Services Actuels",
+          AdmiNoServices: "Aucun service disponible.",
+          dashboardOverview: "Aperçu de l'utilisateur",
+
+          // --------------- AdminAddService ----------------
+          addServiceTitle: "Ajouter un Nouveau Service",
+          addServiceFieldTitle: "Entrez le titre du service",
+          addServiceFieldDescription: "Entrez une brève description",
+          addServiceFieldPrice: "ex : 49.99",
+          addServiceFieldImage: "Télécharger une image",
+          addServiceButtonCancel: "Annuler",
+          addServiceButtonSubmit: "➕ Service",
+          addServiceError: "Une erreur s'est produite. Veuillez réessayer.",
+
+          // --------------- AdminDashboard -----------------
+          dashboardTitle: "Services",
+          dashboardTableServiceTitle: "Service",
+          dashboardTablePrice: "Prix",
+          dashboardStatusLabel: "Statut",
+          dashboardTableActions: "Actions",
+          dashboardOpen: "Ouvrir",
+          dashboardNoPayments: "Aucun paiement trouvé.",
+          dashboardPaymentsFor: "Paiements pour",
+          dashboardTablePayer: "Payeur",
+          dashboardTableEmail: "Email",
+          dashboardTableAmount: "Montant",
+          dashboardClose: "Fermer",
+          dashboardViewPayments:
+            "Sélectionnez un service pour voir les paiements",
+          dashboardActionStatusFailed: "Action échouée",
+          dashboardStatus: {
+            paid_full: "Payé en totalité",
+            paid_half: "Payé partiellement",
+            unpaid: "Non payé",
+            other: "Autre",
+          },
+          dashboardConfirm: {
+            full: "Confirmer complet",
+            half: "Confirmer partiel",
+          },
+
+          // ------------- ProofAttachment --------------
+          proofTitle: "Preuve de paiement",
+          proofNoService: "ce service",
+          proofNotFound:
+            'Preuve introuvable pour "{{service}}". En attendant le rechargement, voici quelques points saillants des services de LM-Ltd.',
+          proofTipPrefix: "Astuce :",
+          proofTip:
+            "Ré-uploadez votre preuve en utilisant le bouton Téléverser la preuve sur la carte du service.",
+          proofImageAlt: "Image promo {{index}}",
+          proofImageForService: "Image de la preuve pour {{service}}",
+          proofViewPdf: "Voir la preuve PDF",
+          proofDownload: "Télécharger la pièce jointe",
+          proofFileLabel: "Fichier",
+          proofUnknownFile: "pièce jointe",
+          proofUploadedAt: "Téléversé",
+          proofNoDate: "—",
+          service: {
+            Test: { title: "Test" },
+            Wedding: { title: "Mariage" },
+            Tutoring: { title: "Cours particuliers" },
+          },
+
+          // ---------- User Calendar -----------
+          "calendar.myEvents": "Mes Événements",
+          "calendar.loading": "Chargement des événements…",
+          "calendar.error": "Échec du chargement des événements du calendrier.",
+          "calendar.noEvents": "Aucun événement trouvé pour cet utilisateur.",
+          "calendar.untitled": "Sans titre",
+          "calendar.eventId": "ID de l'Événement",
+          "calendar.created": "Créé",
+          "calendar.title": "Titre",
+          "calendar.date": "Date",
+          "calendar.time": "Heure",
+
+          "service.Test.title": "Test",
+          "service.Wedding.title": "Mariage",
+          "service.Tutoring.title": "Cours Particuliers",
+
+          // ------------- Service Calendat ----------------
+          calendar: {
+            heading: "Créneaux disponibles",
+            loading: "Chargement des disponibilités…",
+            noAvailability: "Aucune disponibilité trouvée.",
+            lastTried: "Dernier endpoint essayé",
+            endpointHint: "Endpoints essayés : {{endpoints}}",
+            retry: "Réessayer",
+            reload: "Recharger la page",
+            error: {
+              not_found:
+                "Point de terminaison de disponibilité introuvable. Tenté : {{endpoints}}",
+              server: "Erreur du serveur : {{message}}",
+              unknown:
+                "Échec de la récupération des disponibilités : {{message}}",
+            },
+            table: {
+              date: "Date",
+              time: "Heure",
+              available: "Disponible",
+              yes: "Oui",
+              no: "Non",
+              allDay: "Toute la journée",
+            },
+          },
         },
       },
     },
-  }
-);
+  });
 
 export default i18n;
