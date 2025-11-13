@@ -192,7 +192,8 @@ i18n
           // ------------- ProofAttachment --------------
           proofTitle: "Proof of Payment",
           proofNoService: "this service",
-          proofNotFound: 'Proof not found for "{{service}}". While you re-upload here are a few highlights from LM-Ltd Services.',
+          proofNotFound:
+            'Proof not found for "{{service}}". While you re-upload here are a few highlights from LM-Ltd Services.',
           proofTipPrefix: "Tip:",
           proofTip:
             "Re-upload your proof using the Upload Proof button on the service card.",
@@ -225,6 +226,26 @@ i18n
           "service.Test.title": "Test",
           "service.Wedding.title": "Wedding",
           "service.Tutoring.title": "Tutoring",
+
+          // ------------- Service Calendat ----------------
+          "calendar.heading": "Available Services Dates",
+          "calendar.error.general": "Failed to fetch availability.",
+          "calendar.error.notFound":
+            "Availability endpoint not found. Tried: {{endpoints}}",
+          "calendar.error.server": "Request to {{url}} failed: {{message}}",
+          "calendar.error.unknown": "Unknown error occurred.",
+          "calendar.lastTried": "Last tried",
+          "calendar.endpointHint":
+            "If you control the backend, ensure one of these endpoints is exposed: {{endpoints}}",
+          "calendar.retry": "Retry",
+          "calendar.reload": "Reload page",
+          "calendar.noAvailability":
+            "No availability found. If you expect data, verify the backend route and payload schema.",
+          "calendar.table.date": "Date",
+          "calendar.table.time": "Time",
+          "calendar.table.available": "Available",
+          "calendar.table.yes": "Yes",
+          "calendar.table.no": "No",
         },
       },
       pt: {
@@ -408,7 +429,8 @@ i18n
           // ------------- ProofAttachment --------------
           proofTitle: "Comprovativo de Pagamento",
           proofNoService: "este serviço",
-          proofNotFound: 'Comprovativo não encontrado para "{{service}}". Enquanto aguarda o recarregamento, aqui estão alguns destaques dos serviços da LM-Ltda.',
+          proofNotFound:
+            'Comprovativo não encontrado para "{{service}}". Enquanto aguarda o recarregamento, aqui estão alguns destaques dos serviços da LM-Ltda.',
           proofTipPrefix: "Dica:",
           proofTip:
             "Reenvie o comprovativo usando o botão Enviar Comprovativo no cartão do serviço.",
@@ -441,6 +463,27 @@ i18n
           "service.Test.title": "Teste",
           "service.Wedding.title": "Casamento",
           "service.Tutoring.title": "Aulas Particulares",
+
+          // ------------- Service Calendat ----------------
+          "calendar.heading": "Datas de Serviços Disponíveis",
+          "calendar.error.general": "Falha ao buscar disponibilidade.",
+          "calendar.error.notFound":
+            "Endpoint de disponibilidade não encontrado. Tentado: {{endpoints}}",
+          "calendar.error.server":
+            "Requisição para {{url}} falhou: {{message}}",
+          "calendar.error.unknown": "Ocorreu um erro desconhecido.",
+          "calendar.lastTried": "Última tentativa",
+          "calendar.endpointHint":
+            "Se você controla o backend, certifique-se de expor um destes endpoints: {{endpoints}}",
+          "calendar.retry": "Tentar novamente",
+          "calendar.reload": "Recarregar página",
+          "calendar.noAvailability":
+            "Nenhuma disponibilidade encontrada. Verifique a rota e o esquema do backend.",
+          "calendar.table.date": "Data",
+          "calendar.table.time": "Hora",
+          "calendar.table.available": "Disponível",
+          "calendar.table.yes": "Sim",
+          "calendar.table.no": "Não",
         },
       },
       fr: {
@@ -626,7 +669,8 @@ i18n
           // ------------- ProofAttachment --------------
           proofTitle: "Preuve de paiement",
           proofNoService: "ce service",
-          proofNotFound: 'Preuve introuvable pour "{{service}}". En attendant le rechargement, voici quelques points saillants des services de LM-Ltd.',
+          proofNotFound:
+            'Preuve introuvable pour "{{service}}". En attendant le rechargement, voici quelques points saillants des services de LM-Ltd.',
           proofTipPrefix: "Astuce :",
           proofTip:
             "Ré-uploadez votre preuve en utilisant le bouton Téléverser la preuve sur la carte du service.",
@@ -659,6 +703,25 @@ i18n
           "service.Test.title": "Test",
           "service.Wedding.title": "Mariage",
           "service.Tutoring.title": "Cours Particuliers",
+
+          // ------------- Service Calendat ----------------
+          "calendar.heading": "Dates de Services Disponibles",
+          "calendar.error.general": "Échec du chargement des disponibilités.",
+          "calendar.error.notFound":
+            "Point de terminaison de disponibilité introuvable. Essayé : {{endpoints}}",
+          "calendar.error.server": "Requête vers {{url}} échouée : {{message}}",
+          "calendar.error.unknown": "Une erreur inconnue est survenue.",
+          "calendar.lastTried": "Dernière tentative",
+          "calendar.endpointHint":
+            "Si vous contrôlez le backend, assurez-vous qu’un de ces endpoints est exposé : {{endpoints}}",
+          "calendar.retry": "Réessayer",
+          "calendar.noAvailability":
+            "Aucune disponibilité trouvée. Vérifiez la route et le schéma du backend.",
+          "calendar.table.date": "Date",
+          "calendar.table.time": "Heure",
+          "calendar.table.available": "Disponible",
+          "calendar.table.yes": "Oui",
+          "calendar.table.no": "Non",
         },
       },
     },
