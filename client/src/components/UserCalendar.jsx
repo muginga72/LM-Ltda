@@ -1,4 +1,4 @@
- import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
@@ -42,7 +42,8 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
       }
       if (val.$numberLong) return new Date(Number(val.$numberLong));
     }
-    if (typeof val === "string" || typeof val === "number") return new Date(val);
+    if (typeof val === "string" || typeof val === "number")
+      return new Date(val);
     return null;
   };
 
@@ -83,7 +84,10 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
             item.userId ?? (item.user && (item.user.id || item.user._id)) ?? "";
           let eventUserId = "";
           if (candidate === null || candidate === undefined) eventUserId = "";
-          else if (typeof candidate === "string" || typeof candidate === "number")
+          else if (
+            typeof candidate === "string" ||
+            typeof candidate === "number"
+          )
             eventUserId = String(candidate);
           else if (typeof candidate === "object") {
             if (candidate.$oid) eventUserId = String(candidate.$oid);
@@ -95,8 +99,12 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
         });
 
         filtered.sort((a, b) => {
-          const aDate = new Date(`${a.date || ""}T${a.time || "00:00"}`).getTime();
-          const bDate = new Date(`${b.date || ""}T${b.time || "00:00"}`).getTime();
+          const aDate = new Date(
+            `${a.date || ""}T${a.time || "00:00"}`
+          ).getTime();
+          const bDate = new Date(
+            `${b.date || ""}T${b.time || "00:00"}`
+          ).getTime();
           return aDate - bDate;
         });
 
@@ -122,9 +130,11 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
   // Single correct formatter for European date/time
   const formatDateTime = (dateStr, timeStr, fallbackCreatedAt) => {
     const locale =
-      i18n.language === "pt" ? "pt-PT" :
-      i18n.language === "fr" ? "fr-FR" :
-      "en-GB"; // default to UK English for European format
+      i18n.language === "pt"
+        ? "pt-PT"
+        : i18n.language === "fr"
+        ? "fr-FR"
+        : "en-GB"; // default to UK English for European format
 
     if (dateStr) {
       const dt = new Date(`${dateStr}T${timeStr || "00:00"}`);
@@ -134,7 +144,7 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
         year: "numeric",
         hour: timeStr ? "2-digit" : undefined,
         minute: timeStr ? "2-digit" : undefined,
-        hour12: false
+        hour12: false,
       }).format(dt);
     }
 
@@ -146,7 +156,7 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
           year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
-          hour12: false
+          hour12: false,
         }).format(parsed)
       : "";
   };
@@ -171,7 +181,8 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {events.map((ev) => {
             const id = eventId(ev) || Math.random().toString(36).slice(2, 9);
-            const createdAtDate = parseDateFromField(ev.createdAt) || new Date();
+            const createdAtDate =
+              parseDateFromField(ev.createdAt) || new Date();
             return (
               <li
                 key={id}
@@ -183,7 +194,9 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
                   background: ev.createdByAdmin ? "#caf0dbff" : "white",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
                   <strong>
                     {t("calendar.title")}:{" "}
                     {t(`service.${ev.title}.title`, {
@@ -191,7 +204,8 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
                     })}
                   </strong>
                   <span style={{ color: "#eb1241ff", fontSize: 13 }}>
-                    {t("calendar.date")}: {formatDateTime(ev.date, ev.time, ev.createdAt)}
+                    {t("calendar.date")}:{" "}
+                    {formatDateTime(ev.date, ev.time, ev.createdAt)}
                   </span>
                 </div>
                 <div style={{ marginTop: 6, color: "#444", fontSize: 14 }}>

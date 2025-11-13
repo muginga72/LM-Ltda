@@ -192,7 +192,7 @@ i18n
           // ------------- ProofAttachment --------------
           proofTitle: "Proof of Payment",
           proofNoService: "this service",
-          proofNotFound: 'Proof not found for "{{service}}"',
+          proofNotFound: 'Proof not found for "{{service}}". While you re-upload here are a few highlights from LM-Ltd Services.',
           proofTipPrefix: "Tip:",
           proofTip:
             "Re-upload your proof using the Upload Proof button on the service card.",
@@ -408,7 +408,7 @@ i18n
           // ------------- ProofAttachment --------------
           proofTitle: "Comprovativo de Pagamento",
           proofNoService: "este serviço",
-          proofNotFound: 'Comprovativo não encontrado para "{{service}}"',
+          proofNotFound: 'Comprovativo não encontrado para "{{service}}". Enquanto aguarda o recarregamento, aqui estão alguns destaques dos serviços da LM-Ltda.',
           proofTipPrefix: "Dica:",
           proofTip:
             "Reenvie o comprovativo usando o botão Enviar Comprovativo no cartão do serviço.",
@@ -626,7 +626,7 @@ i18n
           // ------------- ProofAttachment --------------
           proofTitle: "Preuve de paiement",
           proofNoService: "ce service",
-          proofNotFound: 'Preuve introuvable pour "{{service}}"',
+          proofNotFound: 'Preuve introuvable pour "{{service}}". En attendant le rechargement, voici quelques points saillants des services de LM-Ltd.',
           proofTipPrefix: "Astuce :",
           proofTip:
             "Ré-uploadez votre preuve en utilisant le bouton Téléverser la preuve sur la carte du service.",
