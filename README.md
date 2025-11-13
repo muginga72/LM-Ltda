@@ -67,7 +67,7 @@ Uploaded documents are stored in MongoDB GridFS and served via /uploads/:filenam
 
 📧 Email Integration
 Users can send payment confirmation emails to:
-Recipient: lmj.muginga@gmail.com
+Recipient: admin-email@gmail.com
 Subject: Payment Confirmation
 Body: Includes service ID and user details
 
@@ -90,7 +90,7 @@ See CONTRIBUTING.md for full guidelines.
 - [x] File upload and email workflows
 - [ ] Stripe integration for direct payments
 - [ ] Plugin system for service extensions
-- [ ] Multi-language support
+- [x] Multi-language support
 
 🛡️ License
 
