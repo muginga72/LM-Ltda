@@ -1,19 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 
 export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
+  const { t, i18n } = useTranslation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Keep a ref to the latest headers so the effect doesn't depend on the headers object identity
   const headersRef = useRef(headers);
   useEffect(() => {
     headersRef.current = headers;
   }, [headers]);
 
-  // Helper to extract an id from various shapes: string, number, { $oid: string }
   const extractId = (u) => {
     if (!u) return "";
     if (typeof u === "string" || typeof u === "number") return String(u);
@@ -25,7 +25,6 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
     return "";
   };
 
-  // Helper to extract a stable event id for React keys and display
   const eventId = (ev) => {
     if (!ev) return "";
     if (typeof ev._id === "string") return ev._id;
@@ -33,10 +32,8 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
     return ev.id || ev._id || "";
   };
 
-  // Helper to parse createdAt values that might be strings, numbers, or Mongo extended format
   const parseDateFromField = (val) => {
     if (!val) return null;
-    // Mongo extended: { $date: { $numberLong: "1234567890123" } } or { $date: "2025-11-30T16:00:00.000Z" }
     if (typeof val === "object") {
       if (val.$date) {
         if (typeof val.$date === "object" && val.$date.$numberLong)
@@ -54,7 +51,7 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
   useEffect(() => {
     if (!currentUserId) {
       setEvents([]);
-      setError("Missing user id");
+      setError(t("calendar.error"));
       setLoading(false);
       return;
     }
@@ -80,7 +77,6 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
 
         const all = Array.isArray(res.data) ? res.data : [];
 
-        // Filter events where event.userId matches the current user's id (supporting multiple id shapes)
         const filtered = all.filter((item) => {
           if (!item) return false;
           const candidate =
@@ -98,14 +94,9 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
           return eventUserId === currentUserId;
         });
 
-        // Sort by date + time ascending; tolerate missing time
         filtered.sort((a, b) => {
-          const aDate = new Date(
-            `${a.date || ""}T${a.time || "00:00"}`
-          ).getTime();
-          const bDate = new Date(
-            `${b.date || ""}T${b.time || "00:00"}`
-          ).getTime();
+          const aDate = new Date(`${a.date || ""}T${a.time || "00:00"}`).getTime();
+          const bDate = new Date(`${b.date || ""}T${b.time || "00:00"}`).getTime();
           return aDate - bDate;
         });
 
@@ -114,7 +105,7 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
         if (axios.isCancel && axios.isCancel(err)) return;
         if (err?.name === "CanceledError") return;
         console.error("Calendar fetch error:", err);
-        if (!didCancel) setError("Failed to load calendar events.");
+        if (!didCancel) setError(t("calendar.error"));
       } finally {
         if (!didCancel) setLoading(false);
       }
@@ -126,30 +117,45 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
       didCancel = true;
       abortController.abort();
     };
-  }, [apiBaseUrl, currentUserId]);
+  }, [apiBaseUrl, currentUserId, t]);
 
+  // Single correct formatter for European date/time
   const formatDateTime = (dateStr, timeStr, fallbackCreatedAt) => {
+    const locale =
+      i18n.language === "pt" ? "pt-PT" :
+      i18n.language === "fr" ? "fr-FR" :
+      "en-GB"; // default to UK English for European format
+
     if (dateStr) {
-      try {
-        const dt = new Date(`${dateStr}T${timeStr || "00:00"}`);
-        return dt.toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: timeStr ? "short" : undefined,
-        });
-      } catch {
-        return `${dateStr} ${timeStr || ""}`;
-      }
+      const dt = new Date(`${dateStr}T${timeStr || "00:00"}`);
+      return new Intl.DateTimeFormat(locale, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: timeStr ? "2-digit" : undefined,
+        minute: timeStr ? "2-digit" : undefined,
+        hour12: false
+      }).format(dt);
     }
-    const parsed = parseDateFromField(fallbackCreatedAt);
-    if (parsed) return parsed.toLocaleString();
-    return "";
+
+    const parsed = fallbackCreatedAt ? new Date(fallbackCreatedAt) : null;
+    return parsed
+      ? new Intl.DateTimeFormat(locale, {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        }).format(parsed)
+      : "";
   };
 
   return (
     <section aria-label="User Events">
-      <h5>My Events</h5>
+      <h5>{t("calendar.myEvents")}</h5>
 
-      {loading && <p>Loading events…</p>}
+      {loading && <p>{t("calendar.loading")}</p>}
 
       {error && (
         <div role="alert" style={{ color: "var(--danger, #c00)" }}>
@@ -157,7 +163,9 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
         </div>
       )}
 
-      {!loading && !error && events.length === 0 && <p>No events found for this user.</p>}
+      {!loading && !error && events.length === 0 && (
+        <p>{t("calendar.noEvents")}</p>
+      )}
 
       {!loading && events.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
@@ -176,17 +184,23 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <strong>{ev.title || "Untitled"}</strong>
+                  <strong>
+                    {t("calendar.title")}:{" "}
+                    {t(`service.${ev.title}.title`, {
+                      defaultValue: ev.title || t("calendar.untitled"),
+                    })}
+                  </strong>
                   <span style={{ color: "#eb1241ff", fontSize: 13 }}>
-                    {formatDateTime(ev.date, ev.time, ev.createdAt)}
+                    {t("calendar.date")}: {formatDateTime(ev.date, ev.time, ev.createdAt)}
                   </span>
                 </div>
                 <div style={{ marginTop: 6, color: "#444", fontSize: 14 }}>
                   <span style={{ marginRight: 12 }}>
-                    <strong>Event ID:</strong> {id}
+                    <strong>{t("calendar.eventId")}:</strong> {id}
                   </span>
                   <span>
-                    <strong>Created:</strong> {createdAtDate.toLocaleString()}
+                    <strong>{t("calendar.created")}:</strong>{" "}
+                    {formatDateTime(null, null, createdAtDate)}
                   </span>
                 </div>
               </li>
@@ -202,7 +216,6 @@ UserCalendar.propTypes = {
   apiBaseUrl: PropTypes.string,
   headers: PropTypes.object,
   user: PropTypes.oneOfType([
-    // allow either a plain id or an object containing id/_id
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       _id: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),

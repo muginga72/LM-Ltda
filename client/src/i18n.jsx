@@ -209,6 +209,22 @@ i18n
             Wedding: { title: "Wedding" },
             Tutoring: { title: "Tutoring" },
           },
+
+          // ---------- User Calendar -----------
+          "calendar.myEvents": "My Events",
+          "calendar.loading": "Loading events…",
+          "calendar.error": "Failed to load calendar events.",
+          "calendar.noEvents": "No events found for this user.",
+          "calendar.untitled": "Untitled",
+          "calendar.eventId": "Event ID",
+          "calendar.created": "Created",
+          "calendar.title": "Title",
+          "calendar.date": "Date",
+          "calendar.time": "Time",
+
+          "service.Test.title": "Test",
+          "service.Wedding.title": "Wedding",
+          "service.Tutoring.title": "Tutoring",
         },
       },
       pt: {
@@ -409,6 +425,22 @@ i18n
             Wedding: { title: "Casamento" },
             Tutoring: { title: "Aulas particulares" },
           },
+
+          // ---------- User Calendar -----------
+          "calendar.myEvents": "Meus Eventos",
+          "calendar.loading": "Carregando eventos…",
+          "calendar.error": "Falha ao carregar eventos do calendário.",
+          "calendar.noEvents": "Nenhum evento encontrado para este usuário.",
+          "calendar.untitled": "Sem título",
+          "calendar.eventId": "ID do Evento",
+          "calendar.created": "Criado",
+          "calendar.title": "Título",
+          "calendar.date": "Data",
+          "calendar.time": "Hora",
+
+          "service.Test.title": "Teste",
+          "service.Wedding.title": "Casamento",
+          "service.Tutoring.title": "Aulas Particulares",
         },
       },
       fr: {
@@ -611,6 +643,22 @@ i18n
             Wedding: { title: "Mariage" },
             Tutoring: { title: "Cours particuliers" },
           },
+
+          // ---------- User Calendar -----------
+          "calendar.myEvents": "Mes Événements",
+          "calendar.loading": "Chargement des événements…",
+          "calendar.error": "Échec du chargement des événements du calendrier.",
+          "calendar.noEvents": "Aucun événement trouvé pour cet utilisateur.",
+          "calendar.untitled": "Sans titre",
+          "calendar.eventId": "ID de l'Événement",
+          "calendar.created": "Créé",
+          "calendar.title": "Titre",
+          "calendar.date": "Date",
+          "calendar.time": "Heure",
+
+          "service.Test.title": "Test",
+          "service.Wedding.title": "Mariage",
+          "service.Tutoring.title": "Cours Particuliers",
         },
       },
     },
