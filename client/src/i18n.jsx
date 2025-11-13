@@ -122,6 +122,7 @@ i18n
           "modal.paymentInstructions.customerName": "Customer Name",
           "modal.paymentInstructions.footer":
             "Once you've completed the payment, please upload the support document or send it via email or 'SEND PAYMENT PROOF' button related to requested, scheduled or shared service.",
+          fullNameId: "Your full name or service ID associated with the payment",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "User Dashboard",
@@ -228,24 +229,29 @@ i18n
           "service.Tutoring.title": "Tutoring",
 
           // ------------- Service Calendat ----------------
-          "calendar.heading": "Available Services Dates",
-          "calendar.error.general": "Failed to fetch availability.",
-          "calendar.error.notFound":
-            "Availability endpoint not found. Tried: {{endpoints}}",
-          "calendar.error.server": "Request to {{url}} failed: {{message}}",
-          "calendar.error.unknown": "Unknown error occurred.",
-          "calendar.lastTried": "Last tried",
-          "calendar.endpointHint":
-            "If you control the backend, ensure one of these endpoints is exposed: {{endpoints}}",
-          "calendar.retry": "Retry",
-          "calendar.reload": "Reload page",
-          "calendar.noAvailability":
-            "No availability found. If you expect data, verify the backend route and payload schema.",
-          "calendar.table.date": "Date",
-          "calendar.table.time": "Time",
-          "calendar.table.available": "Available",
-          "calendar.table.yes": "Yes",
-          "calendar.table.no": "No",
+          calendar: {
+            heading: "Available slots",
+            loading: "Loading availability…",
+            noAvailability: "No availability found.",
+            lastTried: "Last tried endpoint",
+            endpointHint: "Tried endpoints: {{endpoints}}",
+            retry: "Retry",
+            reload: "Reload page",
+            error: {
+              not_found:
+                "Availability endpoint not found. Tried: {{endpoints}}",
+              server: "Server error: {{message}}",
+              unknown: "Failed to fetch availability: {{message}}",
+            },
+            table: {
+              date: "Date",
+              time: "Time",
+              available: "Available",
+              yes: "Yes",
+              no: "No",
+              allDay: "All day",
+            },
+          },
         },
       },
       pt: {
@@ -357,6 +363,7 @@ i18n
           "modal.paymentInstructions.customerName": "Nome do Cliente",
           "modal.paymentInstructions.footer":
             "Após concluir o pagamento, envie em anexo o comprovante por e-mail ou aperta no botão 'ENVIAR COMPROVATIVO DE PAGAMENTO' relacionado ao serviço solicitado, agendado ou compartilhado.",
+          fullNameId: "Nome completo associado ao pagamento ou seu ID associado ao serviço",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Painel do Usuário",
@@ -465,25 +472,29 @@ i18n
           "service.Tutoring.title": "Aulas Particulares",
 
           // ------------- Service Calendat ----------------
-          "calendar.heading": "Datas de Serviços Disponíveis",
-          "calendar.error.general": "Falha ao buscar disponibilidade.",
-          "calendar.error.notFound":
-            "Endpoint de disponibilidade não encontrado. Tentado: {{endpoints}}",
-          "calendar.error.server":
-            "Requisição para {{url}} falhou: {{message}}",
-          "calendar.error.unknown": "Ocorreu um erro desconhecido.",
-          "calendar.lastTried": "Última tentativa",
-          "calendar.endpointHint":
-            "Se você controla o backend, certifique-se de expor um destes endpoints: {{endpoints}}",
-          "calendar.retry": "Tentar novamente",
-          "calendar.reload": "Recarregar página",
-          "calendar.noAvailability":
-            "Nenhuma disponibilidade encontrada. Verifique a rota e o esquema do backend.",
-          "calendar.table.date": "Data",
-          "calendar.table.time": "Hora",
-          "calendar.table.available": "Disponível",
-          "calendar.table.yes": "Sim",
-          "calendar.table.no": "Não",
+          calendar: {
+            heading: "Horários disponíveis",
+            loading: "Carregando disponibilidade…",
+            noAvailability: "Nenhuma disponibilidade encontrada.",
+            lastTried: "Último endpoint tentado",
+            endpointHint: "Endpoints tentados: {{endpoints}}",
+            retry: "Tentar novamente",
+            reload: "Recarregar página",
+            error: {
+              not_found:
+                "Ponto de extremidade de disponibilidade não encontrado. Tentado: {{endpoints}}",
+              server: "Erro do servidor: {{message}}",
+              unknown: "Falha ao obter disponibilidade: {{message}}",
+            },
+            table: {
+              date: "Data",
+              time: "Hora",
+              available: "Disponível",
+              yes: "Sim",
+              no: "Não",
+              allDay: "Todo dia",
+            },
+          },
         },
       },
       fr: {
@@ -595,6 +606,7 @@ i18n
           "modal.paymentInstructions.customerName": "Nom du Client",
           "modal.paymentInstructions.footer":
             "Une fois le paiement effectué, veuillez télécharger le document justificatif ou l'envoyer par e-mail ou via le bouton 'ENVOYER LA PREUVE DE PAIEMENT' lié au service demandé, planifié ou partagé.",
+          fullNameId: "Votre nom complet ou l'ID du service associé au paiement",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Tableau de Bord Utilisateur",
@@ -705,23 +717,30 @@ i18n
           "service.Tutoring.title": "Cours Particuliers",
 
           // ------------- Service Calendat ----------------
-          "calendar.heading": "Dates de Services Disponibles",
-          "calendar.error.general": "Échec du chargement des disponibilités.",
-          "calendar.error.notFound":
-            "Point de terminaison de disponibilité introuvable. Essayé : {{endpoints}}",
-          "calendar.error.server": "Requête vers {{url}} échouée : {{message}}",
-          "calendar.error.unknown": "Une erreur inconnue est survenue.",
-          "calendar.lastTried": "Dernière tentative",
-          "calendar.endpointHint":
-            "Si vous contrôlez le backend, assurez-vous qu’un de ces endpoints est exposé : {{endpoints}}",
-          "calendar.retry": "Réessayer",
-          "calendar.noAvailability":
-            "Aucune disponibilité trouvée. Vérifiez la route et le schéma du backend.",
-          "calendar.table.date": "Date",
-          "calendar.table.time": "Heure",
-          "calendar.table.available": "Disponible",
-          "calendar.table.yes": "Oui",
-          "calendar.table.no": "Non",
+          calendar: {
+            heading: "Créneaux disponibles",
+            loading: "Chargement des disponibilités…",
+            noAvailability: "Aucune disponibilité trouvée.",
+            lastTried: "Dernier endpoint essayé",
+            endpointHint: "Endpoints essayés : {{endpoints}}",
+            retry: "Réessayer",
+            reload: "Recharger la page",
+            error: {
+              not_found:
+                "Point de terminaison de disponibilité introuvable. Tenté : {{endpoints}}",
+              server: "Erreur du serveur : {{message}}",
+              unknown:
+                "Échec de la récupération des disponibilités : {{message}}",
+            },
+            table: {
+              date: "Date",
+              time: "Heure",
+              available: "Disponible",
+              yes: "Oui",
+              no: "Non",
+              allDay: "Toute la journée",
+            },
+          },
         },
       },
     },

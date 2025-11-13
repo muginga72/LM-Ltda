@@ -293,7 +293,7 @@ function UserOnlyDashboard({
             </li>
             <li>
               <strong>{t("modal.paymentInstructions.customerName")}:</strong>{" "}
-              Your full name or service ID
+              {t("fullNameId")}
             </li>
           </ul>
           <hr />
