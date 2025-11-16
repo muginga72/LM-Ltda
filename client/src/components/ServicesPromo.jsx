@@ -26,11 +26,11 @@ const ServicesPromo = () => {
     },
     {
       name: t("product3"),
-      image: "/images/buffet.png",
+      image: "/images/buffet-service.png",
     },
     {
       name: t("product4"),
-      image: "/images/tutor-chemistry.png",
+      image: "/images/tutoring-chemistry.png",
     },
     {
       name: t("product5"),
@@ -40,6 +40,14 @@ const ServicesPromo = () => {
       name: t("product6"),
       image: "/images/cocktail-drinks.jpg",
     },
+    {
+      name: t("product7"),
+      image: "/images/salao-festas-1.JPG",
+    },
+    {
+      name: t("product8"),
+      image: "/images/edificio-caculo.jpg",
+    }, 
   ];
 
   return (

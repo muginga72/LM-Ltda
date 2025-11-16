@@ -93,7 +93,7 @@ function Services() {
                 Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola <br />
                 {t("footer.phone")}
               </p>
-              &copy; {new Date().getFullYear()} LM Ltd. {t("footer.rights")}
+              &copy; {new Date().getFullYear()} {t("lmLtd")}. {t("footer.rights")}
             </small>
           </footer>
         </Container>

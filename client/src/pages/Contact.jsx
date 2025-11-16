@@ -24,14 +24,10 @@ const Contact = () => {
   };
 
   const handleClose = () => {
-    // Hide the form (and success message)
     setIsOpen(false);
-
-    // Optional: navigate away
     navigate("/");
   };
 
-  // If the user has closed the form, render nothing
   if (!isOpen) {
     return null;
   }
@@ -94,8 +90,7 @@ const Contact = () => {
 
       <footer className="text-center py-4 border-top">
         <small>
-          &copy; {new Date().getFullYear()} LM Ltd. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} LM-Ltd Services. All rights reserved.
         </small>
       </footer>
     </>
