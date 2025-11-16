@@ -11,19 +11,19 @@ const cardSets = [
       price: "",
     },
     right: [
-      { image: "buffet-left1a.png", title: "🍽️ Buffet for You", price: "" },
-      { image: "mealorder-left1b.png", title: "👨‍🍳 Made-to-Order Meals", price: "" },
+      { image: "buffet-left1a.jpg", title: "🍽️ Buffet for You", price: "" },
+      { image: "mealorder-left1b.jpg", title: "👨‍🍳 Made-to-Order Meals", price: "" },
     ],
   },
   {
     id: 2,
     left: {
-      image: "wedding-left2.png",
+      image: "wedding-left2.jpeg",
       title: "💍 Wedding Events",
       price: "",
     },
     right: [
-      { image: "tutor-chemistry-right2a.png", title: "📚 Tutoring", price: "" },
+      { image: "tutoring-right2a.jpeg", title: "📚 Tutoring", price: "" },
       { image: "humburger-right2b.png", title: "🍔 Hamburgers", price: "" },
     ],
   },
