@@ -1,3 +1,4 @@
+// src/pages/Contact.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -5,10 +6,13 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -16,11 +20,37 @@ const Contact = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", message: "" });
+    setError(null);
+
+    // basic phone validation (allow digits, spaces, +, -, parentheses)
+    if (!/^[\d\s()+-]{7,20}$/.test(formData.phone)) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Server error");
+      }
+
+      setSubmitted(true);
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -28,9 +58,7 @@ const Contact = () => {
     navigate("/");
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
     <>
@@ -51,7 +79,13 @@ const Contact = () => {
             </button>
           </>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            )}
+
             <input
               type="text"
               name="name"
@@ -72,6 +106,16 @@ const Contact = () => {
               required
             />
 
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone"
+              className="form-control mb-3"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+
             <textarea
               name="message"
               placeholder="Message"
@@ -81,8 +125,8 @@ const Contact = () => {
               required
             />
 
-            <button type="submit" className="btn btn-primary">
-              Send
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? "Sending..." : "Send"}
             </button>
           </form>
         )}
@@ -90,6 +134,9 @@ const Contact = () => {
 
       <footer className="text-center py-4 border-top">
         <small>
+          <p><strong>Phones:</strong> (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046"<br/>
+            Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola
+          </p>
           &copy; {new Date().getFullYear()} LM-Ltd Services. All rights reserved.
         </small>
       </footer>

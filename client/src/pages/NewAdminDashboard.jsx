@@ -15,6 +15,7 @@ import AdminDashboard from "../components/admin/AdminDashboard.jsx";
 import AdminScheduleForm from "../components/admin/AdminScheduleForm.jsx";
 import ServiceCalendar from "../components/ServiceCalendar.jsx";
 import { useTranslation } from "react-i18next";
+import CustomerMessages from "../components/CustomerMessages.jsx";
 
 function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
   const { t } = useTranslation();
@@ -171,6 +172,8 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
           </div>
         </div>
 
+        <hr />
+          <CustomerMessages />
         <hr />
 
         <AdminDashboard

@@ -36,6 +36,7 @@ function AdminLogin() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="e. g. example@lm-ltd.com"
               required
             />
           </Form.Group>
@@ -45,6 +46,7 @@ function AdminLogin() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="e. g. mMb765sdf"
               required
             />
           </Form.Group>
@@ -54,7 +56,7 @@ function AdminLogin() {
       <hr />
       <footer className="text-center py-2">
         <small>
-          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+          &copy; {new Date().getFullYear()} LM-Ltd Services. All rights reserved.
         </small>
       </footer>
     </>

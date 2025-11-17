@@ -1,58 +1,73 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import ServiceCardWithModals from "../components/ServiceCardWithModals";
-import axios from "axios";
+import ServicesList from "../components/ServicesList";
 import { useTranslation } from "react-i18next";
 import "../i18n";
 
-function Services() {
+const BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+const Services = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const { t, i18n } = useTranslation();
 
+  // Ensure UI language follows browser (run once)
   useEffect(() => {
-    // Optional: force language to browser language if not already set
-    const browserLang = navigator.language.split("-")[0];
-    if (i18n.language !== browserLang) {
-      i18n.changeLanguage(browserLang);
+    const browserLang = navigator.language?.split("-")[0];
+    if (browserLang && i18n.language !== browserLang) {
+      i18n.changeLanguage(browserLang).catch(() => {});
     }
-  }, [i18n]);
+  });
 
   useEffect(() => {
     const controller = new AbortController();
+    const signal = controller.signal;
 
-    const fetchServices = async () => {
+    const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await axios.get("http://localhost:5000/api/services", {
-          signal: controller.signal,
-        });
-
-        if (Array.isArray(response.data)) {
-          setServices(response.data);
-        } else {
-          throw new Error("Invalid response format");
+        const res = await fetch(`${BASE}/api/services`, { signal });
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(`Failed to fetch services: ${res.status} ${txt}`);
         }
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("Invalid response format");
+        setServices(data);
       } catch (err) {
-        if (axios.isCancel(err)) {
-          console.log("Fetch cancelled");
+        if (err.name === "AbortError") {
+          // ignore abort
         } else {
           console.error("Error fetching services:", err);
-          setError(t("services.error"));
+          setError(t("services.error") || "Error loading services");
         }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchServices();
-
+    load();
     return () => controller.abort();
   }, [t]);
 
-  if (loading) return <p>{t("services.loading")}</p>;
-  if (error) return <p className="error">{error}</p>;
+  const normalizeImagePath = (raw) => {
+    if (!raw) return null;
+    try {
+      const u = new URL(raw);
+      return u.toString();
+    } catch {
+    }
+    // It starts with /uploads or uploads
+    if (raw.startsWith("/uploads")) return `${BASE}${raw}`;
+    if (raw.startsWith("uploads/")) return `${BASE}/${raw}`;
+    return `${BASE}/uploads/${raw.replace(/^\/+/, "")}`;
+  };
+
+  if (loading) return <p className="text-center my-4">{t("services.loading") || "Loading services…"}</p>;
+  if (error) return <p className="text-center text-danger my-4">{error}</p>;
 
   return (
     <>
@@ -60,26 +75,29 @@ function Services() {
         <h2 className="mb-4">{t("services.title")}</h2>
         <Row className="justify-content-center">
           {services.length === 0 ? (
-            <p>{t("services.empty")}</p>
+            <p>{t("services.empty") || "No services found"}</p>
           ) : (
-            services.map((service) => (
-              <Col
-                key={service._id}
-                xs="auto"
-                className="d-flex justify-content-center mb-4"
-              >
-                <div style={{ width: "400px" }}>
-                  <ServiceCardWithModals
-                    serviceId={service._id}
-                    title={service.title}
-                    description={service.description}
-                    imagePath={service.imagePath || "/images/placeholder.png"}
-                    price={service.price}
-                    link={`/services/${service._id}`}
-                  />
-                </div>
-              </Col>
-            ))
+            services.map((service) => {
+              const key = service._id || service.id || service.title;
+              const imgPath = service.imagePath || service.image || service.filename || null;
+              return (
+                <Col
+                  key={key}
+                  xs="auto"
+                  className="d-flex justify-content-center mb-4"
+                >
+                  <div style={{ width: "400px" }}>
+                    <ServicesList
+                      serviceId={service._id || service.id}
+                      title={service.title || "Untitled"}
+                      description={service.description || ""}
+                      price={service.price ?? ""}
+                      imagePath={normalizeImagePath(imgPath)}
+                    />
+                  </div>
+                </Col>
+              );
+            })
           )}
         </Row>
       </Container>

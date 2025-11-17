@@ -60,7 +60,7 @@ i18n
               "Love served fresh. From intimate dinners to grand wedding celebrations—this season is made to be savored.",
           },
           footer: {
-            phone: "Tel. : (+244) 222 022 351; (+244) 975 957 847",
+            phone: "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "All rights reserved.",
           },
 
@@ -367,7 +367,7 @@ i18n
               "Servimos com amor num ambiente ameno. Desde jantares íntimos a grandes celebrações de casamento, esta estação é feita para ser saboreada.",
           },
           footer: {
-            phone: "Tel. : (+244) 222 022 351; (+244) 975 957 847",
+            phone: "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "Todos os direitos reservados.",
           },
 
@@ -674,7 +674,7 @@ i18n
               "L’amour servi frais. Des dîners intimes aux grandes célébrations de mariage — cette saison est faite pour être savourée.",
           },
           footer: {
-            phone: "Tél. : (+244) 222 022 351; (+244) 975 957 847",
+            phone: "Tél.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "Tous droits réservés.",
           },
 
