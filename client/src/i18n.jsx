@@ -33,6 +33,8 @@ i18n
           product4: "Chemistry Tutor",
           product5: "Wedding",
           product6: "Beverage",
+          product7: "Party Salon",
+          product8: "Building Caculo",
           promoText1: "Buy for Half Price",
           promoText2: "Select from our Products List",
           learnMoreBtn: "Learn More",
@@ -58,7 +60,7 @@ i18n
               "Love served fresh. From intimate dinners to grand wedding celebrations—this season is made to be savored.",
           },
           footer: {
-            phone: "Tel. : (+244) 222 022 351; (+244) 975 957 847",
+            phone: "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "All rights reserved.",
           },
 
@@ -122,7 +124,8 @@ i18n
           "modal.paymentInstructions.customerName": "Customer Name",
           "modal.paymentInstructions.footer":
             "Once you've completed the payment, please upload the support document or send it via email or 'SEND PAYMENT PROOF' button related to requested, scheduled or shared service.",
-          fullNameId: "Your full name or service ID associated with the payment",
+          fullNameId:
+            "Your full name or service ID associated with the payment",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "User Dashboard",
@@ -251,6 +254,67 @@ i18n
               no: "No",
               allDay: "All day",
             },
+
+            button: {
+              request: "Request",
+              schedule: "Schedule",
+              share: "Share",
+              cancel: "Cancel",
+              submit: "Submit",
+            },
+            notification: {
+              success: "Action successful.",
+            },
+            form: {
+              fullName: "Full Name",
+              email: "Email",
+              serviceType: "Service Type",
+              details: "Details",
+              date: "Date",
+              time: "Time",
+            },
+            placeholder: {
+              fullName: "Your full name",
+              emailFor: "Enter your email for {{service}}",
+              serviceType: "{{action}} {{service}}",
+              details: "Describe your {{service}} request...",
+              date: "mm/dd/yyyy",
+              time: "10:30 AM",
+            },
+
+            // ---------------- Who we are page  ---------------
+            whoWeAre: {
+              title: "Who We Are",
+              description:
+                "Laurindo Muginga Retail and Service Provision is a service and retail company offering quality, professionalism, and social responsibility. We aim to provide quality and personalized service. We exist to serve and will continue to serve with responsibility and dedication, showing that the customer is the reason for our existence.",
+              missionTitle: "Mission",
+              mission:
+                "To provide meals to order, buffet services, and beverage sales.\nTo operate profitably, with social responsibility, and to contribute to the country's growth.\nTo provide customers with comfort, well-being, healthy food, and safety.\nTo create value and make a difference wherever we operate.",
+              visionTitle: "Vision",
+              vision:
+                'We want to grow, become profitable, stabilize, and ensure the financial health of the company "CRES."',
+              valuesTitle: "Values",
+              values: {
+                ethics:
+                  'Ethics: Mutual respect, doing "the right thing" and what you say, and being authentic and saying what you mean.',
+                capacity:
+                  "Capacity: Being capable means applying all our training and experience to the pursuit of continuous improvement, every day.",
+                competence:
+                  "Competence: Doing things well means exercising our competence and assuming responsibilities.",
+                courage:
+                  "Courage: Courage makes us face challenges and take the risks necessary for the success of projects and tasks.",
+                creativity:
+                  "Creativity: Being creative means reinventing the path, seeking alternatives where they seemingly don't exist.",
+                heart:
+                  "Heart: Friendship and team spirit create bonds of fraternity, solidarity, and companionship.",
+                commitment:
+                  "Commitment: Being committed means cherishing all these values, seeking to fully exercise them, at work and in life.",
+              },
+              differentiatorsTitle: "Differentiators",
+              differentiators:
+                "A company that prioritizes moral and spiritual values such as faith, humility, insight, kindness, and altruism. Quality, Environment, Safety, Health, and Social Responsibility Policy: To be an innovative company, with quality services and customer service, competitive in the domestic market, and striving for harmony between the services provided, people, and the environment, respecting the principles of social responsibility.",
+              footer: "All rights reserved.",
+            },
           },
         },
       },
@@ -275,6 +339,8 @@ i18n
           product4: "Professor de Química",
           product5: "Casamento",
           product6: "Bebidas",
+          product7: "Salão de Festas",
+          product8: "Edificio Caculo",
           promoText1: "Compre Pela Metade do Preço",
           promoText2: "Acesse a nossa lista de produtos disponíveis.",
           learnMoreBtn: "Explore Mais",
@@ -301,7 +367,7 @@ i18n
               "Servimos com amor num ambiente ameno. Desde jantares íntimos a grandes celebrações de casamento, esta estação é feita para ser saboreada.",
           },
           footer: {
-            phone: "Tel. : (+244) 222 022 351; (+244) 975 957 847",
+            phone: "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "Todos os direitos reservados.",
           },
 
@@ -363,7 +429,8 @@ i18n
           "modal.paymentInstructions.customerName": "Nome do Cliente",
           "modal.paymentInstructions.footer":
             "Após concluir o pagamento, envie em anexo o comprovante por e-mail ou aperta no botão 'ENVIAR COMPROVATIVO DE PAGAMENTO' relacionado ao serviço solicitado, agendado ou compartilhado.",
-          fullNameId: "Nome completo associado ao pagamento ou seu ID associado ao serviço",
+          fullNameId:
+            "Nome completo associado ao pagamento ou seu ID associado ao serviço",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Painel do Usuário",
@@ -494,6 +561,67 @@ i18n
               no: "Não",
               allDay: "Todo dia",
             },
+
+            button: {
+              request: "Solicitar",
+              schedule: "Agendar",
+              share: "Compartilhar",
+              cancel: "Cancelar",
+              submit: "Enviar",
+            },
+            notification: {
+              success: "Ação concluída com sucesso.",
+            },
+            form: {
+              fullName: "Nome Completo",
+              email: "E-mail",
+              serviceType: "Tipo de Serviço",
+              details: "Detalhes",
+              date: "Data",
+              time: "Hora",
+            },
+            placeholder: {
+              fullName: "Seu nome completo",
+              emailFor: "Insira seu e-mail para {{service}}",
+              serviceType: "{{action}} {{service}}",
+              details: "Descreva seu pedido de {{service}}...",
+              date: "dd/mm/aaaa",
+              time: "10:30",
+            },
+
+            // ---------------- Who we are page  ---------------
+            whoWeAre: {
+              title: "Quem Somos",
+              description:
+                "Laurindo Muginga Comércio e Prestação de Serviços é uma empresa de serviços e comércio que oferece qualidade, profissionalismo e responsabilidade social. Nosso objetivo é fornecer um serviço de qualidade e personalizado. Existimos para servir e continuaremos a servir com responsabilidade e dedicação, mostrando que o cliente é a razão da nossa existência.",
+              missionTitle: "Missão",
+              mission:
+                "Fornecer refeições sob encomenda, serviços de buffet e venda de bebidas.\nOperar de forma lucrativa, com responsabilidade social, e contribuir para o crescimento do país.\nProporcionar aos clientes conforto, bem-estar, alimentação saudável e segurança.\nCriar valor e fazer a diferença onde quer que atuemos.",
+              visionTitle: "Visão",
+              vision:
+                'Queremos crescer, tornar-nos lucrativos, estabilizar e garantir a saúde financeira da empresa "CRES."',
+              valuesTitle: "Valores",
+              values: {
+                ethics:
+                  'Ética: Respeito mútuo, fazer "a coisa certa" e cumprir o que se diz, sendo autêntico e dizendo o que se pensa.',
+                capacity:
+                  "Capacidade: Ser capaz significa aplicar todo o nosso treinamento e experiência na busca da melhoria contínua, todos os dias.",
+                competence:
+                  "Competência: Fazer bem as coisas significa exercer nossa competência e assumir responsabilidades.",
+                courage:
+                  "Coragem: A coragem nos faz enfrentar desafios e assumir os riscos necessários para o sucesso dos projetos e tarefas.",
+                creativity:
+                  "Criatividade: Ser criativo significa reinventar o caminho, buscando alternativas onde aparentemente não existem.",
+                heart:
+                  "Coração: A amizade e o espírito de equipe criam laços de fraternidade, solidariedade e companheirismo.",
+                commitment:
+                  "Compromisso: Ser comprometido significa valorizar todos esses valores, buscando exercê-los plenamente, no trabalho e na vida.",
+              },
+              differentiatorsTitle: "Diferenciais",
+              differentiators:
+                "Uma empresa que prioriza valores morais e espirituais como fé, humildade, discernimento, bondade e altruísmo. Política de Qualidade, Meio Ambiente, Segurança, Saúde e Responsabilidade Social: Ser uma empresa inovadora, com serviços de qualidade e atendimento ao cliente, competitiva no mercado interno, e buscando harmonia entre os serviços prestados, as pessoas e o meio ambiente, respeitando os princípios da responsabilidade social.",
+              footer: "Todos os direitos reservados.",
+            },
           },
         },
       },
@@ -518,6 +646,8 @@ i18n
           product4: "Tuteur en Chimie",
           product5: "Mariage",
           product6: "Boire",
+          product7: "Salon de fête",
+          product8: "Edificio Calculo",
           promoText1: "Achetez à moitié prix",
           promoText2: "Consultez notre liste de produits disponibles.",
           learnMoreBtn: "Apprendre encore plus",
@@ -544,7 +674,7 @@ i18n
               "L’amour servi frais. Des dîners intimes aux grandes célébrations de mariage — cette saison est faite pour être savourée.",
           },
           footer: {
-            phone: "Tél. : (+244) 222 022 351; (+244) 975 957 847",
+            phone: "Tél.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "Tous droits réservés.",
           },
 
@@ -554,7 +684,6 @@ i18n
           "button.share": "Partager",
           "button.submit": "Envoyer",
           "button.cancel": "Annuler",
-
           "label.price": "€ {{price}}",
 
           "service.🍹 Beverages Service.title": "🍹 Service de Boissons",
@@ -606,7 +735,8 @@ i18n
           "modal.paymentInstructions.customerName": "Nom du Client",
           "modal.paymentInstructions.footer":
             "Une fois le paiement effectué, veuillez télécharger le document justificatif ou l'envoyer par e-mail ou via le bouton 'ENVOYER LA PREUVE DE PAIEMENT' lié au service demandé, planifié ou partagé.",
-          fullNameId: "Votre nom complet ou l'ID du service associé au paiement",
+          fullNameId:
+            "Votre nom complet ou l'ID du service associé au paiement",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Tableau de Bord Utilisateur",
@@ -740,6 +870,67 @@ i18n
               no: "Non",
               allDay: "Toute la journée",
             },
+
+            button: {
+              request: "Demander",
+              schedule: "Planifier",
+              share: "Partager",
+              cancel: "Annuler",
+              submit: "Envoyer",
+            },
+            notification: {
+              success: "Action réussie.",
+            },
+            form: {
+              fullName: "Nom Complet",
+              email: "E‑mail",
+              serviceType: "Type de Service",
+              details: "Détails",
+              date: "Date",
+              time: "Heure",
+            },
+            placeholder: {
+              fullName: "Votre nom complet",
+              emailFor: "Saisissez votre e‑mail pour {{service}}",
+              serviceType: "{{action}} {{service}}",
+              details: "Décrivez votre demande {{service}}...",
+              date: "jj/mm/aaaa",
+              time: "10:30",
+            },
+          },
+
+          // ---------------- Who we are page  ---------------
+          whoWeAre: {
+            title: "Qui Nous Sommes",
+            description:
+              "Laurindo Muginga Commerce et Prestation de Services est une entreprise de services et de commerce offrant qualité, professionnalisme et responsabilité sociale. Nous visons à fournir un service de qualité et personnalisé. Nous existons pour servir et continuerons à servir avec responsabilité et dévouement, montrant que le client est la raison de notre existence.",
+            missionTitle: "Mission",
+            mission:
+              "Fournir des repas à la commande, des services de buffet et la vente de boissons.\nOpérer de manière rentable, avec responsabilité sociale, et contribuer à la croissance du pays.\nOffrir aux clients confort, bien-être, nourriture saine et sécurité.\nCréer de la valeur et faire la différence partout où nous opérons.",
+            visionTitle: "Vision",
+            vision:
+              'Nous voulons croître, devenir rentables, nous stabiliser et assurer la santé financière de l’entreprise "CRES."',
+            valuesTitle: "Valeurs",
+            values: {
+              ethics:
+                'Éthique: Respect mutuel, faire "ce qui est juste" et tenir parole, être authentique et dire ce que l’on pense.',
+              capacity:
+                "Capacité: Être capable signifie appliquer toute notre formation et expérience à la recherche d'une amélioration continue, chaque jour.",
+              competence:
+                "Compétence: Bien faire les choses signifie exercer notre compétence et assumer nos responsabilités.",
+              courage:
+                "Courage: Le courage nous pousse à relever les défis et à prendre les risques nécessaires à la réussite des projets et des tâches.",
+              creativity:
+                "Créativité: Être créatif signifie réinventer le chemin, chercher des alternatives là où elles semblent ne pas exister.",
+              heart:
+                "Cœur: L’amitié et l’esprit d’équipe créent des liens de fraternité, de solidarité et de camaraderie.",
+              commitment:
+                "Engagement: Être engagé signifie valoriser toutes ces valeurs, chercher à les exercer pleinement, au travail et dans la vie.",
+            },
+            differentiatorsTitle: "Différenciateurs",
+            differentiators:
+              "Une entreprise qui privilégie des valeurs morales et spirituelles telles que la foi, l’humilité, la perspicacité, la bonté et l’altruisme. Politique de Qualité, Environnement, Sécurité, Santé et Responsabilité Sociale: Être une entreprise innovante, avec des services de qualité et un service client, compétitive sur le marché intérieur, et recherchant l’harmonie entre les services fournis, les personnes et l’environnement, en respectant les principes de responsabilité sociale.",
+            footer: "Tous droits réservés.",
           },
         },
       },

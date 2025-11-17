@@ -264,7 +264,7 @@ function UserOnlyDashboard({
       {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-1">
         <small>
-          &copy; {new Date().getFullYear()} LM Ltd. {t("footer.rights")}
+          &copy; {new Date().getFullYear()} {t("lmLtd")}. {t("footer.rights")}
         </small>
       </footer>
 

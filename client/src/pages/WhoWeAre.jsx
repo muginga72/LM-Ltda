@@ -59,7 +59,13 @@ const WhoWeAre = () => (
     </div>
     <footer className="text-center py-4 border-top">
       <small>
-        &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+        <p>
+          <strong>Phones:</strong> (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083;
+          (+244) 939 207 046"
+          <br />
+          Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola
+        </p>
+        &copy; {new Date().getFullYear()} LM-Ltd Services. All rights reserved.
       </small>
     </footer>
   </>
