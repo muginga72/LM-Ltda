@@ -60,7 +60,8 @@ i18n
               "Love served fresh. From intimate dinners to grand wedding celebrations—this season is made to be savored.",
           },
           footer: {
-            phone: "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
+            phone:
+              "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "All rights reserved.",
           },
 
@@ -254,68 +255,144 @@ i18n
               no: "No",
               allDay: "All day",
             },
+          },
 
-            button: {
-              request: "Request",
-              schedule: "Schedule",
-              share: "Share",
-              cancel: "Cancel",
-              submit: "Submit",
-            },
-            notification: {
-              success: "Action successful.",
-            },
-            form: {
-              fullName: "Full Name",
-              email: "Email",
-              serviceType: "Service Type",
-              details: "Details",
-              date: "Date",
-              time: "Time",
-            },
-            placeholder: {
-              fullName: "Your full name",
-              emailFor: "Enter your email for {{service}}",
-              serviceType: "{{action}} {{service}}",
-              details: "Describe your {{service}} request...",
-              date: "mm/dd/yyyy",
-              time: "10:30 AM",
-            },
+          // ---------------- Modal Profile  ---------------
+          "Your Profile": "Your Profile",
+          Fullname: "Full name",
+          Email: "Email",
+          Phone: "Phone",
+          "Save Changes": "Save Changes",
+          Close: "Close",
+          "Profile updated successfully!": "Profile updated successfully!",
+          "Failed to update profile": "Failed to update profile",
+          "No token found": "No token found",
 
-            // ---------------- Who we are page  ---------------
-            whoWeAre: {
-              title: "Who We Are",
-              description:
-                "Laurindo Muginga Retail and Service Provision is a service and retail company offering quality, professionalism, and social responsibility. We aim to provide quality and personalized service. We exist to serve and will continue to serve with responsibility and dedication, showing that the customer is the reason for our existence.",
-              missionTitle: "Mission",
-              mission:
-                "To provide meals to order, buffet services, and beverage sales.\nTo operate profitably, with social responsibility, and to contribute to the country's growth.\nTo provide customers with comfort, well-being, healthy food, and safety.\nTo create value and make a difference wherever we operate.",
-              visionTitle: "Vision",
-              vision:
-                'We want to grow, become profitable, stabilize, and ensure the financial health of the company "CRES."',
-              valuesTitle: "Values",
-              values: {
-                ethics:
-                  'Ethics: Mutual respect, doing "the right thing" and what you say, and being authentic and saying what you mean.',
-                capacity:
-                  "Capacity: Being capable means applying all our training and experience to the pursuit of continuous improvement, every day.",
-                competence:
-                  "Competence: Doing things well means exercising our competence and assuming responsibilities.",
-                courage:
-                  "Courage: Courage makes us face challenges and take the risks necessary for the success of projects and tasks.",
-                creativity:
-                  "Creativity: Being creative means reinventing the path, seeking alternatives where they seemingly don't exist.",
-                heart:
-                  "Heart: Friendship and team spirit create bonds of fraternity, solidarity, and companionship.",
-                commitment:
-                  "Commitment: Being committed means cherishing all these values, seeking to fully exercise them, at work and in life.",
-              },
-              differentiatorsTitle: "Differentiators",
-              differentiators:
-                "A company that prioritizes moral and spiritual values such as faith, humility, insight, kindness, and altruism. Quality, Environment, Safety, Health, and Social Responsibility Policy: To be an innovative company, with quality services and customer service, competitive in the domestic market, and striving for harmony between the services provided, people, and the environment, respecting the principles of social responsibility.",
-              footer: "All rights reserved.",
+          // --------------- Contact Page -----------------
+          contact: {
+            title: "Contact Us",
+            name: "Name",
+            email: "Email",
+            phone: "Phone",
+            message: "Message",
+            send: "Send",
+            sending: "Sending...",
+            success: "Message sent successfully!",
+            close: "Close",
+            phoneError: "Please enter a valid phone number.",
+            serverError: "Server error",
+            footer: {
+              phones: "Phones",
+              address: "Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola",
+              copyright: "All rights reserved.",
             },
           },
+
+          button: {
+            request: "Request",
+            schedule: "Schedule",
+            share: "Share",
+            cancel: "Cancel",
+            submit: "Submit",
+          },
+          notification: {
+            success: "Action successful.",
+          },
+          form: {
+            fullName: "Full Name",
+            email: "Email",
+            serviceType: "Service Type",
+            details: "Details",
+            date: "Date",
+            time: "Time",
+          },
+          placeholder: {
+            fullName: "Your full name",
+            emailFor: "Enter your email for {{service}}",
+            serviceType: "{{action}} {{service}}",
+            details: "Describe your {{service}} request...",
+            date: "mm/dd/yyyy",
+            time: "10:30 AM",
+          },
+
+          // ---------------- Who we are page  ---------------
+          whoWeAre: {
+            title: "Who We Are",
+            description:
+              "Laurindo Muginga Retail and Service Provision is a service and retail company offering quality, professionalism, and social responsibility. We aim to provide quality and personalized service. We exist to serve and will continue to serve with responsibility and dedication, showing that the customer is the reason for our existence.",
+            missionTitle: "Mission",
+            mission:
+              "To provide meals to order, buffet services, and beverage sales.\nTo operate profitably, with social responsibility, and to contribute to the country's growth.\nTo provide customers with comfort, well-being, healthy food, and safety.\nTo create value and make a difference wherever we operate.",
+            visionTitle: "Vision",
+            vision:
+              'We want to grow, become profitable, stabilize, and ensure the financial health of the company "CRES."',
+            valuesTitle: "Values",
+            values: [
+              'Ethics: Mutual respect, doing "the right thing" and what you say, and being authentic and saying what you mean.',
+              "Capacity: Applying all our training and experience to continuous improvement, every day.",
+              "Competence: Doing things well and assuming responsibilities.",
+              "Courage: Facing challenges and taking necessary risks.",
+              "Creativity: Reinventing the path and seeking alternatives.",
+              "Heart: Friendship and team spirit create bonds of fraternity and solidarity.",
+              "Commitment: Cherishing and exercising these values at work and in life.",
+            ],
+            differentiatorsTitle: "Differentiators",
+            differentiators:
+              "A company that prioritizes moral and spiritual values such as faith, humility, insight, kindness, and altruism. Our policy on Quality, Environment, Safety, Health, and Social Responsibility aims to be innovative, competitive in the domestic market, and harmonious with people and the environment.",
+            footer: {
+              phones: "Phones",
+              address: "Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola",
+              copyright: "All rights reserved.",
+            },
+          },
+
+          // --------------- Learn More Page ------------------
+          overview: {
+            title: "🧭 Service Overview",
+            content:
+              "LMJM-services is a modular platform designed to streamline data delivery, image rendering, and service management for scalable web applications...",
+          },
+          howItWorks: {
+            title: "How It Works",
+            content:
+              "The LMJM flow begins with Express backend routes that expose RESTful endpoints...",
+          },
+          benefitsValues: {
+            title: "Benefits & Value",
+            content: [
+              "Faster access to promo product data and images",
+              "Reliable static image rendering via Express",
+              "Scalable architecture built with modular components",
+              "Maintainable codebase with defensive patterns and clear separation of concerns",
+            ],
+          },
+          useCases: {
+            title: "Use Cases",
+            content:
+              "LMJM-services is ideal for promotional platforms needing dynamic product displays...",
+          },
+          techStack: {
+            title: "Tech Stack Transparency",
+            content:
+              "LMJM-services is built using React for the frontend and Express for the backend...",
+          },
+          developerFeatures: {
+            title: "Developer-Friendly Features",
+            content:
+              "Developers can preview API documentation with clear endpoint descriptions...",
+          },
+          scalability: {
+            title: "Scalability & Reliability",
+            content:
+              "LMJM-services is designed for high uptime and performance...",
+          },
+          callToAction: {
+            title: "📞 Call to Action",
+            content:
+              "Ready to explore LMJM-services? Schedule a Demo, Explore Docs, or Contact Us...",
+          },
+          weddingTitle: "Wedding Testimonials",
+          tutoringTitle: "Tutoring Chemistry Testimonials",
         },
       },
       pt: {
@@ -367,7 +444,8 @@ i18n
               "Servimos com amor num ambiente ameno. Desde jantares íntimos a grandes celebrações de casamento, esta estação é feita para ser saboreada.",
           },
           footer: {
-            phone: "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
+            phone:
+              "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "Todos os direitos reservados.",
           },
 
@@ -561,68 +639,144 @@ i18n
               no: "Não",
               allDay: "Todo dia",
             },
+          },
 
-            button: {
-              request: "Solicitar",
-              schedule: "Agendar",
-              share: "Compartilhar",
-              cancel: "Cancelar",
-              submit: "Enviar",
-            },
-            notification: {
-              success: "Ação concluída com sucesso.",
-            },
-            form: {
-              fullName: "Nome Completo",
-              email: "E-mail",
-              serviceType: "Tipo de Serviço",
-              details: "Detalhes",
-              date: "Data",
-              time: "Hora",
-            },
-            placeholder: {
-              fullName: "Seu nome completo",
-              emailFor: "Insira seu e-mail para {{service}}",
-              serviceType: "{{action}} {{service}}",
-              details: "Descreva seu pedido de {{service}}...",
-              date: "dd/mm/aaaa",
-              time: "10:30",
-            },
+          // ---------------- Modal Profile  ---------------
+          "Your Profile": "Seu Perfil",
+          Fullname: "Nome completo",
+          Email: "E-mail",
+          Phone: "Telefone",
+          "Save Changes": "Salvar Alterações",
+          Close: "Fechar",
+          "Profile updated successfully!": "Perfil atualizado com sucesso!",
+          "Failed to update profile": "Falha ao atualizar perfil",
+          "No token found": "Token não encontrado",
 
-            // ---------------- Who we are page  ---------------
-            whoWeAre: {
-              title: "Quem Somos",
-              description:
-                "Laurindo Muginga Comércio e Prestação de Serviços é uma empresa de serviços e comércio que oferece qualidade, profissionalismo e responsabilidade social. Nosso objetivo é fornecer um serviço de qualidade e personalizado. Existimos para servir e continuaremos a servir com responsabilidade e dedicação, mostrando que o cliente é a razão da nossa existência.",
-              missionTitle: "Missão",
-              mission:
-                "Fornecer refeições sob encomenda, serviços de buffet e venda de bebidas.\nOperar de forma lucrativa, com responsabilidade social, e contribuir para o crescimento do país.\nProporcionar aos clientes conforto, bem-estar, alimentação saudável e segurança.\nCriar valor e fazer a diferença onde quer que atuemos.",
-              visionTitle: "Visão",
-              vision:
-                'Queremos crescer, tornar-nos lucrativos, estabilizar e garantir a saúde financeira da empresa "CRES."',
-              valuesTitle: "Valores",
-              values: {
-                ethics:
-                  'Ética: Respeito mútuo, fazer "a coisa certa" e cumprir o que se diz, sendo autêntico e dizendo o que se pensa.',
-                capacity:
-                  "Capacidade: Ser capaz significa aplicar todo o nosso treinamento e experiência na busca da melhoria contínua, todos os dias.",
-                competence:
-                  "Competência: Fazer bem as coisas significa exercer nossa competência e assumir responsabilidades.",
-                courage:
-                  "Coragem: A coragem nos faz enfrentar desafios e assumir os riscos necessários para o sucesso dos projetos e tarefas.",
-                creativity:
-                  "Criatividade: Ser criativo significa reinventar o caminho, buscando alternativas onde aparentemente não existem.",
-                heart:
-                  "Coração: A amizade e o espírito de equipe criam laços de fraternidade, solidariedade e companheirismo.",
-                commitment:
-                  "Compromisso: Ser comprometido significa valorizar todos esses valores, buscando exercê-los plenamente, no trabalho e na vida.",
-              },
-              differentiatorsTitle: "Diferenciais",
-              differentiators:
-                "Uma empresa que prioriza valores morais e espirituais como fé, humildade, discernimento, bondade e altruísmo. Política de Qualidade, Meio Ambiente, Segurança, Saúde e Responsabilidade Social: Ser uma empresa inovadora, com serviços de qualidade e atendimento ao cliente, competitiva no mercado interno, e buscando harmonia entre os serviços prestados, as pessoas e o meio ambiente, respeitando os princípios da responsabilidade social.",
-              footer: "Todos os direitos reservados.",
+          // --------------- Contact Page -----------------
+          contact: {
+            title: "Contate-nos",
+            name: "Nome",
+            email: "Email",
+            phone: "Telefone",
+            message: "Mensagem",
+            send: "Enviar",
+            sending: "Enviando...",
+            success: "Mensagem enviada com sucesso!",
+            close: "Fechar",
+            phoneError: "Por favor, insira um número de telefone válido.",
+            serverError: "Erro no servidor",
+            footer: {
+              phones: "Telefones",
+              address: "Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola",
+              copyright: "Todos os direitos reservados.",
             },
           },
+
+          button: {
+            request: "Solicitar",
+            schedule: "Agendar",
+            share: "Compartilhar",
+            cancel: "Cancelar",
+            submit: "Enviar",
+          },
+          notification: {
+            success: "Ação concluída com sucesso.",
+          },
+          form: {
+            fullName: "Nome Completo",
+            email: "E-mail",
+            serviceType: "Tipo de Serviço",
+            details: "Detalhes",
+            date: "Data",
+            time: "Hora",
+          },
+          placeholder: {
+            fullName: "Seu nome completo",
+            emailFor: "Insira seu e-mail para {{service}}",
+            serviceType: "{{action}} {{service}}",
+            details: "Descreva seu pedido de {{service}}...",
+            date: "dd/mm/aaaa",
+            time: "10:30",
+          },
+
+          // ---------------- Who we are page  ---------------
+          whoWeAre: {
+            title: "Quem Somos",
+            description:
+              "Laurindo Muginga Comércio e Prestação de Serviços é uma empresa de serviços e comércio que oferece qualidade, profissionalismo e responsabilidade social. Nosso objetivo é fornecer um serviço de qualidade e personalizado. Existimos para servir e continuaremos a servir com responsabilidade e dedicação, mostrando que o cliente é a razão da nossa existência.",
+            missionTitle: "Missão",
+            mission:
+              "Fornecer refeições sob encomenda, serviços de buffet e venda de bebidas.\nOperar de forma lucrativa, com responsabilidade social, e contribuir para o crescimento do país.\nProporcionar aos clientes conforto, bem-estar, alimentação saudável e segurança.\nCriar valor e fazer a diferença onde quer que atuemos.",
+            visionTitle: "Visão",
+            vision:
+              'Queremos crescer, tornar-nos lucrativos, estabilizar e garantir a saúde financeira da empresa "CRES."',
+            valuesTitle: "Valores",
+            values: [
+              'Ética: Respeito mútuo, fazer "a coisa certa" e cumprir o que se diz, sendo autêntico.',
+              "Capacidade: Aplicar todo nosso treinamento e experiência na melhoria contínua.",
+              "Competência: Fazer bem feito e assumir responsabilidades.",
+              "Coragem: Enfrentar desafios e assumir riscos necessários.",
+              "Criatividade: Reinventar caminhos e buscar alternativas.",
+              "Coração: Amizade e espírito de equipe criam laços de fraternidade e solidariedade.",
+              "Compromisso: Valorizar e exercer esses valores no trabalho e na vida.",
+            ],
+            differentiatorsTitle: "Diferenciais",
+            differentiators:
+              "Uma empresa que prioriza valores morais e espirituais como fé, humildade, discernimento, bondade e altruísmo. Nossa política de Qualidade, Meio Ambiente, Segurança, Saúde e Responsabilidade Social busca inovação, competitividade e harmonia com as pessoas e o meio ambiente.",
+            footer: {
+              phones: "Telefones",
+              address: "Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola",
+              copyright: "Todos os direitos reservados.",
+            },
+          },
+
+          // --------------- Learn More Page ------------------
+          overview: {
+            title: "🧭 Visão Geral do Serviço",
+            content:
+              "LM-Ltda Serviços é uma plataforma modular projetada para otimizar a entrega de dados...",
+          },
+          howItWorks: {
+            title: "Como Funciona",
+            content:
+              "O fluxo de serviços da LM-Ltda  começa com rotas backend Express que expõem endpoints RESTful...",
+          },
+          benefitsValues: {
+            title: "Benefícios & Valor",
+            content: [
+              "Acesso mais rápido a dados e imagens",
+              "Renderização confiável de imagens estáticas via Express",
+              "Arquitetura escalável com componentes modulares",
+              "Código sustentável com padrões defensivos",
+            ],
+          },
+          useCases: {
+            title: "Casos de Uso",
+            content:
+              "LM-Ltda Serviços é ideal para plataformas promocionais que precisam de exibições dinâmicas...",
+          },
+          techStack: {
+            title: "Transparência da Stack Tecnológica",
+            content:
+              "LM-Ltda Serviços é construído com React no frontend e Express no backend...",
+          },
+          developerFeatures: {
+            title: "Recursos para Desenvolvedores",
+            content:
+              "Os desenvolvedores podem visualizar a documentação da API com descrições claras...",
+          },
+          scalability: {
+            title: "Escalabilidade & Confiabilidade",
+            content:
+              "LM-Ltda Serviços foi projetado para alta disponibilidade e desempenho...",
+          },
+          callToAction: {
+            title: "📞 Chamada para Ação",
+            content:
+              "Pronto para explorar LM-Ltda Serviços? Agende uma demonstração, explore a documentação ou entre em contato...",
+          },
+          weddingTitle: "Testemunhos de Casamento",
+          tutoringTitle: "Testemunhos de Tutoria em Química",
         },
       },
       fr: {
@@ -674,7 +828,8 @@ i18n
               "L’amour servi frais. Des dîners intimes aux grandes célébrations de mariage — cette saison est faite pour être savourée.",
           },
           footer: {
-            phone: "Tél.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
+            phone:
+              "Tél.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "Tous droits réservés.",
           },
 
@@ -870,33 +1025,64 @@ i18n
               no: "Non",
               allDay: "Toute la journée",
             },
+          },
 
-            button: {
-              request: "Demander",
-              schedule: "Planifier",
-              share: "Partager",
-              cancel: "Annuler",
-              submit: "Envoyer",
+          // ---------------- Modal Profile  ---------------
+          "Your Profile": "Votre Profil",
+          Fullname: "Nom complet",
+          Email: "E-mail",
+          Phone: "Téléphone",
+          "Save Changes": "Enregistrer",
+          Close: "Fermer",
+          "Profile updated successfully!": "Profil mis à jour avec succès !",
+          "Failed to update profile": "Échec de la mise à jour du profil",
+          "No token found": "Jeton introuvable",
+
+          // --------------- Contact Page -----------------
+          contact: {
+            title: "Contactez-Nous",
+            name: "Nom",
+            email: "Email",
+            phone: "Téléphone",
+            message: "Message",
+            send: "Envoyer",
+            sending: "Envoi...",
+            success: "Message envoyé avec succès!",
+            close: "Fermer",
+            phoneError: "Veuillez entrer un numéro de téléphone valide.",
+            serverError: "Erreur du serveur",
+            footer: {
+              phones: "Téléphones",
+              address: "Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola",
+              copyright: "Tous droits réservés.",
             },
-            notification: {
-              success: "Action réussie.",
-            },
-            form: {
-              fullName: "Nom Complet",
-              email: "E‑mail",
-              serviceType: "Type de Service",
-              details: "Détails",
-              date: "Date",
-              time: "Heure",
-            },
-            placeholder: {
-              fullName: "Votre nom complet",
-              emailFor: "Saisissez votre e‑mail pour {{service}}",
-              serviceType: "{{action}} {{service}}",
-              details: "Décrivez votre demande {{service}}...",
-              date: "jj/mm/aaaa",
-              time: "10:30",
-            },
+          },
+
+          button: {
+            request: "Demander",
+            schedule: "Planifier",
+            share: "Partager",
+            cancel: "Annuler",
+            submit: "Envoyer",
+          },
+          notification: {
+            success: "Action réussie.",
+          },
+          form: {
+            fullName: "Nom Complet",
+            email: "E‑mail",
+            serviceType: "Type de Service",
+            details: "Détails",
+            date: "Date",
+            time: "Heure",
+          },
+          placeholder: {
+            fullName: "Votre nom complet",
+            emailFor: "Saisissez votre e‑mail pour {{service}}",
+            serviceType: "{{action}} {{service}}",
+            details: "Décrivez votre demande {{service}}...",
+            date: "jj/mm/aaaa",
+            time: "10:30",
           },
 
           // ---------------- Who we are page  ---------------
@@ -911,27 +1097,72 @@ i18n
             vision:
               'Nous voulons croître, devenir rentables, nous stabiliser et assurer la santé financière de l’entreprise "CRES."',
             valuesTitle: "Valeurs",
-            values: {
-              ethics:
-                'Éthique: Respect mutuel, faire "ce qui est juste" et tenir parole, être authentique et dire ce que l’on pense.',
-              capacity:
-                "Capacité: Être capable signifie appliquer toute notre formation et expérience à la recherche d'une amélioration continue, chaque jour.",
-              competence:
-                "Compétence: Bien faire les choses signifie exercer notre compétence et assumer nos responsabilités.",
-              courage:
-                "Courage: Le courage nous pousse à relever les défis et à prendre les risques nécessaires à la réussite des projets et des tâches.",
-              creativity:
-                "Créativité: Être créatif signifie réinventer le chemin, chercher des alternatives là où elles semblent ne pas exister.",
-              heart:
-                "Cœur: L’amitié et l’esprit d’équipe créent des liens de fraternité, de solidarité et de camaraderie.",
-              commitment:
-                "Engagement: Être engagé signifie valoriser toutes ces valeurs, chercher à les exercer pleinement, au travail et dans la vie.",
-            },
+            values: [
+              'Éthique: Respect mutuel, faire "ce qui est juste" et être authentique.',
+              "Capacité: Appliquer notre formation et expérience à l'amélioration continue.",
+              "Compétence: Bien faire les choses et assumer les responsabilités.",
+              "Courage: Relever les défis et prendre les risques nécessaires.",
+              "Créativité: Réinventer le chemin et chercher des alternatives.",
+              "Cœur: L’amitié et l’esprit d’équipe créent des liens de fraternité et de solidarité.",
+              "Engagement: Valoriser et exercer ces valeurs au travail et dans la vie.",
+            ],
             differentiatorsTitle: "Différenciateurs",
             differentiators:
-              "Une entreprise qui privilégie des valeurs morales et spirituelles telles que la foi, l’humilité, la perspicacité, la bonté et l’altruisme. Politique de Qualité, Environnement, Sécurité, Santé et Responsabilité Sociale: Être une entreprise innovante, avec des services de qualité et un service client, compétitive sur le marché intérieur, et recherchant l’harmonie entre les services fournis, les personnes et l’environnement, en respectant les principes de responsabilité sociale.",
-            footer: "Tous droits réservés.",
+              "Une entreprise qui privilégie des valeurs morales et spirituelles telles que la foi, l’humilité, la perspicacité, la bonté et l’altruisme. Notre politique de Qualité, Environnement, Sécurité, Santé et Responsabilité Sociale vise l’innovation, la compétitivité et l’harmonie avec les personnes et l’environnement.",
+            footer: {
+              phones: "Téléphones",
+              address: "Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola",
+              copyright: "Tous droits réservés.",
+            },
           },
+
+          // --------------- Learn More Page ------------------
+          overview: {
+            title: "🧭 Aperçu du service",
+            content:
+              "LM-Ltd Services est une plateforme modulaire conçue pour rationaliser la livraison de données...",
+          },
+          howItWorks: {
+            title: "Fonctionnement",
+            content:
+              "Le flux LM-Ltd Services par des routes backend Express qui exposent des endpoints RESTful...",
+          },
+          benefitsValues: {
+            title: "Avantages & Valeur",
+            content: [
+              "Accès plus rapide aux données et images",
+              "Rendu fiable des images statiques via Express",
+              "Architecture évolutive avec composants modulaires",
+              "Code maintenable avec séparation claire des responsabilités",
+            ],
+          },
+          useCases: {
+            title: "Cas d’utilisation",
+            content:
+              "LM-Ltd Services est idéal pour les plateformes promotionnelles nécessitant des affichages dynamiques...",
+          },
+          techStack: {
+            title: "Transparence de la stack technique",
+            content:
+              "LMJM-services est construit avec React pour le frontend et Express pour le backend...",
+          },
+          developerFeatures: {
+            title: "Fonctionnalités pour développeurs",
+            content:
+              "Les développeurs peuvent consulter la documentation API avec descriptions claires...",
+          },
+          scalability: {
+            title: "Scalabilité & Fiabilité",
+            content:
+              "LM-Ltd Services est conçu pour une haute disponibilité et performance...",
+          },
+          callToAction: {
+            title: "📞 Appel à l’action",
+            content:
+              "Prêt à explorer LM-Ltd Services ? Planifiez une démo, consultez la documentation ou contactez-nous...",
+          },
+          weddingTitle: "Témoignages de mariage",
+          tutoringTitle: "Témoignages de tutorat en chimie",
         },
       },
     },
