@@ -84,13 +84,13 @@ function App() {
 
       {/* Add a Learn React link so the test passes */}
       <header className="App-header">
-        <h1>Welcome to LM Ltd</h1>
+        {/* <h1>Welcome to LM Ltd</h1> */}
         <a
           href="https://react.dev/learn"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+          {/* Learn React */}
         </a>
       </header>
 
