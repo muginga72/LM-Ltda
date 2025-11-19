@@ -236,10 +236,16 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
         {errorShared && <Alert variant="danger">{errorShared}</Alert>}
         <AdminSharedServicesTable services={sharedServices} />
       </Container>
-      <hr />
-      <footer className="text-center py-2">
+
+      <footer className="text-center py-4 border-top">
         <small>
-          &copy; {new Date().getFullYear()} {t("lmLtd")}. {t("footer.rights")}
+          <p>
+            <strong>{t("whoWeAre.footer.phones")}:</strong>{" "}
+            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <br />
+            {t("whoWeAre.footer.address")}
+          </p>
+          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </>

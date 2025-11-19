@@ -1,19 +1,29 @@
-// src/pages/Contact.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 const Contact = () => {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    message: "",
+    message: ""
   });
   const [submitted, setSubmitted] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [activeLang, setActiveLang] = useState(i18n.language || "en");
+
+  useEffect(() => {
+    const handleLangChange = () => setActiveLang(i18n.language);
+    i18n.on("languageChanged", handleLangChange);
+    return () => i18n.off("languageChanged", handleLangChange);
+  }, [i18n]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,9 +34,8 @@ const Contact = () => {
     e.preventDefault();
     setError(null);
 
-    // basic phone validation (allow digits, spaces, +, -, parentheses)
     if (!/^[\d\s()+-]{7,20}$/.test(formData.phone)) {
-      setError("Please enter a valid phone number.");
+      setError(t("contact.phoneError"));
       return;
     }
 
@@ -36,12 +45,12 @@ const Contact = () => {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || "Server error");
+        throw new Error(body.message || t("contact.serverError"));
       }
 
       setSubmitted(true);
@@ -58,24 +67,44 @@ const Contact = () => {
     navigate("/");
   };
 
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
   if (!isOpen) return null;
 
   return (
     <>
       <div className="container py-5">
-        <h2>Contact Us</h2>
+        {/* Language Tabs */}
+        <div style={{ display: "flex", borderBottom: "2px solid #ccc", marginBottom: "1rem" }}>
+          {["en", "pt", "fr"].map((lng) => (
+            <div
+              key={lng}
+              onClick={() => changeLanguage(lng)}
+              style={{
+                padding: "0.5rem 1rem",
+                cursor: "pointer",
+                borderBottom: activeLang === lng ? "3px solid #007bff" : "3px solid transparent",
+                fontWeight: activeLang === lng ? "bold" : "normal"
+              }}
+            >
+              {lng === "en" && "English"}
+              {lng === "pt" && "Português"}
+              {lng === "fr" && "Français"}
+            </div>
+          ))}
+        </div>
+
+        <h2>{t("contact.title")}</h2>
 
         {submitted ? (
           <>
             <div className="alert alert-success" role="alert">
-              Message sent successfully!
+              {t("contact.success")}
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleClose}
-            >
-              Close
+            <button type="button" className="btn btn-secondary" onClick={handleClose}>
+              {t("contact.close")}
             </button>
           </>
         ) : (
@@ -89,7 +118,7 @@ const Contact = () => {
             <input
               type="text"
               name="name"
-              placeholder="Name"
+              placeholder={t("contact.name")}
               className="form-control mb-3"
               value={formData.name}
               onChange={handleChange}
@@ -99,7 +128,7 @@ const Contact = () => {
             <input
               type="email"
               name="email"
-              placeholder="Email"
+              placeholder={t("contact.email")}
               className="form-control mb-3"
               value={formData.email}
               onChange={handleChange}
@@ -109,7 +138,7 @@ const Contact = () => {
             <input
               type="tel"
               name="phone"
-              placeholder="Phone"
+              placeholder={t("contact.phone")}
               className="form-control mb-3"
               value={formData.phone}
               onChange={handleChange}
@@ -118,7 +147,7 @@ const Contact = () => {
 
             <textarea
               name="message"
-              placeholder="Message"
+              placeholder={t("contact.message")}
               className="form-control mb-3"
               value={formData.message}
               onChange={handleChange}
@@ -126,7 +155,7 @@ const Contact = () => {
             />
 
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? "Sending..." : "Send"}
+              {loading ? t("contact.sending") : t("contact.send")}
             </button>
           </form>
         )}
@@ -134,10 +163,13 @@ const Contact = () => {
 
       <footer className="text-center py-4 border-top">
         <small>
-          <p><strong>Phones:</strong> (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046"<br/>
-            Rua do Sapsapeiro F-7A, Sapú 2, Luanda, Angola
+          <p>
+            <strong>{t("contact.footer.phones")}:</strong>{" "}
+            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <br />
+            {t("contact.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} LM-Ltd Services. All rights reserved.
+          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("contact.footer.copyright")}
         </small>
       </footer>
     </>

@@ -1,10 +1,19 @@
-// components/LearnMore.jsx
+// cient/src/pages/LearnMore.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const LearnMore = () => {
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Optional: simple language switcher for EN/PT/FR
+  const LANGS = [
+    { code: "en", label: "English" },
+    { code: "pt", label: "Português" },
+    { code: "fr", label: "Français" },
+  ];
 
   useEffect(() => {
     const fetchLearnMoreData = async () => {
@@ -23,67 +32,73 @@ const LearnMore = () => {
 
   if (loading || !data) return <div>Loading...</div>;
 
-  const {
-    overview,
-    howItWorks,
-    benefitsValues,
-    useCases,
-    techStack,
-    developerFeatures,
-    scalability,
-    callToAction,
-    wedding,
-    tutoringChemistry,
-  } = data;
+  const { wedding = [], tutoringChemistry = [] } = data;
 
   return (
     <div className="learn-more container text-center">
-      <h1 style={{ marginTop: "30px" }}>{overview.title}</h1>
-      <p>{overview.content}</p>
+      {/* Language switcher */}
+      <div className="d-flex justify-content-end mt-3">
+        <div className="btn-group" role="group" aria-label="Language switcher">
+          {LANGS.map((l) => (
+            <button
+              key={l.code}
+              className={`btn btn-sm ${
+                i18n.language === l.code ? "btn-primary" : "btn-outline-primary"
+              }`}
+              onClick={() => i18n.changeLanguage(l.code)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <h2>{howItWorks.title}</h2>
-      <p>{howItWorks.content}</p>
+      <h1 style={{ marginTop: "30px" }}>{t("overview.title")}</h1>
+      <p>{t("overview.content")}</p>
 
-      <h2>{benefitsValues.title}</h2>
+      <h2>{t("howItWorks.title")}</h2>
+      <p>{t("howItWorks.content")}</p>
+
+      <h2>{t("benefitsValues.title")}</h2>
       <ul className="list-unstyled">
-        {benefitsValues.content.map((b, i) => (
+        {t("benefitsValues.content", { returnObjects: true }).map((b, i) => (
           <li key={i}>{b}</li>
         ))}
       </ul>
 
-      <h2>{useCases.title}</h2>
-      <p>{useCases.content}</p>
+      <h2>{t("useCases.title")}</h2>
+      <p>{t("useCases.content")}</p>
 
-      <h2>{techStack.title}</h2>
-      <p>{techStack.content}</p>
+      <h2>{t("techStack.title")}</h2>
+      <p>{t("techStack.content")}</p>
 
-      <h2>{developerFeatures.title}</h2>
-      <p>{developerFeatures.content}</p>
+      <h2>{t("developerFeatures.title")}</h2>
+      <p>{t("developerFeatures.content")}</p>
 
-      <h2>{scalability.title}</h2>
-      <p>{scalability.content}</p>
+      <h2>{t("scalability.title")}</h2>
+      <p>{t("scalability.content")}</p>
 
-      <h2>{callToAction.title}</h2>
-      <p>{callToAction.content}</p>
+      <h2>{t("callToAction.title")}</h2>
+      <p>{t("callToAction.content")}</p>
 
-      <h2>💍 Wedding Testimonials</h2>
+      <h2>{t("weddingTitle")}</h2>
       {wedding.length > 0 ? (
-        wedding.map((t, i) => (
+        wedding.map((tst, i) => (
           <blockquote key={`wedding-${i}`}>
-            <p>"{t.quote}"</p>
-            <footer>— {t.name}</footer>
+            <p>"{tst.quote}"</p>
+            <footer>— {tst.name}</footer>
           </blockquote>
         ))
       ) : (
         <p>No wedding testimonials available.</p>
       )}
 
-      <h2>🧪 Tutoring Chemistry Testimonials</h2>
+      <h2>{t("tutoringTitle")}</h2>
       {tutoringChemistry.length > 0 ? (
-        tutoringChemistry.map((t, i) => (
+        tutoringChemistry.map((tst, i) => (
           <blockquote key={`tutoring-${i}`}>
-            <p>"{t.quote}"</p>
-            <footer>— {t.name}</footer>
+            <p>"{tst.quote}"</p>
+            <footer>— {tst.name}</footer>
           </blockquote>
         ))
       ) : (
@@ -92,7 +107,13 @@ const LearnMore = () => {
 
       <footer className="text-center py-4 border-top">
         <small>
-          &copy; {new Date().getFullYear()} LM Ltd. All rights reserved.
+          <p>
+            <strong>{t("whoWeAre.footer.phones")}:</strong>{" "}
+            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <br />
+            {t("whoWeAre.footer.address")}
+          </p>
+          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </div>

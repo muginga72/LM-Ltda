@@ -1,11 +1,5 @@
 // server/controllers/calendarAvailabilityController.js
 
-// Returns N days of "All day" availability starting from today (or startDate).
-// Excludes any date that already has an event in the events collection.
-// Query params:
-//   - days (number) default 30, clamped 1..365
-//   - startDate (YYYY-MM-DD) optional
-
 const Event = require('../models/Event');
 
 function pad2(n) {
