@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
     },
     howItWorks: {
       title: "How It Works",
-      content: "The LMJM flow begins with Express backend routes that expose RESTful endpoints for promo product data and image assets. These endpoints are consumed by React components using custom hooks and conditional rendering. Validation logic ensures data integrity before rendering, while static assets are served via Express middleware. This modular pipeline guarantees seamless backend-to-frontend communication, optimized for speed and reliability."
+      content: "The LM-Ltd flow begins with Express backend routes that expose RESTful endpoints for promo product data and image assets. These endpoints are consumed by React components using custom hooks and conditional rendering. Validation logic ensures data integrity before rendering, while static assets are served via Express middleware. This modular pipeline guarantees seamless backend-to-frontend communication, optimized for speed and reliability."
     },
     benefitsValues: {
       title: "Benefits & Value",
@@ -42,14 +42,12 @@ router.get('/', (req, res) => {
       content: "Ready to explore LMJM-services? Schedule a Demo to see it in action, Explore Docs for technical deep dives, or Contact Us to discuss integration. Optionally, try a live preview or mock API call to experience the flow firsthand."
     },
     wedding: [
-      { name: "Joaquim & Maria", quote: "The party salon made our wedding unforgettable..." },
-      { name: "Dorcas M.", quote: "From planning to execution, everything was seamless..." },
-      { name: "Domingos & Ana", quote: "We loved the flexibility in layout..." }
+      { name: "Joaquim & Maria", quote: "The party salon made our wedding unforgettable." },
+      { name: "Dorcas M.", quote: "From planning to execution, everything was seamless." },
+      { name: "Domingos & Ana", quote: "We loved the flexibility in layout." }
     ],
     tutoringChemistry: [
-      { name: "Mutula A.", quote: "Chemistry used to feel impossible..." },
-      // { name: "Dr. Nguyen", quote: "The modular lesson plans helped my students..." },
-      // { name: "Emily S.", quote: "Tutoring chemistry online felt surprisingly engaging..." }
+      { name: "Mutula A.", quote: "Chemistry used to feel impossible." },
     ]
   });
 });
