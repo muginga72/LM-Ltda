@@ -40,13 +40,18 @@ i18n
           learnMoreBtn: "Learn More",
 
           // ---------- Card Sets -----------
+          // Set-1
           "button.explore": "Explore",
           "card.left.🍹 Beverages Service": "🍹 Beverages Service",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet for You",
-          "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Made-to-Order Meals",
-          "card.left.💍 Wedding Events": "💍 Wedding Events",
-          "card.right.📚 Tutoring": "📚 Tutoring",
-          "card.right.🍔 Hamburgers": "🍔 Hamburgers",
+          "card.right.💍 Wedding Events": "💍 Wedding Events",
+          // "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Made-to-Order Meals",
+
+          // Do not remove: It is to be used later
+          // Set-2
+          // "card.left.💍 Wedding Events": "💍 Wedding Events",
+          // "card.right.📚 Tutoring": "📚 Tutoring",
+          // "card.right.🍔 Hamburgers": "🍔 Hamburgers",
 
           // ----------- Services Page ---------------
           services: {
@@ -350,12 +355,12 @@ i18n
           overview: {
             title: "🧭 Service Overview",
             content:
-              "LMJM-services is a modular platform designed to streamline data delivery, image rendering, and service management for scalable web applications...",
+              "LM-Ltd Services is a modular platform designed to streamline data delivery, image rendering, and service management for scalable web applications...",
           },
           howItWorks: {
             title: "How It Works",
             content:
-              "The LMJM flow begins with Express backend routes that expose RESTful endpoints...",
+              "The LM-Ltd flow begins with Express backend routes that expose RESTful endpoints...",
           },
           benefitsValues: {
             title: "Benefits & Value",
@@ -369,12 +374,12 @@ i18n
           useCases: {
             title: "Use Cases",
             content:
-              "LMJM-services is ideal for promotional platforms needing dynamic product displays...",
+              "LM-Ltd Services is ideal for promotional platforms needing dynamic product displays...",
           },
           techStack: {
             title: "Tech Stack Transparency",
             content:
-              "LMJM-services is built using React for the frontend and Express for the backend...",
+              "LM-Ltd Services is built using React for the frontend and Express for the backend...",
           },
           developerFeatures: {
             title: "Developer-Friendly Features",
@@ -384,12 +389,12 @@ i18n
           scalability: {
             title: "Scalability & Reliability",
             content:
-              "LMJM-services is designed for high uptime and performance...",
+              "LM-Ltd Services is designed for high uptime and performance...",
           },
           callToAction: {
             title: "📞 Call to Action",
             content:
-              "Ready to explore LMJM-services? Schedule a Demo, Explore Docs, or Contact Us...",
+              "Ready to explore LM-Ltd Services? Schedule a Demo, Explore Docs, or Contact Us...",
           },
           weddingTitle: "Wedding Testimonials",
           tutoringTitle: "Tutoring Chemistry Testimonials",
@@ -422,14 +427,20 @@ i18n
           promoText2: "Acesse a nossa lista de produtos disponíveis.",
           learnMoreBtn: "Explore Mais",
 
-          // ---------------- Card Sets ------------------
+          // ---------------- Card Sets --------------------
+          // Set-1
           "button.explore": "Explorar",
           "card.left.🍹 Beverages Service": "🍹 Bebidas a Retalho",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet para Você",
-          "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Refeições por Encomenda",
-          "card.left.💍 Wedding Events": "💍 Eventos de Casamento",
-          "card.right.📚 Tutoring": "📚 Aulas Particulares",
-          "card.right.🍔 Hamburgers": "🍔 Hambúrgueres",
+          "card.rigth.💍 Wedding Events": "💍 Eventos de Casamento",
+          // "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Refeições por Encomenda",
+
+          // Do not remove: It is to be used later
+
+          // Set-2
+          // "card.left.💍 Wedding Events": "💍 Eventos de Casamento",
+          // "card.right.📚 Tutoring": "📚 Aulas Particulares",
+          // "card.right.🍔 Hamburgers": "🍔 Hambúrgueres",
 
           // -------------- Services Page ------------------
           services: {
@@ -739,7 +750,7 @@ i18n
           howItWorks: {
             title: "Como Funciona",
             content:
-              "O fluxo de serviços da LM-Ltda  começa com rotas backend Express que expõem endpoints RESTful...",
+              "O fluxo de serviços da LM-Ltda começa com rotas backend Express que expõem endpoints RESTful...",
           },
           benefitsValues: {
             title: "Benefícios & Valor",
@@ -776,7 +787,7 @@ i18n
               "Pronto para explorar LM-Ltda Serviços? Agende uma demonstração, explore a documentação ou entre em contato...",
           },
           weddingTitle: "Testemunhos de Casamento",
-          tutoringTitle: "Testemunhos de Tutoria em Química",
+          tutoringTitle: "Testemunhos das aulas particulares em Química",
         },
       },
       fr: {
@@ -807,13 +818,19 @@ i18n
           learnMoreBtn: "Apprendre encore plus",
 
           // ---------- Card Sets -----------
+          // Set-1
           "button.explore": "Explorer",
           "card.left.🍹 Beverages Service": "🍹 Service de Boissons",
+          "card.right.💍 Wedding Events": "💍 Événements de Mariage",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet Pour Vous",
-          "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Repas Sur Mesure",
-          "card.left.💍 Wedding Events": "💍 Événements de Mariage",
-          "card.right.📚 Tutoring": "📚 Soutien Scolaire",
-          "card.right.🍔 Hamburgers": "🍔 Hamburgers",
+          // "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Repas Sur Mesure",
+
+          // Do not remove: It is to be used later
+
+          // Set-2
+          // "card.left.💍 Wedding Events": "💍 Événements de Mariage",
+          // "card.right.📚 Tutoring": "📚 Soutien Scolaire",
+          // "card.right.🍔 Hamburgers": "🍔 Hamburgers",
 
           // ----------- Services Page ---------------
           services: {
@@ -1125,7 +1142,7 @@ i18n
           howItWorks: {
             title: "Fonctionnement",
             content:
-              "Le flux LM-Ltd Services par des routes backend Express qui exposent des endpoints RESTful...",
+              "Le flux LM-Ltd par des routes backend Express qui exposent des endpoints RESTful...",
           },
           benefitsValues: {
             title: "Avantages & Valeur",
@@ -1144,7 +1161,7 @@ i18n
           techStack: {
             title: "Transparence de la stack technique",
             content:
-              "LMJM-services est construit avec React pour le frontend et Express pour le backend...",
+              "LM-Ltd Services est construit avec React pour le frontend et Express pour le backend...",
           },
           developerFeatures: {
             title: "Fonctionnalités pour développeurs",

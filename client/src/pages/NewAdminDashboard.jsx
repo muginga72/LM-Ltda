@@ -236,7 +236,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
         {errorShared && <Alert variant="danger">{errorShared}</Alert>}
         <AdminSharedServicesTable services={sharedServices} />
       </Container>
-      <hr />
+
       <footer className="text-center py-4 border-top">
         <small>
           <p>
