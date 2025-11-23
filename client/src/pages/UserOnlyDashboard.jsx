@@ -1,5 +1,4 @@
 // client/src/pages/UserOnlyDashboard.jsx
-
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import UploadDocumentModal from "../components/UploadDocumentModal";
@@ -19,6 +18,11 @@ import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import { useTranslation } from "react-i18next";
+
+import RoomCardUser from "../components/roomrentals/RoomCardUser";
+import BookingModal from "../components/roomrentals/BookingModal";
+import RequestListRoomModal from "../components/roomrentals/RequestListRoomModal";
+import MyBookings from "../components/roomrentals/MyBookings";
 
 function UserOnlyDashboard({
   apiBaseUrl,
@@ -44,6 +48,15 @@ function UserOnlyDashboard({
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [emailSupportModal, setEmailSupportModal] = useState(false);
+
+  const [rooms, setRooms] = useState([]);
+  const [error, setError] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+
+  // bump this to refresh both room list and bookings
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handlePayClick = (serviceId) => {
     setSelectedServiceId(serviceId);
@@ -104,6 +117,64 @@ function UserOnlyDashboard({
       () => setLoading(false)
     );
   }, [user, apiBaseUrl, t]);
+
+  // --------- UseEffect for the rooms liating and booking ------------
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    const q = new URLSearchParams({
+      archived: "false",
+      limit: "100",
+    }).toString();
+    axios
+      .get(`/api/rooms?${q}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+      .then((res) => {
+        if (!mounted) return;
+        const data = Array.isArray(res.data) ? res.data : res.data.data || [];
+        setRooms(data);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error("Failed to load rooms", err);
+        if (!mounted) return;
+        setError("Unable to load rooms");
+      })
+      .finally(() => mounted && setLoading(false));
+    return () => {
+      mounted = false;
+    };
+  }, [token, refreshKey]);
+
+  function openBooking(room) {
+    setSelectedRoom(room);
+    setBookingOpen(true);
+  }
+
+  // when booking succeeds, bump refreshKey to refresh MyBookings and rooms if needed
+  function onBooked(result) {
+    setBookingOpen(false);
+    setSelectedRoom(null);
+    setRefreshKey((k) => k + 1);
+  }
+
+  function openRequestModal() {
+    setRequestModalOpen(true);
+  }
+
+  function onRequestSubmitted() {
+    setRequestModalOpen(false);
+  }
+
+  if (loading) {
+    return (
+      <Container className="py-5 text-center">
+        <Spinner animation="border" />
+      </Container>
+    );
+  }
+  // ------------------ End of rooms code -----------------------
 
   const renderServiceCards = (titleKey, services, error, typeKey) => (
     <>
@@ -221,6 +292,48 @@ function UserOnlyDashboard({
           onServiceSelect={onServiceSelect}
         />
         <hr />
+
+        <Container className="py-4">
+          {/* ----------------- AVAILABLE ROOMS & LISTING ------------------------- */}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h3>Available Rooms</h3>
+            <div>
+              <Button variant="outline-primary" onClick={openRequestModal}>
+                Request a Listing
+              </Button>
+            </div>
+          </div>
+
+          {error && <Alert variant="danger">{error}</Alert>}
+
+          <Row xs={1} sm={2} md={3} className="g-3">
+            {rooms.map((room) => (
+              <Col key={room._id}>
+                <RoomCardUser room={room} onBook={() => openBooking(room)} />
+              </Col>
+            ))}
+          </Row>
+
+          <hr style={{ margin: "2rem 0" }} />
+
+          {/* ----------------- My bookings panel ------------------- */}
+          <MyBookings refreshKey={refreshKey} />
+
+          <BookingModal
+            show={bookingOpen}
+            onHide={() => setBookingOpen(false)}
+            room={selectedRoom}
+            onBooked={onBooked}
+          />
+
+          <RequestListRoomModal
+            show={requestModalOpen}
+            onHide={() => setRequestModalOpen(false)}
+            onSubmitted={onRequestSubmitted}
+          />
+        </Container>
+
+        <hr />
         <div className="dashboard-container">
           <ServiceCalendar userId={userId} />
         </div>
@@ -259,18 +372,17 @@ function UserOnlyDashboard({
         )}
       </Container>
 
-      <hr />
-
       {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-4 border-top">
         <small>
           <p>
-            <strong>{t("whoWeAre.footer.phones")}:</strong>{" "}
-            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <strong>{t("whoWeAre.footer.phones")}:</strong> (+244) 222 022 351;
+            (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
+          &copy; {new Date().getFullYear()} {t("lmLtd")}.{" "}
+          {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
 

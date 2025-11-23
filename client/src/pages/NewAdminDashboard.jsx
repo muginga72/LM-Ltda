@@ -1,25 +1,26 @@
-// client/src/pages/NewAdminDashboard.jsx
-
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
-import AdminUserTable from "../components/admin/adminTables/AdminUserTable";
-import AdminRequestedServicesTable from "../components/admin/adminTables/AdminRequestedServicesTable.jsx";
-import AdminScheduledServicesTable from "../components/admin/adminTables/AdminScheduledServicesTable.jsx";
-import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
-import { Container, Spinner, Alert, Button, Col, Row } from "react-bootstrap";
+import { Container, Spinner, Alert, Button, Col, Row, Modal } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import AdminAddService from "../components/admin/AdminAddService";
 import ServicesGrid from "../components/ServicesGrid";
 import { fetchServices } from "../api/servicesApi";
 import AdminDashboard from "../components/admin/AdminDashboard.jsx";
 import AdminScheduleForm from "../components/admin/AdminScheduleForm.jsx";
 import ServiceCalendar from "../components/ServiceCalendar.jsx";
-import { useTranslation } from "react-i18next";
 import CustomerMessages from "../components/CustomerMessages.jsx";
+import AdminUserTable from "../components/admin/adminTables/AdminUserTable";
+import AdminRequestedServicesTable from "../components/admin/adminTables/AdminRequestedServicesTable.jsx";
+import AdminScheduledServicesTable from "../components/admin/adminTables/AdminScheduledServicesTable.jsx";
+import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
+import AddRoomForm from "../components/roomrentals/AddRoomForm.jsx";
+import RoomList from "../components/roomrentals/RoomList.jsx";
 
-function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
+function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
+  const token = user?.token || propToken;
 
   const [users, setUsers] = useState([]);
   const [requestedServices, setRequestedServices] = useState([]);
@@ -33,14 +34,13 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  // room modal/list refresh
+  const [modalOpen, setModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    if (!user?.token) return;
-    const headers = {
-      Authorization: `Bearer ${user.token}`,
-      "Cache-Control": "no-cache",
-    };
+    if (!token) return;
+    const headers = { Authorization: `Bearer ${token}`, "Cache-Control": "no-cache" };
 
     const fetchUsers = async () => {
       try {
@@ -85,13 +85,13 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
     const fetchAll = async () => {
       setLoading(true);
       const promises = [fetchRequested(), fetchScheduled(), fetchShared()];
-      if (user.role === "admin") promises.unshift(fetchUsers());
+      if (user?.role === "admin") promises.unshift(fetchUsers());
       await Promise.all(promises);
       setLoading(false);
     };
 
     fetchAll();
-  }, [user]);
+  }, [user, token]);
 
   useEffect(() => {
     fetchServices()
@@ -103,7 +103,6 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
     fetchServices()
       .then(setServices)
       .catch((err) => console.error("Error refreshing services:", err));
-    setShowAddModal(false);
   };
 
   const handleStatusUpdate = (serviceId, newStatus, type) => {
@@ -126,6 +125,13 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
     );
   }
 
+  // called when AddRoomForm successfully creates a room
+  const handleRoomCreated = (createdRoom) => {
+    setModalOpen(false);
+    setRefreshKey(k => k + 1);
+    alert("Room created successfully");
+  };
+
   return (
     <>
       <Container style={{ padding: "2rem" }}>
@@ -141,24 +147,27 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
         </p>
 
         <Container className="py-2">
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <Button
-              variant="outline-success"
-              onClick={() => setShowAddModal(true)}
-            >
+          <div className="d-flex align-items-center mb-2">
+            <Button variant="outline-success" onClick={() => setModalOpen(true)} style={{ marginRight: 20 }}>
               {t("adminAddService")}
+            </Button>
+
+            {/* Add Room button */}
+            <Button variant="outline-primary" onClick={() => setModalOpen(true)}>
+              ➕ Room
             </Button>
           </div>
 
           <AdminAddService
-            show={showAddModal}
-            onHide={() => setShowAddModal(false)}
+            show={false}
+            onHide={() => {}}
             onCreated={handleServiceCreated}
             token={token}
           />
           <hr />
         </Container>
 
+        {/* Services preview */}
         <div className="container py-3">
           <div className="row mb-4">
             <div className="col-md-12">
@@ -173,7 +182,21 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
         </div>
 
         <hr />
-          <CustomerMessages />
+
+        {/* Rooms section */}
+        <section style={{ marginTop: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 style={{ margin: 0 }}>Room Listings</h3>
+            <div>
+              <Button variant="primary" onClick={() => setModalOpen(true)}>Add Room</Button>
+            </div>
+          </div>
+
+          <RoomList refreshKey={refreshKey} />
+        </section>
+
+        <hr />
+        <CustomerMessages />
         <hr />
 
         <AdminDashboard
@@ -188,7 +211,6 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
 
         <div className="admin-dashboard-wrapper">
           <Row className="g-3 align-items-start">
-            {/* Form column: 40% on md+, full width on small */}
             <Col xs={12} md={5} className="admin-form-col">
               <div className="card h-100 shadow-sm">
                 <div className="card-body">
@@ -197,7 +219,6 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
               </div>
             </Col>
 
-            {/* Calendar column: 60% on md+, full width on small */}
             <Col xs={12} md={7} className="admin-calendar-col">
               <div className="card h-100 shadow-sm">
                 <div className="card-body calendar-card-body">
@@ -212,7 +233,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
 
         <h4 className="m-3 text-center">{t("dashboardOverview")}</h4>
 
-        {user?.role === t("adminRole") && (
+        {user?.role === "admin" && (
           <>
             {errorUsers && <Alert variant="danger">{errorUsers}</Alert>}
             <AdminUserTable users={users} />
@@ -222,20 +243,30 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
         {errorRequested && <Alert variant="danger">{errorRequested}</Alert>}
         <AdminRequestedServicesTable
           services={requestedServices}
-          token={user?.token}
+          token={token}
           onStatusUpdate={handleStatusUpdate}
         />
 
         {errorScheduled && <Alert variant="danger">{errorScheduled}</Alert>}
         <AdminScheduledServicesTable
           services={scheduledServices}
-          token={user?.token}
+          token={token}
           onStatusUpdate={handleStatusUpdate}
         />
 
         {errorShared && <Alert variant="danger">{errorShared}</Alert>}
         <AdminSharedServicesTable services={sharedServices} />
       </Container>
+
+      {/* Add Room modal (react-bootstrap) */}
+      <Modal show={modalOpen} onHide={() => setModalOpen(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Add new room</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <AddRoomForm onCreated={handleRoomCreated} onCancel={() => setModalOpen(false)} />
+        </Modal.Body>
+      </Modal>
 
       <footer className="text-center py-4 border-top">
         <small>
@@ -245,7 +276,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token, userId }) {
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
+          &copy; {new Date().getFullYear()} {t("lmLtd")}. {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </>
