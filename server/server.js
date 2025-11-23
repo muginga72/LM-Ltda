@@ -24,8 +24,9 @@ const calendarRouter = require('./routes/calendar');
 const contactRouter = require("../server/routes/contact");
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
-const roomRoutes = require('../server/routes/roomrental/roomRoutes');
+const roomRoutes = require("../server/routes/roomrental/roomRoutes");
 const bookingRoutes = require('../server/routes/roomrental/bookingRoutes');
+const listingsRouter = require("../server/routes/roomrental/listingRoutes");
 
 const { Server } = require('socket.io');
 
@@ -104,6 +105,7 @@ app.use('/api/testimonials', testimonialsRoute);
 // Mount room rental routes
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use("/api/listings", listingsRouter);
 
 // mount admin calendar routes with io
 app.use('/api/admin/calendar', adminCalendarRouterFactory(io));

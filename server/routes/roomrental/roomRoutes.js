@@ -1,18 +1,12 @@
+// routes/roomrental/rooms.js
 const express = require('express');
 const router = express.Router();
-const {
-  createRoom,
-  getRoom,
-  searchRooms
-} = require('../../controllers/roomrental/roomsController');
+const { createRoom, getRoom, searchRooms } = require('../../controllers/roomrental/roomsController');
 
-// Create a new room
-router.post('/', createRoom);
+const { protect } = require('../../middleware/authMiddleware'); 
 
-// Get a specific room by ID
-router.get('/:id', getRoom);
-
-// Search available rooms
 router.get('/', searchRooms);
+router.post('/', protect, createRoom);
+router.get('/:id', getRoom);
 
 module.exports = router;

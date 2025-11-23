@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Booking = require('../../models/roomrental/Booking');
 const Room = require('../../models/roomrental/Room');
 const { toUTCDate } = require('../../utils/dateHelpers');
@@ -28,6 +29,10 @@ const createBooking = async (req, res, next) => {
       return res.status(400).json({ message: 'Guest must be at least 18 years old to book' });
     }
 
+    if (!mongoose.isValidObjectId(roomId)) {
+      return res.status(400).json({ message: 'Invalid roomId' });
+    }
+
     const room = await Room.findById(roomId);
     if (!room) return res.status(404).json({ message: 'Room not found' });
 
@@ -45,14 +50,18 @@ const createBooking = async (req, res, next) => {
     const conflict = await Booking.findOne({
       room: room._id,
       status: { $in: ['pending', 'confirmed'] },
-      $or: [{ startDate: { $lt: end }, endDate: { $gt: start } }]
+      $or: [
+        { startDate: { $lt: end, $gte: start } },
+        { endDate: { $gt: start, $lte: end } },
+        { startDate: { $lte: start }, endDate: { $gte: end } }
+      ]
     });
 
     if (conflict && !room.instantBook) {
       return res.status(409).json({ message: 'Dates unavailable' });
     }
 
-    const total = room.pricePerNight.amount * nights;
+    const total = (room.pricePerNight?.amount || 0) * nights;
 
     const docMeta = {
       filename: req.file.filename,
@@ -66,13 +75,13 @@ const createBooking = async (req, res, next) => {
 
     const booking = await Booking.create({
       room: room._id,
-      guest: req.user.id,
+      guest: req.user._id,
       host: room.host,
       startDate: toUTCDate(start),
       endDate: toUTCDate(end),
       nights,
       guestsCount: guestsCount || 1,
-      totalPrice: { currency: room.pricePerNight.currency, amount: total },
+      totalPrice: { currency: room.pricePerNight?.currency || 'USD', amount: total },
       status: room.instantBook ? 'confirmed' : 'pending',
       dateOfBirth: dob,
       idDocument: docMeta
@@ -84,31 +93,50 @@ const createBooking = async (req, res, next) => {
   }
 };
 
-// Get a booking by ID
+// Get a booking by ID (public route that requires auth in router)
 const getBooking = async (req, res, next) => {
   try {
-    const booking = await Booking.findById(req.params.id)
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid booking id' });
+    }
+
+    const booking = await Booking.findById(id)
       .populate('room')
       .populate('guest', 'name email')
       .populate('host', 'name email');
 
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    // authorize: only guest (owner) or host or admin can view
+    const userId = req.user && (req.user._id || req.user.id);
+    const isOwner = booking.guest && String(booking.guest._id || booking.guest) === String(userId);
+    const isHost = booking.host && String(booking.host._id || booking.host) === String(userId);
+    if (!isOwner && !isHost && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
     res.json(booking);
   } catch (err) {
     next(err);
   }
 };
 
-// List all bookings for the logged-in user
+// Alias kept for backward compatibility (if used elsewhere)
+const getBookingById = getBooking;
+
+// List all bookings for the logged-in user (GET /my)
 const listBookings = async (req, res, next) => {
   try {
-    if (!req.user || !req.user.id) {
+    if (!req.user || !(req.user._id || req.user.id)) {
       return res.status(401).json({ message: 'Unauthorized: user not found in request' });
     }
 
-    const bookings = await Booking.find({ guest: req.user.id })
+    const userId = req.user._id || req.user.id;
+    const bookings = await Booking.find({ guest: userId })
       .populate('room')
-      .populate('host', 'name email');
+      .populate('host', 'name email')
+      .sort({ createdAt: -1 });
 
     res.json(bookings);
   } catch (err) {
@@ -119,10 +147,16 @@ const listBookings = async (req, res, next) => {
 // Cancel a booking
 const cancelBooking = async (req, res, next) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid booking id' });
+    }
+
+    const booking = await Booking.findById(id);
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
 
-    if (String(booking.guest) !== String(req.user.id)) {
+    const userId = req.user._id || req.user.id;
+    if (String(booking.guest) !== String(userId) && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to cancel this booking' });
     }
 
@@ -138,6 +172,7 @@ const cancelBooking = async (req, res, next) => {
 module.exports = {
   createBooking,
   getBooking,
+  getBookingById,
   listBookings,
   cancelBooking
 };
