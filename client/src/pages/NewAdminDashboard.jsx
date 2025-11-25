@@ -191,7 +191,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
               <Button variant="primary" onClick={() => setModalOpen(true)}>Add Room</Button>
             </div>
           </div>
-
+          {/* Render the Room card without image */}
           <RoomList refreshKey={refreshKey} />
         </section>
 

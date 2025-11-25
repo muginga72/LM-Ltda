@@ -1,33 +1,57 @@
 import React from "react";
-import { Card, Button, Badge } from "react-bootstrap";
+import { Card, Button, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-export default function RoomCardUser({ room, onBook }) {
+function RoomCardUser({ room, onBook }) {
   return (
     <Card className="h-100">
-      {room.roomImages && room.roomImages[0] && (
-        <Card.Img variant="top" src={room.roomImages[0]} style={{ objectFit: "cover", height: 180 }} />
-      )}
-      <Card.Body className="d-flex flex-column">
-        <Card.Title style={{ marginBottom: 6 }}>{room.roomTitle}</Card.Title>
-        <Card.Text className="flex-grow-1" style={{ fontSize: 14, color: "#444" }}>
-          {room.roomDescription?.slice(0, 140)}
-        </Card.Text>
+      <Row className="g-0">
+        <Col xs={12} md={4} lg={4}>
+          {room.roomImages && room.roomImages[0] ? (
+            <img
+              src={room.roomImages[0]}
+              alt={room.roomTitle}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <div style={{ width: "100%", height: "100%", minHeight: 160, background: "#f0f0f0" }} />
+          )}
+        </Col>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <strong>{room.pricePerNight?.amount}</strong> <small>{room.pricePerNight?.currency}</small>
-          </div>
-          <div>
-            <Badge bg="secondary">{room.roomCapacity} guests</Badge>
-          </div>
-        </div>
+        <Col xs={12} md={8} lg={8}>
+          <Card.Body className="d-flex flex-column h-100">
+            <div>
+              <Card.Title className="mb-1">{room.roomTitle}</Card.Title>
+              <Card.Text className="text-muted small mb-2">
+                {room.roomLocation?.city ? `${room.roomLocation.city} • ` : ""}
+                {room.roomLocation?.country || ""}
+              </Card.Text>
+            </div>
 
-        <div className="d-flex gap-2 mt-3">
-          <Button variant="primary" onClick={onBook}>Book</Button>
-          <Link className="btn btn-outline-secondary" to={`/rooms/${room._id}`}>Details</Link>
-        </div>
-      </Card.Body>
+            <Card.Text className="flex-grow-1" style={{ fontSize: 14, color: "#444" }}>
+              {room.roomDescription ? room.roomDescription.slice(0, 220) + (room.roomDescription.length > 220 ? "…" : "") : ""}
+            </Card.Text>
+
+            <div className="d-flex align-items-center justify-content-between mt-2">
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>
+                  {room.pricePerNight?.amount ?? "-"} <small style={{ fontWeight: 400 }}>{room.pricePerNight?.currency ?? ""}</small>
+                </div>
+                <div style={{ fontSize: 13, color: "#666" }}>
+                  {room.roomCapacity} guest{room.roomCapacity > 1 ? "s" : ""} • {room.bedrooms ?? 0} bd • {room.bathrooms ?? 0} ba
+                </div>
+              </div>
+
+              <div className="d-flex gap-2">
+                <Button variant="primary" size="sm" onClick={onBook}>Book</Button>
+                <Link className="btn btn-outline-secondary btn-sm" to={`/rooms/${room._id}`}>Details</Link>
+              </div>
+            </div>
+          </Card.Body>
+        </Col>
+      </Row>
     </Card>
   );
 }
+
+export default RoomCardUser;

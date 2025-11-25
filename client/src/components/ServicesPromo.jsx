@@ -30,8 +30,12 @@ const ServicesPromo = () => {
     },
     {
       name: t("product4"),
-      image: "/images/tutoring-chemistry.png",
+      image: "/images/Roomrental-03.png",
     },
+    // {
+    //   name: t("product4"),
+    //   image: "/images/tutoring-chemistry.png",
+    // },
     {
       name: t("product5"),
       image: "/images/wedding-bsket-ring.jpg",
