@@ -25,7 +25,7 @@ export default function AddRoomModal({ open, onClose, children }) {
         onMouseDown={e => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <h3 style={{ margin: 0 }}>Add new room</h3>
+          <h3 style={{ margin: 0 }}>Add New Room</h3>
           <button onClick={onClose} aria-label="Close">✕</button>
         </div>
         {children}

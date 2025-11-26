@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
-import { Form, Row, Col, Button, InputGroup, Badge } from "react-bootstrap";
+import { Form, Row, Col, Button, InputGroup, Badge, ProgressBar, Alert } from "react-bootstrap";
 import axios from "axios";
 import { AuthContext } from "../../contexts/AuthContext";
 
-export default function AddRoomForm({ onCreated, onCancel }) {
+function AddRoomForm({ onCreated, onCancel }) {
   const { user } = useContext(AuthContext);
   const token = user?.token;
 
@@ -17,23 +17,19 @@ export default function AddRoomForm({ onCreated, onCancel }) {
     pricePerNight: { amount: 100, currency: "USD" },
     minNights: 1,
     maxNights: 30,
-    roomImages: [],
-    roomLocation: {
-      address: "",
-      city: "",
-      region: "",
-      country: "",
-      coordinates: []
-    },
+    roomLocation: { address: "", city: "", region: "", country: "", coordinates: [] },
     rules: [],
     instantBook: false
   });
 
-  const [imageInput, setImageInput] = useState("");
   const [amenityInput, setAmenityInput] = useState("");
   const [ruleInput, setRuleInput] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [validated, setValidated] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   function updateField(path, value) {
     setForm(prev => {
@@ -70,295 +66,231 @@ export default function AddRoomForm({ onCreated, onCancel }) {
     updateField("rules", form.rules.filter((_, i) => i !== idx));
   }
 
-  function addImage() {
-    if (!imageInput?.trim()) return;
-    updateField("roomImages", [...form.roomImages, imageInput.trim()]);
-    setImageInput("");
+  function handleFileChange(e) {
+    const files = Array.from(e.target.files || []);
+    const newFiles = [...selectedFiles, ...files].slice(0, 12);
+    setSelectedFiles(newFiles);
+
+    // generate previews
+    const readers = newFiles.map(file => new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve({ name: file.name, src: ev.target.result });
+      reader.readAsDataURL(file);
+    }));
+    Promise.all(readers).then(setPreviews);
+    e.target.value = null;
   }
 
-  function removeImage(idx) {
-    updateField("roomImages", form.roomImages.filter((_, i) => i !== idx));
+  function removeFile(index) {
+    const next = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(next);
+    const nextPreviews = previews.filter((_, i) => i !== index);
+    setPreviews(nextPreviews);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const formEl = e.currentTarget;
-    setValidated(true);
-    if (formEl.checkValidity() === false) {
-      e.stopPropagation();
+    setError("");
+    setSuccess("");
+
+    if (!form.roomTitle || !form.pricePerNight?.amount) {
+      setError("Please provide at least a title and price.");
       return;
     }
-
     if (!token) {
-      alert("You must be signed in to create a room.");
+      setError("You must be signed in to create a room.");
       return;
     }
 
     setSaving(true);
+    setProgress(0);
+
     try {
-      const res = await axios.post("/api/rooms", form, {
-        headers: { Authorization: `Bearer ${token}` }
+      const formData = new FormData();
+      formData.append("roomTitle", form.roomTitle);
+      formData.append("roomDescription", form.roomDescription || "");
+      formData.append("roomCapacity", String(form.roomCapacity));
+      formData.append("bedrooms", String(form.bedrooms));
+      formData.append("bathrooms", String(form.bathrooms));
+      formData.append("minNights", String(form.minNights));
+      formData.append("maxNights", String(form.maxNights));
+      formData.append("instantBook", form.instantBook ? "true" : "false");
+      formData.append("pricePerNight", JSON.stringify(form.pricePerNight));
+      formData.append("roomLocation", JSON.stringify(form.roomLocation));
+      formData.append("amenities", JSON.stringify(form.amenities || []));
+      formData.append("rules", JSON.stringify(form.rules || []));
+
+      selectedFiles.forEach(file => {
+        formData.append("images", file, file.name);
       });
-      const created = res.data;
-      onCreated?.(created);
+
+      const headers = {
+        Authorization: `Bearer ${token}`
+      };
+
+      const res = await axios.post("/api/rooms", formData, {
+        headers,
+        onUploadProgress: (progressEvent) => {
+          if (!progressEvent.total) return;
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percent);
+        }
+      });
+
+      setSuccess("Room created successfully.");
+      setSelectedFiles([]);
+      setPreviews([]);
+      setForm({
+        roomTitle: "",
+        roomDescription: "",
+        roomCapacity: 1,
+        bedrooms: 1,
+        bathrooms: 1,
+        amenities: [],
+        pricePerNight: { amount: 100, currency: "USD" },
+        minNights: 1,
+        maxNights: 30,
+        roomLocation: { address: "", city: "", region: "", country: "", coordinates: [] },
+        rules: [],
+        instantBook: false
+      });
+      setProgress(0);
+      onCreated?.(res.data);
     } catch (err) {
-      console.error("Create room error:", err);
-      alert(err?.response?.data?.message || "Failed to create room");
+      console.error(err);
+      setError(err?.response?.data?.message || err.message || "Failed to create room");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Form noValidate validated={validated} onSubmit={handleSubmit}>
-      <Form.Group className="mb-3" controlId="roomTitle">
-        {/* <Form.Label>Title</Form.Label> */}
-        <Form.Control
-          type="text"
-          placeholder="Enter room title"
-          value={form.roomTitle}
-          onChange={e => updateField("roomTitle", e.target.value)}
-          required
-        />
-        <Form.Control.Feedback type="invalid">Title is required.</Form.Control.Feedback>
+    <Form onSubmit={handleSubmit}>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">{success}</Alert>}
+
+      <Form.Group className="mb-3">
+        <Form.Control placeholder="e.g. Cozy studio near downtown"
+          value={form.roomTitle} onChange={e => updateField("roomTitle", e.target.value)} required />
       </Form.Group>
 
-      <Form.Group className="mb-3" controlId="roomDescription">
-        {/* <Form.Label>Description</Form.Label> */}
-        <Form.Control
-          as="textarea"
-          rows={3}
-          placeholder="Describe the room"
-          value={form.roomDescription}
-          onChange={e => updateField("roomDescription", e.target.value)}
-        />
+      <Form.Group className="mb-3">
+        <Form.Control as="textarea" rows={3} 
+        placeholder="Describe the space, and anything guests should know"
+        value={form.roomDescription} onChange={e => updateField("roomDescription", e.target.value)} />
       </Form.Group>
 
       <Row>
         <Col md={4} className="mb-3">
-          <Form.Group controlId="roomCapacity">
+          <Form.Group>
             <Form.Label>Capacity</Form.Label>
-            <Form.Control
-              type="number"
-              min={1}
-              value={form.roomCapacity}
-              onChange={e => updateField("roomCapacity", Number(e.target.value))}
-              required
-            />
-            <Form.Control.Feedback type="invalid">Provide capacity (min 1).</Form.Control.Feedback>
+            <Form.Control type="number" min={1} value={form.roomCapacity} onChange={e => updateField("roomCapacity", Number(e.target.value))} />
           </Form.Group>
         </Col>
-
         <Col md={4} className="mb-3">
-          <Form.Group controlId="bedrooms">
+          <Form.Group>
             <Form.Label>Bedrooms</Form.Label>
-            <Form.Control
-              type="number"
-              min={0}
-              value={form.bedrooms}
-              onChange={e => updateField("bedrooms", Number(e.target.value))}
-            />
+            <Form.Control type="number" min={0} value={form.bedrooms} onChange={e => updateField("bedrooms", Number(e.target.value))} />
           </Form.Group>
         </Col>
-
         <Col md={4} className="mb-3">
-          <Form.Group controlId="bathrooms">
+          <Form.Group>
             <Form.Label>Bathrooms</Form.Label>
-            <Form.Control
-              type="number"
-              min={0}
-              value={form.bathrooms}
-              onChange={e => updateField("bathrooms", Number(e.target.value))}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <Row className="align-items-end">
-        <Col md={6} className="mb-3">
-          <Form.Group controlId="price">
-            <Form.Label>Price per night</Form.Label>
-            <InputGroup>
-              <Form.Control
-                type="number"
-                min={0}
-                value={form.pricePerNight.amount}
-                onChange={e => updateField("pricePerNight.amount", Number(e.target.value))}
-                required
-              />
-              <Form.Select
-                value={form.pricePerNight.currency}
-                onChange={e => updateField("pricePerNight.currency", e.target.value)}
-                style={{ maxWidth: 120 }}
-                aria-label="Currency"
-              >
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="BRL">BRL</option>
-              </Form.Select>
-            </InputGroup>
-            <Form.Control.Feedback type="invalid">Enter a valid price.</Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-
-        <Col md={3} className="mb-3">
-          <Form.Group controlId="minNights">
-            <Form.Label>Min nights</Form.Label>
-            <Form.Control
-              type="number"
-              min={1}
-              value={form.minNights}
-              onChange={e => updateField("minNights", Number(e.target.value))}
-            />
-          </Form.Group>
-        </Col>
-
-        <Col md={3} className="mb-3">
-          <Form.Group controlId="maxNights">
-            <Form.Label>Max nights</Form.Label>
-            <Form.Control
-              type="number"
-              min={1}
-              value={form.maxNights}
-              onChange={e => updateField("maxNights", Number(e.target.value))}
-            />
+            <Form.Control type="number" min={0} value={form.bathrooms} onChange={e => updateField("bathrooms", Number(e.target.value))} />
           </Form.Group>
         </Col>
       </Row>
 
       <Row className="mb-3">
         <Col md={6}>
-          <Form.Group controlId="address">
-            <Form.Label>Address</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Address"
-              value={form.roomLocation.address}
-              onChange={e => updateField("roomLocation.address", e.target.value)}
-            />
+          <Form.Group>
+            <Form.Label>Price per night</Form.Label>
+            <InputGroup>
+              <Form.Control type="number" min={0} value={form.pricePerNight.amount} onChange={e => updateField("pricePerNight.amount", Number(e.target.value))} />
+              <Form.Select value={form.pricePerNight.currency} onChange={e => updateField("pricePerNight.currency", e.target.value)} style={{ maxWidth: 120 }}>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="BRL">BRL</option>
+              </Form.Select>
+            </InputGroup>
           </Form.Group>
         </Col>
 
         <Col md={3}>
-          <Form.Group controlId="city">
-            <Form.Label>City</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="City"
-              value={form.roomLocation.city}
-              onChange={e => updateField("roomLocation.city", e.target.value)}
-            />
+          <Form.Group>
+            <Form.Label>Min nights</Form.Label>
+            <Form.Control type="number" min={1} value={form.minNights} onChange={e => updateField("minNights", Number(e.target.value))} />
           </Form.Group>
         </Col>
 
         <Col md={3}>
-          <Form.Group controlId="country">
-            <Form.Label>Country</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Country"
-              value={form.roomLocation.country}
-              onChange={e => updateField("roomLocation.country", e.target.value)}
-            />
+          <Form.Group>
+            <Form.Label>Max nights</Form.Label>
+            <Form.Control type="number" min={1} value={form.maxNights} onChange={e => updateField("maxNights", Number(e.target.value))} />
           </Form.Group>
         </Col>
       </Row>
 
-      <Form.Group className="mb-2" controlId="coordinates">
-        <Form.Label>Coordinates (lng, lat)</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="-70.25,43.65"
-          onBlur={e => {
-            const coords = e.target.value.split(",").map(s => Number(s.trim())).filter(n => !Number.isNaN(n));
-            updateField("roomLocation.coordinates", coords);
-          }}
-        />
-        <Form.Text className="text-muted">Optional — use "lng,lat" format for geolocation.</Form.Text>
-      </Form.Group>
-
-      <fieldset className="mb-2">
+      <fieldset className="mb-3">
         <legend>Amenities</legend>
         <div className="mb-2">
           {form.amenities.map((a, i) => (
             <Badge bg="secondary" pill key={i} className="me-1">
-              {a} <Button variant="link" size="sm" onClick={() => removeAmenity(i)} style={{ color: "inherit", textDecoration: "none" }}>×</Button>
+              {a} <Button variant="link" size="sm" onClick={() => removeAmenity(i)} style={{ color: "inherit", textDecoration: "none", padding: 0, marginLeft: 6 }}>×</Button>
             </Badge>
           ))}
         </div>
-
         <InputGroup className="mb-2">
-          <Form.Control
-            placeholder="Add amenity (e.g. Wifi)"
-            value={amenityInput}
-            onChange={e => setAmenityInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addAmenity(); } }}
-          />
+          <Form.Control placeholder="Add amenity" value={amenityInput} onChange={e => setAmenityInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }} />
           <Button variant="outline-secondary" onClick={addAmenity}>Add</Button>
         </InputGroup>
       </fieldset>
 
-      <fieldset className="mb-2">
-        {/* <legend>Rules</legend> */}
+      <fieldset className="mb-3">
+        <legend>Rules</legend>
         <div className="mb-2">
           {form.rules.map((r, i) => (
             <Badge bg="info" text="dark" key={i} className="me-1">
-              {r} <Button variant="link" size="sm" onClick={() => removeRule(i)} style={{ color: "inherit", textDecoration: "none" }}>×</Button>
+              {r} <Button variant="link" size="sm" onClick={() => removeRule(i)} style={{ color: "inherit", textDecoration: "none", padding: 0, marginLeft: 6 }}>×</Button>
             </Badge>
           ))}
         </div>
-
         <InputGroup className="mb-2">
-          <Form.Control
-            placeholder="Add rule (e.g. No smoking)"
-            value={ruleInput}
-            onChange={e => setRuleInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addRule(); } }}
-          />
+          <Form.Control placeholder="Add rule" value={ruleInput} onChange={e => setRuleInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addRule(); } }} />
           <Button variant="outline-secondary" onClick={addRule}>Add</Button>
         </InputGroup>
       </fieldset>
 
       <fieldset className="mb-3">
-        {/* <legend>Images</legend> */}
-        <div className="mb-2">
-          {form.roomImages.map((img, i) => (
-            <Badge bg="light" text="dark" key={i} className="me-1">
-              <a href={img} target="_blank" rel="noreferrer" style={{ color: "inherit", textDecoration: "underline" }}>img</a>
-              <Button variant="link" size="sm" onClick={() => removeImage(i)} style={{ color: "inherit", textDecoration: "none" }}>×</Button>
-            </Badge>
+        <legend>Images</legend>
+        <Form.Group className="mb-2">
+          <Form.Label>Upload images (you can select multiple)</Form.Label>
+          <Form.Control type="file" multiple accept="image/*" onChange={handleFileChange} />
+          <Form.Text className="text-muted">Select up to 12 images, 5MB each.</Form.Text>
+        </Form.Group>
+
+        <div className="mb-2" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {previews.map((p, i) => (
+            <div key={i} style={{ position: "relative", width: 96, height: 72, borderRadius: 6, overflow: "hidden", border: "1px solid #eee" }}>
+              <img src={p.src} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <button type="button" onClick={() => removeFile(i)} style={{ position: "absolute", top: 4, right: 4, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 12, width: 22, height: 22, cursor: "pointer" }} aria-label={`Remove ${p.name}`}>×</button>
+            </div>
           ))}
         </div>
 
-        <InputGroup className="mb-2">
-          <Form.Control
-            placeholder="Image URL (https://...)"
-            value={imageInput}
-            onChange={e => setImageInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addImage(); } }}
-          />
-          <Button variant="outline-secondary" onClick={addImage}>Add</Button>
-        </InputGroup>
-        <Form.Text className="text-muted">You can add image URLs; consider implementing file uploads on the server for production.</Form.Text>
+        {saving && <ProgressBar now={progress} label={`${progress}%`} className="mb-2" />}
       </fieldset>
 
-      <Form.Group className="mb-3" controlId="instantBook">
-        <Form.Check
-          type="checkbox"
-          label="Instant Book"
-          checked={form.instantBook}
-          onChange={e => updateField("instantBook", e.target.checked)}
-        />
+      <Form.Group className="mb-3">
+        <Form.Check type="checkbox" label="Instant Book" checked={form.instantBook} onChange={e => updateField("instantBook", e.target.checked)} />
       </Form.Group>
 
       <div className="d-flex gap-2">
-        <Button type="submit" disabled={saving} variant="primary">
-          {saving ? "Creating…" : "Create Room"}
-        </Button>
-        <Button variant="outline-secondary" onClick={() => onCancel?.()} disabled={saving}>
-          Cancel
-        </Button>
+        <Button type="submit" disabled={saving} variant="primary">{saving ? "Creating…" : "Create Room"}</Button>
+        <Button variant="outline-secondary" onClick={() => onCancel?.()} disabled={saving}>Cancel</Button>
       </div>
     </Form>
   );
 }
+
+export default AddRoomForm;
