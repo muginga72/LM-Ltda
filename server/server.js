@@ -173,7 +173,7 @@ const calendarRouter = require('./routes/calendar');
 const contactRouter = require('./routes/contact');
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
-const roomRoutes = require('./routes/roomrental/roomRoutes');
+const roomsRoutes = require('./routes/roomrental/roomRoutes');
 const bookingRoutes = require('./routes/roomrental/bookingRoutes');
 const listingsRouter = require('./routes/roomrental/listingRoutes');
 // THIS is the uploads router that provides POST /upload-docs
@@ -255,7 +255,7 @@ app.use('/api/calendar', calendarRouter);
 app.use('/api/calendar', calendarAvailabilityRouter);
 app.use('/api/testimonials', testimonialsRoute);
 // Room rental routes
-app.use('/api/rooms', roomRoutes);
+app.use('/api/rooms', roomsRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/listings', listingsRouter);
 app.use('/api/room-requests', roomRequestRoutes);
