@@ -180,6 +180,44 @@ function AddRoomForm({ onCreated, onCancel }) {
         value={form.roomDescription} onChange={e => updateField("roomDescription", e.target.value)} />
       </Form.Group>
 
+      <Row className="mb-3">
+        <Col md={6}>
+          <Form.Group controlId="address">
+            <Form.Label>Address</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Full address"
+              value={form.roomLocation.address}
+              onChange={e => updateField("roomLocation.address", e.target.value)}
+            />
+          </Form.Group>
+        </Col>
+
+        <Col md={3}>
+          <Form.Group controlId="city">
+            <Form.Label>City</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter the city"
+              value={form.roomLocation.city}
+              onChange={e => updateField("roomLocation.city", e.target.value)}
+            />
+          </Form.Group>
+        </Col>
+
+        <Col md={3}>
+          <Form.Group controlId="country">
+            <Form.Label>Country</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter the country"
+              value={form.roomLocation.country}
+              onChange={e => updateField("roomLocation.country", e.target.value)}
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
       <Row>
         <Col md={4} className="mb-3">
           <Form.Group>
@@ -241,7 +279,7 @@ function AddRoomForm({ onCreated, onCancel }) {
           ))}
         </div>
         <InputGroup className="mb-2">
-          <Form.Control placeholder="Add amenity" value={amenityInput} onChange={e => setAmenityInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }} />
+          <Form.Control placeholder="Add amenity (e.g. Wifi)" value={amenityInput} onChange={e => setAmenityInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }} />
           <Button variant="outline-secondary" onClick={addAmenity}>Add</Button>
         </InputGroup>
       </fieldset>
@@ -256,7 +294,7 @@ function AddRoomForm({ onCreated, onCancel }) {
           ))}
         </div>
         <InputGroup className="mb-2">
-          <Form.Control placeholder="Add rule" value={ruleInput} onChange={e => setRuleInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addRule(); } }} />
+          <Form.Control placeholder="Add rule (e.g. No smoking)" value={ruleInput} onChange={e => setRuleInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addRule(); } }} />
           <Button variant="outline-secondary" onClick={addRule}>Add</Button>
         </InputGroup>
       </fieldset>
@@ -264,9 +302,8 @@ function AddRoomForm({ onCreated, onCancel }) {
       <fieldset className="mb-3">
         <legend>Images</legend>
         <Form.Group className="mb-2">
-          <Form.Label>Upload images (you can select multiple)</Form.Label>
           <Form.Control type="file" multiple accept="image/*" onChange={handleFileChange} />
-          <Form.Text className="text-muted">Select up to 12 images, 5MB each.</Form.Text>
+          <Form.Text className="text-muted">It's possible to select up to 12 images, 5MB each.</Form.Text>
         </Form.Group>
 
         <div className="mb-2" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
