@@ -5,11 +5,6 @@ const crypto = require("crypto");
 
 const router = express.Router();
 
-/**
- * Optional encryption helper for bank details.
- * NOTE: This is a demonstration only. For production, use a
- * proper secrets manager or encryption service and rotate keys.
- */
 function encrypt(text, key) {
   if (!key) return text;
   const iv = crypto.randomBytes(12);

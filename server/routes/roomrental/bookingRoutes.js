@@ -15,7 +15,6 @@ const {
 // Middleware
 const { protect, adminOnly } = require('../../middleware/authMiddleware');
 
-// File upload middleware (multer)
 const multer = require('multer');
 
 // Ensure upload directory exists
@@ -37,12 +36,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ------------------- ROUTES -------------------
-
 // Create a booking (multipart/form-data with idDocument)
 router.post('/', protect, upload.single('idDocument'), createBooking);
-
-// Explicit route to list current user's bookings
 router.get('/my', protect, listBookings);
 
 // Admin-only route: list all bookings in the system
@@ -87,7 +82,6 @@ router.get('/', protect, adminOnly, async (req, res, next) => {
 // Get a booking by ID (/:id) - must be after literal routes
 router.get('/:id', protect, getBooking);
 
-// Cancel a booking
 router.delete('/:id', protect, cancelBooking);
 
 module.exports = router;
