@@ -14,7 +14,8 @@ import AdminUserTable from "../components/admin/adminTables/AdminUserTable";
 import AdminRequestedServicesTable from "../components/admin/adminTables/AdminRequestedServicesTable.jsx";
 import AdminScheduledServicesTable from "../components/admin/adminTables/AdminScheduledServicesTable.jsx";
 import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
-import AddRoomForm from "../components/roomrentals/AddRoomForm.jsx";
+// import AddRoomForm from "../components/roomrentals/AddRoomForm.jsx";
+import AddRoomManager from "../components/roomrentals/AddRoomManager.jsx"
 import RoomList from "../components/roomrentals/RoomList.jsx";
 
 function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
@@ -126,10 +127,11 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   }
 
   // called when AddRoomForm successfully creates a room
-  const handleRoomCreated = (createdRoom) => {
+  const handleRoomCreated = (newRoom) => {
     setModalOpen(false);
     setRefreshKey(k => k + 1);
     alert("Room created successfully");
+    console.log("Room created", newRoom);
   };
 
   return (
@@ -193,6 +195,9 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
           </div>
           {/* Render the Room card without image */}
           <RoomList refreshKey={refreshKey} />
+
+          {/* <AddRoomForm onCreated={handleRoomCreated} authToken={token} /> */}
+          {/* <AddRoomManager onCreated={handleRoomCreated} authToken={token} /> */}
         </section>
 
         <hr />
@@ -261,10 +266,12 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
       {/* Add Room modal (react-bootstrap) */}
       <Modal show={modalOpen} onHide={() => setModalOpen(false)} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add new room</Modal.Title>
+          <Modal.Title>Add New Room</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <AddRoomForm onCreated={handleRoomCreated} onCancel={() => setModalOpen(false)} />
+          {/* --------- AddRoomManager ------------------ */}
+          <AddRoomManager onCreated={handleRoomCreated} onCancel={() => setModalOpen(false)} />
+          {/* <AddRoomForm onCreated={handleRoomCreated} onCancel={() => setModalOpen(false)} /> */}
         </Modal.Body>
       </Modal>
 
