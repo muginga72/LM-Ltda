@@ -1,41 +1,44 @@
-// server/routes/roomrental/roomRoutes.js
+// routes/roomrental/roomRoutes.js
 const express = require('express');
-const multer = require('multer');
+const router = express.Router();
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 
-const authModule = require('../../middleware/authMiddleware');
+// Use exact path and case for your project
+const roomsController = require('../../controllers/roomrental/roomsController');
+const { protect, adminOnly } = require('../../middleware/authMiddleware');
 
-const authenticate = typeof authModule === 'function' ? authModule : authModule.authenticate;
-const requireAdmin = authModule && authModule.requireAdmin
-  ? authModule.requireAdmin
-  : (req, res, next) => {
-      if (!req.user || !req.user.isAdmin) return res.status(403).json({ message: 'Admin only' });
-      next();
-    };
-
-// sanity check
-if (typeof authenticate !== 'function' || typeof requireAdmin !== 'function') {
-  console.error('authModule:', authModule);
-  throw new Error('authenticate or requireAdmin is not a function. Check middleware/auth.js exports and require path.');
+// Quick runtime checks to fail fast with clear message if imports are wrong
+if (!roomsController || typeof roomsController !== 'object') {
+  throw new Error('Invalid import: controllers/roomrental/roomsController must export an object');
 }
+if (typeof protect !== 'function' || typeof adminOnly !== 'function') {
+  throw new Error('Invalid import: middleware/authMiddleware must export { protect, adminOnly } functions');
+}
+['getRooms', 'createRoom', 'updateRoom', 'deleteRoom'].forEach(fn => {
+  if (typeof roomsController[fn] !== 'function') {
+    throw new Error(`Invalid export: roomsController.${fn} must be a function`);
+  }
+});
 
-const controller = require('../../controllers/roomrental/roomsController'); // adjust path if needed
+// Multer setup
+const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'rooms');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../uploads/rooms')),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname)}`;
+    cb(null, unique);
+  }
 });
 const upload = multer({ storage });
 
-const router = express.Router();
-
-// apply auth middleware to all routes in this router
-router.use(authenticate, requireAdmin);
-
-router.get('/', controller.listRooms);
-router.get('/:id', controller.getRoom);
-router.post('/', upload.array('images', 10), controller.createRoom);
-router.put('/:id', upload.array('images', 10), controller.updateRoom);
-router.delete('/:id', controller.deleteRoom);
+// Routes: protect must run before adminOnly so req.user exists
+router.get('/', protect, roomsController.getRooms); // public or authenticated list
+router.post('/', protect, adminOnly, upload.array('roomImages', 8), roomsController.createRoom);
+router.put('/:id', protect, adminOnly, upload.array('roomImages', 8), roomsController.updateRoom);
+router.delete('/:id', protect, adminOnly, roomsController.deleteRoom);
 
 module.exports = router;
