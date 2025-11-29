@@ -1,8 +1,21 @@
+// src/pages/NewAdminDashboard.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
-import { Container, Spinner, Alert, Button, Col, Row, Modal } from "react-bootstrap";
+import {
+  Container,
+  Spinner,
+  Alert,
+  Button,
+  Col,
+  Row,
+  Modal,
+  Tab,
+  Nav,
+  Card,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+
 import AdminAddService from "../components/admin/AdminAddService";
 import ServicesGrid from "../components/ServicesGrid";
 import { fetchServices } from "../api/servicesApi";
@@ -14,8 +27,8 @@ import AdminUserTable from "../components/admin/adminTables/AdminUserTable";
 import AdminRequestedServicesTable from "../components/admin/adminTables/AdminRequestedServicesTable.jsx";
 import AdminScheduledServicesTable from "../components/admin/adminTables/AdminScheduledServicesTable.jsx";
 import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
-// import AddRoomForm from "../components/roomrentals/AddRoomForm.jsx";
-import AddRoomManager from "../components/roomrentals/AddRoomManager.jsx"
+
+import RoomManager from "../components/roomrentals/RoomManager.jsx";
 import RoomList from "../components/roomrentals/RoomList.jsx";
 
 function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
@@ -129,7 +142,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   // called when AddRoomForm successfully creates a room
   const handleRoomCreated = (newRoom) => {
     setModalOpen(false);
-    setRefreshKey(k => k + 1);
+    setRefreshKey((k) => k + 1);
     alert("Room created successfully");
     console.log("Room created", newRoom);
   };
@@ -150,9 +163,16 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
 
         <Container className="py-2">
           <div className="d-flex align-items-center mb-2">
-            <Button variant="outline-success" onClick={() => setModalOpen(true)} style={{ marginRight: 20 }}>
+
+          {/* --------- Do Not Remove It ------------- */}
+
+            {/* <Button
+              variant="outline-success"
+              onClick={() => setModalOpen(true)}
+              style={{ marginRight: 20 }}
+            >
               {t("adminAddService")}
-            </Button>
+            </Button> */}
 
             {/* Add Room button */}
             <Button variant="outline-primary" onClick={() => setModalOpen(true)}>
@@ -160,47 +180,93 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
             </Button>
           </div>
 
-          <AdminAddService
-            show={false}
-            onHide={() => {}}
-            onCreated={handleServiceCreated}
-            token={token}
-          />
+          <AdminAddService show={false} onHide={() => {}} onCreated={handleServiceCreated} token={token} />
           <hr />
         </Container>
 
-        {/* Services preview */}
-        <div className="container py-3">
-          <div className="row mb-4">
-            <div className="col-md-12">
-              <h3 className="mb-3 text-center">{t("dashboardPreview")}</h3>
-              {services.length === 0 ? (
-                <Alert variant="info">{t("admiNoServices")}</Alert>
-              ) : (
-                <ServicesGrid services={services} />
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Tabs: Overview / Rooms / Services / Settings */}
+        <Tab.Container defaultActiveKey="overview">
+          <Card>
+            <Card.Header>
+              <Nav variant="tabs">
+                <Nav.Item>
+                  <Nav.Link eventKey="overview">Overview</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="rooms">Rooms</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="services">Services</Nav.Link>
+                </Nav.Item>
+                {/* <Nav.Item>
+                  <Nav.Link eventKey="settings">Settings</Nav.Link>
+                </Nav.Item> */}
+              </Nav>
+            </Card.Header>
+
+            <Card.Body>
+              <Tab.Content>
+                <Tab.Pane eventKey="overview">
+                  <div className="mb-4">
+                    <h4>Overview</h4>
+                    <p className="text-muted">Quick stats and admin shortcuts.</p>
+                  </div>
+
+                  <div className="container py-3">
+                    <div className="row mb-4">
+                      <div className="col-md-12">
+                        <h3 className="mb-3 text-center">{t("dashboardPreview")}</h3>
+                        {services.length === 0 ? (
+                          <Alert variant="info">{t("admiNoServices")}</Alert>
+                        ) : (
+                          <ServicesGrid services={services} />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="rooms">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <h4 style={{ margin: 0 }}>Manage Rooms</h4>
+                      <p className="text-muted mb-0">Create, edit and remove rooms. Admin access required.</p>
+                    </div>
+                    <div>
+                      <Button variant="primary" onClick={() => setModalOpen(true)}>
+                        Add Room
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* AddRoomManager handles listing, creating and refreshing rooms */}
+                  <RoomManager currentUser={user} token={token} onCreated={handleRoomCreated} />
+
+                  {/* RoomList for a simple listing (kept for compatibility) */}
+                  <div className="mt-4">
+                    <RoomList refreshKey={refreshKey} />
+                  </div>
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="services">
+                  <h5>Manage Services</h5>
+                  <p className="text-muted">Create and manage services.</p>
+                  <div className="mt-3">
+                    <ServicesGrid services={services} />
+                  </div>
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="settings">
+                  <h5>Settings</h5>
+                  <p className="text-muted">Admin settings and configuration.</p>
+                </Tab.Pane>
+              </Tab.Content>
+            </Card.Body>
+          </Card>
+        </Tab.Container>
 
         <hr />
 
-        {/* Rooms section */}
-        <section style={{ marginTop: 20 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ margin: 0 }}>Room Listings</h3>
-            <div>
-              <Button variant="primary" onClick={() => setModalOpen(true)}>Add Room</Button>
-            </div>
-          </div>
-          {/* Render the Room card without image */}
-          <RoomList refreshKey={refreshKey} />
-
-          {/* <AddRoomForm onCreated={handleRoomCreated} authToken={token} /> */}
-          {/* <AddRoomManager onCreated={handleRoomCreated} authToken={token} /> */}
-        </section>
-
-        <hr />
         <CustomerMessages />
         <hr />
 
@@ -246,46 +312,27 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
         )}
 
         {errorRequested && <Alert variant="danger">{errorRequested}</Alert>}
-        <AdminRequestedServicesTable
-          services={requestedServices}
-          token={token}
-          onStatusUpdate={handleStatusUpdate}
-        />
+        <AdminRequestedServicesTable services={requestedServices} token={token} onStatusUpdate={handleStatusUpdate} />
 
         {errorScheduled && <Alert variant="danger">{errorScheduled}</Alert>}
-        <AdminScheduledServicesTable
-          services={scheduledServices}
-          token={token}
-          onStatusUpdate={handleStatusUpdate}
-        />
+        <AdminScheduledServicesTable services={scheduledServices} token={token} onStatusUpdate={handleStatusUpdate} />
 
         {errorShared && <Alert variant="danger">{errorShared}</Alert>}
         <AdminSharedServicesTable services={sharedServices} />
       </Container>
 
-      {/* Add Room modal (react-bootstrap) */}
+      {/* Modal used for Add Room / Add Service actions */}
       <Modal show={modalOpen} onHide={() => setModalOpen(false)} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add New Room</Modal.Title>
+          <Modal.Title>{t("adminAddItem") || "Add Item"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* --------- AddRoomManager ------------------ */}
-          <AddRoomManager onCreated={handleRoomCreated} onCancel={() => setModalOpen(false)} />
-          {/* <AddRoomForm onCreated={handleRoomCreated} onCancel={() => setModalOpen(false)} /> */}
+          {/* Render AddRoomManager's form or AdminAddService depending on context.
+              For simplicity, show AddRoomManager's internal modal/form when modalOpen is true.
+              If you prefer a dedicated AddRoomForm component, replace with that component. */}
+          <RoomManager currentUser={user} token={token} onCreated={handleRoomCreated} />
         </Modal.Body>
       </Modal>
-
-      <footer className="text-center py-4 border-top">
-        <small>
-          <p>
-            <strong>{t("whoWeAre.footer.phones")}:</strong>{" "}
-            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
-            <br />
-            {t("whoWeAre.footer.address")}
-          </p>
-          &copy; {new Date().getFullYear()} {t("lmLtd")}. {t("whoWeAre.footer.copyright")}
-        </small>
-      </footer>
     </>
   );
 }

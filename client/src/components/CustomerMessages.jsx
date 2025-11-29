@@ -25,7 +25,7 @@ const CustomerMessages = () => {
 
   return (
     <div className="container py-5">
-      <h2>Customer Contact Messages</h2>
+      <h5>Customer Contact Messages</h5>
 
       {loading && <p>Loading messages...</p>}
       {error && <div className="alert alert-danger">{error}</div>}
