@@ -48,13 +48,16 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
 
-  // room modal/list refresh
-  const [modalOpen, setModalOpen] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [modalRoomOpen, setModalRoomOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!token) return;
-    const headers = { Authorization: `Bearer ${token}`, "Cache-Control": "no-cache" };
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Cache-Control": "no-cache",
+    };
 
     const fetchUsers = async () => {
       try {
@@ -117,6 +120,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
     fetchServices()
       .then(setServices)
       .catch((err) => console.error("Error refreshing services:", err));
+    setShowAddModal(false);
   };
 
   const handleStatusUpdate = (serviceId, newStatus, type) => {
@@ -141,7 +145,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
 
   // called when AddRoomForm successfully creates a room
   const handleRoomCreated = (newRoom) => {
-    setModalOpen(false);
+    setModalRoomOpen(false);
     setRefreshKey((k) => k + 1);
     alert("Room created successfully");
     console.log("Room created", newRoom);
@@ -161,27 +165,14 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
           {t("adminRole")}: {user?.role}
         </p>
 
+        {/* --------- Do Not Remove It ------------- */}
         <Container className="py-2">
-          <div className="d-flex align-items-center mb-2">
-
-          {/* --------- Do Not Remove It ------------- */}
-
-            {/* <Button
-              variant="outline-success"
-              onClick={() => setModalOpen(true)}
-              style={{ marginRight: 20 }}
-            >
-              {t("adminAddService")}
-            </Button> */}
-
-            {/* Add Room button */}
-            <Button variant="outline-primary" onClick={() => setModalOpen(true)}>
-              ➕ Room
-            </Button>
-          </div>
-
-          <AdminAddService show={false} onHide={() => {}} onCreated={handleServiceCreated} token={token} />
-          <hr />
+          <AdminAddService
+            show={showAddModal}
+            onHide={() => setShowAddModal(false)}
+            onCreated={handleServiceCreated}
+            token={token}
+          />
         </Container>
 
         {/* Tabs: Overview / Rooms / Services / Settings */}
@@ -198,9 +189,9 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                 <Nav.Item>
                   <Nav.Link eventKey="services">Services</Nav.Link>
                 </Nav.Item>
-                {/* <Nav.Item>
+                <Nav.Item>
                   <Nav.Link eventKey="settings">Settings</Nav.Link>
-                </Nav.Item> */}
+                </Nav.Item>
               </Nav>
             </Card.Header>
 
@@ -209,13 +200,17 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                 <Tab.Pane eventKey="overview">
                   <div className="mb-4">
                     <h4>Overview</h4>
-                    <p className="text-muted">Quick stats and admin shortcuts.</p>
+                    <p className="text-muted">
+                      Quick stats and admin shortcuts.
+                    </p>
                   </div>
 
                   <div className="container py-3">
                     <div className="row mb-4">
                       <div className="col-md-12">
-                        <h3 className="mb-3 text-center">{t("dashboardPreview")}</h3>
+                        <h3 className="mb-3 text-center">
+                          {t("dashboardPreview")}
+                        </h3>
                         {services.length === 0 ? (
                           <Alert variant="info">{t("admiNoServices")}</Alert>
                         ) : (
@@ -230,17 +225,26 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <div>
                       <h4 style={{ margin: 0 }}>Manage Rooms</h4>
-                      <p className="text-muted mb-0">Create, edit and remove rooms. Admin access required.</p>
+                      <p className="text-muted mb-0">
+                        Create, edit and remove rooms. Admin access required.
+                      </p>
                     </div>
                     <div>
-                      <Button variant="primary" onClick={() => setModalOpen(true)}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setModalRoomOpen(true)}
+                      >
                         Add Room
                       </Button>
                     </div>
                   </div>
 
                   {/* AddRoomManager handles listing, creating and refreshing rooms */}
-                  <RoomManager currentUser={user} token={token} onCreated={handleRoomCreated} />
+                  <RoomManager
+                    currentUser={user}
+                    token={token}
+                    onCreated={handleRoomCreated}
+                  />
 
                   {/* RoomList for a simple listing (kept for compatibility) */}
                   <div className="mt-4">
@@ -249,8 +253,21 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                 </Tab.Pane>
 
                 <Tab.Pane eventKey="services">
-                  <h5>Manage Services</h5>
-                  <p className="text-muted">Create and manage services.</p>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <h5>Manage Services</h5>
+                      <p className="text-muted">Create and manage services.</p>
+                    </div>
+
+                    <Button
+                      variant="outline-success"
+                      onClick={() => setShowAddModal(true)}
+                      style={{ marginRight: 20 }}
+                    >
+                      {t("adminAddService")}
+                    </Button>
+                  </div>
+
                   <div className="mt-3">
                     <ServicesGrid services={services} />
                   </div>
@@ -258,7 +275,9 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
 
                 <Tab.Pane eventKey="settings">
                   <h5>Settings</h5>
-                  <p className="text-muted">Admin settings and configuration.</p>
+                  <p className="text-muted">
+                    Admin settings and configuration.
+                  </p>
                 </Tab.Pane>
               </Tab.Content>
             </Card.Body>
@@ -266,8 +285,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
         </Tab.Container>
 
         <hr />
-
-        <CustomerMessages />
+          <CustomerMessages />
         <hr />
 
         <AdminDashboard
@@ -312,27 +330,53 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
         )}
 
         {errorRequested && <Alert variant="danger">{errorRequested}</Alert>}
-        <AdminRequestedServicesTable services={requestedServices} token={token} onStatusUpdate={handleStatusUpdate} />
+        <AdminRequestedServicesTable
+          services={requestedServices}
+          token={token}
+          onStatusUpdate={handleStatusUpdate}
+        />
 
         {errorScheduled && <Alert variant="danger">{errorScheduled}</Alert>}
-        <AdminScheduledServicesTable services={scheduledServices} token={token} onStatusUpdate={handleStatusUpdate} />
+        <AdminScheduledServicesTable
+          services={scheduledServices}
+          token={token}
+          onStatusUpdate={handleStatusUpdate}
+        />
 
         {errorShared && <Alert variant="danger">{errorShared}</Alert>}
         <AdminSharedServicesTable services={sharedServices} />
       </Container>
 
-      {/* Modal used for Add Room / Add Service actions */}
-      <Modal show={modalOpen} onHide={() => setModalOpen(false)} size="lg" centered>
+      {/*---- Modal used for Add Room / Add Service actions -----*/}
+      <Modal
+        show={modalRoomOpen}
+        onHide={() => setModalRoomOpen(false)}
+        size="lg"
+        centered
+      >
         <Modal.Header closeButton>
-          <Modal.Title>{t("adminAddItem") || "Add Item"}</Modal.Title>
+          <Modal.Title>{"Admin Add Item" || "Add Item"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* Render AddRoomManager's form or AdminAddService depending on context.
-              For simplicity, show AddRoomManager's internal modal/form when modalOpen is true.
-              If you prefer a dedicated AddRoomForm component, replace with that component. */}
-          <RoomManager currentUser={user} token={token} onCreated={handleRoomCreated} />
+          <RoomManager
+            currentUser={user}
+            token={token}
+            onCreated={handleRoomCreated}
+          />
         </Modal.Body>
       </Modal>
+
+      <footer className="text-center py-4 border-top">
+        <small>
+          <p>
+            <strong>{t("whoWeAre.footer.phones")}:</strong>{" "}
+            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <br />
+            {t("whoWeAre.footer.address")}
+          </p>
+          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
+        </small>
+      </footer>
     </>
   );
 }
