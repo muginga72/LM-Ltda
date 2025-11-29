@@ -9,7 +9,7 @@ const multer = require('multer');
 const roomsController = require('../../controllers/roomrental/roomsController');
 const { protect, adminOnly } = require('../../middleware/authMiddleware');
 
-// Quick runtime checks to fail fast with clear message if imports are wrong
+// Runtime checks
 if (!roomsController || typeof roomsController !== 'object') {
   throw new Error('Invalid import: controllers/roomrental/roomsController must export an object');
 }
@@ -22,10 +22,11 @@ if (typeof protect !== 'function' || typeof adminOnly !== 'function') {
   }
 });
 
-// Multer setup
+// Ensure upload directory exists
 const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'rooms');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
+// Disk storage so files persist
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -33,12 +34,85 @@ const storage = multer.diskStorage({
     cb(null, unique);
   }
 });
-const upload = multer({ storage });
 
-// Routes: protect must run before adminOnly so req.user exists
-router.get('/', protect, roomsController.getRooms); // public or authenticated list
-router.post('/', protect, adminOnly, upload.array('roomImages', 8), roomsController.createRoom);
-router.put('/:id', protect, adminOnly, upload.array('roomImages', 8), roomsController.updateRoom);
+// Accept images only and limit size
+const fileFilter = (req, file, cb) => {
+  if (!file.mimetype.startsWith('image/')) return cb(new Error('Only image files are allowed'), false);
+  cb(null, true);
+};
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
+  fileFilter,
+});
+
+// Match frontend field name exactly: images
+const imagesUpload = upload.array('images', 12);
+
+function safeParse(value, fallback) {
+  if (value === undefined || value === null || value === '') return fallback;
+  if (typeof value !== 'string') return value;
+  try { return JSON.parse(value); } catch (e) { return fallback; }
+}
+
+// Helper: build images metadata from multer files
+function buildImagesArray(files) {
+  if (!Array.isArray(files)) return [];
+  return files.map(f => ({
+    filename: f.filename,
+    originalname: f.originalname,
+    mimetype: f.mimetype,
+    size: f.size,
+    url: `/uploads/rooms/${f.filename}`,
+    path: f.path
+  }));
+}
+
+// GET all rooms
+router.get('/', protect, roomsController.getRooms);
+
+// CREATE room with images
+router.post('/', protect, adminOnly, imagesUpload, async (req, res, next) => {
+  try {
+    const title = req.body.roomTitle || req.body.title || '';
+    req.body.roomTitle = title;
+    if (!title || String(title).trim() === '') {
+      return res.status(400).json({ message: 'Title is required' });
+    }
+
+    // Parse JSON-like fields if sent inside FormData
+    req.body.pricePerNight = safeParse(req.body.pricePerNight, req.body.pricePerNight);
+    req.body.roomLocation = safeParse(req.body.roomLocation, req.body.roomLocation);
+    req.body.amenities = safeParse(req.body.amenities, req.body.amenities || []);
+    req.body.rules = safeParse(req.body.rules, req.body.rules || []);
+    req.body.images = buildImagesArray(req.files);
+
+    return roomsController.createRoom(req, res, next);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// UPDATE room with optional images (appendImages=true to append)
+router.put('/:id', protect, adminOnly, imagesUpload, async (req, res, next) => {
+  try {
+    if (req.body.title && !req.body.roomTitle) req.body.roomTitle = req.body.title;
+    req.body.pricePerNight = safeParse(req.body.pricePerNight, req.body.pricePerNight);
+    req.body.roomLocation = safeParse(req.body.roomLocation, req.body.roomLocation);
+    req.body.amenities = safeParse(req.body.amenities, req.body.amenities);
+    req.body.rules = safeParse(req.body.rules, req.body.rules);
+
+    req.body.uploadedImages = buildImagesArray(req.files);
+    req.query.appendImages = String(req.query.appendImages || 'true').toLowerCase();
+
+    return roomsController.updateRoom(req, res, next);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE room
 router.delete('/:id', protect, adminOnly, roomsController.deleteRoom);
 
 module.exports = router;
