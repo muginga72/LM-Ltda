@@ -1,5 +1,14 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Form, Row, Col, Button, InputGroup, Badge, ProgressBar, Alert } from "react-bootstrap";
+import {
+  Form,
+  Row,
+  Col,
+  Button,
+  InputGroup,
+  Badge,
+  ProgressBar,
+  Alert,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import { createRoom } from "../../api/roomsApi";
@@ -159,16 +168,39 @@ function RoomForm({ onCreated, onCancel }) {
     try {
       const formData = new FormData();
       formData.append("roomTitle", form.roomTitle);
-      formData.append("title", form.roomTitle);
       formData.append("roomDescription", form.roomDescription || "");
-      formData.append("roomCapacity", String(form.roomCapacity));
-      formData.append("bedrooms", String(form.bedrooms));
-      formData.append("bathrooms", String(form.bathrooms));
-      formData.append("minNights", String(form.minNights));
-      formData.append("maxNights", String(form.maxNights));
-      formData.append("instantBook", form.instantBook ? "true" : "false");
-      formData.append("pricePerNight", JSON.stringify(form.pricePerNight));
-      formData.append("roomLocation", JSON.stringify(form.roomLocation));
+      formData.append(
+        "roomCapacity",
+        JSON.stringify(Number(form.roomCapacity))
+      );
+      formData.append("bedrooms", JSON.stringify(Number(form.bedrooms)));
+      formData.append("bathrooms", JSON.stringify(Number(form.bathrooms)));
+      formData.append("minNights", JSON.stringify(Number(form.minNights)));
+      formData.append("maxNights", JSON.stringify(Number(form.maxNights)));
+      formData.append("instantBook", JSON.stringify(Boolean(form.instantBook)));
+
+      // Nested objects
+      formData.append(
+        "pricePerNight",
+        JSON.stringify({
+          amount: Number(form.pricePerNight.amount),
+          currency: form.pricePerNight.currency || "USD",
+        })
+      );
+
+      formData.append(
+        "roomLocation",
+        JSON.stringify({
+          address: form.roomLocation.address || "",
+          city: form.roomLocation.city || "",
+          region: form.roomLocation.region || "",
+          country: form.roomLocation.country || "",
+          coordinates: Array.isArray(form.roomLocation.coordinates)
+            ? form.roomLocation.coordinates.map(Number).filter((n) => !isNaN(n))
+            : [],
+        })
+      );
+
       formData.append("amenities", JSON.stringify(form.amenities || []));
       formData.append("rules", JSON.stringify(form.rules || []));
 
