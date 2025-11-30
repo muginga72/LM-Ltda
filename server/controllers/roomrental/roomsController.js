@@ -16,24 +16,57 @@ const getRooms = async (req, res) => {
 
 const createRoom = async (req, res) => {
   try {
-    const { title, description, price, capacity } = req.body || {};
-    if (!title) return res.status(400).json({ message: 'Title is required' });
+    const parse = (val, fallback) => {
+      try {
+        return typeof val === "string" ? JSON.parse(val) : val;
+      } catch {
+        return fallback;
+      }
+    };
 
-    const images = (req.files || []).map(f => path.relative(process.cwd(), f.path));
+    const roomTitle = req.body.roomTitle || req.body.title;
+    if (!roomTitle) return res.status(400).json({ message: "roomTitle is required" });
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: missing user" });
+    }
+
+    const images = (req.files || []).map((file) => ({
+      filename: file.originalname,
+      mimetype: file.mimetype,
+      url: `/uploads/rooms/${file.filename}`,
+      path: file.path,
+    }));
 
     const room = new Room({
-      title,
-      description,
-      price: price ? Number(price) : undefined,
-      capacity: capacity ? Number(capacity) : undefined,
-      images
+      roomTitle,
+      roomDescription: req.body.roomDescription || "",
+      roomCapacity: Number(req.body.roomCapacity) || 1,
+      bedrooms: Number(req.body.bedrooms) || 1,
+      bathrooms: Number(req.body.bathrooms) || 1,
+      minNights: Number(req.body.minNights) || 1,
+      maxNights: Number(req.body.maxNights) || 30,
+      instantBook: req.body.instantBook === "true",
+      archived: false,
+      pricePerNight: parse(req.body.pricePerNight, { amount: 100, currency: "USD" }),
+      roomLocation: parse(req.body.roomLocation, {
+        address: "",
+        city: "",
+        region: "",
+        country: "",
+        coordinates: [],
+      }),
+      amenities: parse(req.body.amenities, []),
+      rules: parse(req.body.rules, []),
+      images,
+      host: req.user._id,
     });
 
     await room.save();
-    res.status(201).json({ message: 'Room created', room });
+    res.status(201).json(room);
   } catch (err) {
-    console.error('createRoom error:', err);
-    res.status(500).json({ message: 'Failed to create room.' });
+    console.error("createRoom error:", err);
+    res.status(500).json({ message: "Room creation failed", error: err.message });
   }
 };
 
