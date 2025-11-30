@@ -62,7 +62,7 @@ export default function RoomList({ refreshKey, archived = false }) {
             <div
               style={{
                 flex: "0 0 180px",
-                width: 180,
+                width: 150,
                 height: "100%",
                 borderRadius: 6,
                 overflow: "hidden",

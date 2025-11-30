@@ -159,6 +159,7 @@ function RoomForm({ onCreated, onCancel }) {
     try {
       const formData = new FormData();
       formData.append("roomTitle", form.roomTitle);
+      formData.append("title", form.roomTitle);
       formData.append("roomDescription", form.roomDescription || "");
       formData.append("roomCapacity", String(form.roomCapacity));
       formData.append("bedrooms", String(form.bedrooms));
@@ -362,7 +363,7 @@ function RoomForm({ onCreated, onCancel }) {
               >
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
-                <option value="BRL">BRL</option>
+                <option value="BRL">AOA</option>
               </Form.Select>
             </InputGroup>
           </Form.Group>

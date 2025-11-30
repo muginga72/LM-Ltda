@@ -239,16 +239,24 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                     </div>
                   </div>
 
-                  {/* AddRoomManager handles listing, creating and refreshing rooms */}
+                  {/* RoomManager handles listing, creating and refreshing rooms */}
                   <RoomManager
                     currentUser={user}
                     token={token}
                     onCreated={handleRoomCreated}
                   />
 
-                  {/* RoomList for a simple listing (kept for compatibility) */}
-                  <div className="mt-4">
-                    <RoomList refreshKey={refreshKey} />
+                  <div
+                    className="mt-4"
+                    style={{
+                      maxHeight: "80vh", 
+                      overflowY: "auto",
+                      paddingRight: 8, 
+                    }}
+                  >
+                    <Row className="g-3">
+                      <RoomList refreshKey={refreshKey} />
+                    </Row>
                   </div>
                 </Tab.Pane>
 
@@ -285,7 +293,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
         </Tab.Container>
 
         <hr />
-          <CustomerMessages />
+        <CustomerMessages />
         <hr />
 
         <AdminDashboard
@@ -369,12 +377,13 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
       <footer className="text-center py-4 border-top">
         <small>
           <p>
-            <strong>{t("whoWeAre.footer.phones")}:</strong>{" "}
-            (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <strong>{t("whoWeAre.footer.phones")}:</strong> (+244) 222 022 351;
+            (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
+          &copy; {new Date().getFullYear()} LM-Ltd Services.{" "}
+          {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </>
