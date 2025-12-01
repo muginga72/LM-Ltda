@@ -35,8 +35,8 @@ i18n
           product6: "Beverage",
           product7: "Party Salon",
           product8: "Building Caculo",
-          promoText1: "Buy for Half Price",
-          promoText2: "Select from our Products List",
+          promoText1: "Stop being scammed by “fake realtors”.",
+          promoText2: "Enlist your room with us!",
           learnMoreBtn: "Learn More",
 
           // ---------- Card Sets -----------
@@ -423,8 +423,8 @@ i18n
           product6: "Bebidas",
           product7: "Salão de Festas",
           product8: "Edificio Caculo",
-          promoText1: "Compre Pela Metade do Preço",
-          promoText2: "Acesse a nossa lista de produtos disponíveis.",
+          promoText1: "Pare de ser aldrabado pelos “matoxeiros”.",
+          promoText2: "Aliste o seu quarto conosco!",
           learnMoreBtn: "Explore Mais",
 
           // ---------------- Card Sets --------------------
@@ -813,8 +813,8 @@ i18n
           product6: "Boire",
           product7: "Salon de fête",
           product8: "Edificio Calculo",
-          promoText1: "Achetez à moitié prix",
-          promoText2: "Consultez notre liste de produits disponibles.",
+          promoText1: "Cessez de vous faire arnaquer par des “faux agents immobiliers”.",
+          promoText2: "Réservez votre chambre chez nous!",
           learnMoreBtn: "Apprendre encore plus",
 
           // ---------- Card Sets -----------

@@ -184,13 +184,13 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                   <Nav.Link eventKey="overview">Overview</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="rooms">Rooms</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
                   <Nav.Link eventKey="services">Services</Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="settings">Settings</Nav.Link>
+                  <Nav.Link eventKey="rooms">Rooms</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="bookings">Bookings</Nav.Link>
                 </Nav.Item>
               </Nav>
             </Card.Header>
@@ -281,10 +281,10 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                   </div>
                 </Tab.Pane>
 
-                <Tab.Pane eventKey="settings">
-                  <h5>Settings</h5>
+                <Tab.Pane eventKey="bookings">
+                  <h5>Bookings</h5>
                   <p className="text-muted">
-                    Admin settings and configuration.
+                    List all bookings made by the users.
                   </p>
                 </Tab.Pane>
               </Tab.Content>
