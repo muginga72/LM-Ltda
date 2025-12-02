@@ -29,7 +29,7 @@ import AdminScheduledServicesTable from "../components/admin/adminTables/AdminSc
 import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
 
 import RoomManager from "../components/roomrentals/RoomManager.jsx";
-import RoomList from "../components/roomrentals/RoomList.jsx";
+// import RoomList from "../components/roomrentals/RoomList.jsx";
 
 function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   const { t } = useTranslation();
@@ -223,7 +223,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
 
                 <Tab.Pane eventKey="rooms">
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div>
+                    {/* <div>
                       <h4 style={{ margin: 0 }}>Manage Rooms</h4>
                       <p className="text-muted mb-0">
                         Create, edit and remove rooms. Admin access required.
@@ -236,7 +236,7 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                       >
                         Add Room
                       </Button>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* RoomManager handles listing, creating and refreshing rooms */}
@@ -254,9 +254,9 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                       paddingRight: 8, 
                     }}
                   >
-                    <Row className="g-3">
+                    {/* <Row className="g-3">
                       <RoomList refreshKey={refreshKey} />
-                    </Row>
+                    </Row> */}
                   </div>
                 </Tab.Pane>
 

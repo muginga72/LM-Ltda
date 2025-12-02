@@ -19,10 +19,10 @@ import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import { useTranslation } from "react-i18next";
 
-import RoomCardUser from "../components/roomrentals/RoomCardUser";
-import BookingModal from "../components/roomrentals/BookingModal";
-import RequestListRoomModal from "../components/roomrentals/RequestListRoomModal";
-import MyBookings from "../components/roomrentals/MyBookings";
+// import RoomCardUser from "../components/roomrentals/RoomCardUser";
+// import BookingModal from "../components/roomrentals/BookingModal";
+// import RequestListRoomModal from "../components/roomrentals/RequestListRoomModal";
+// import MyBookings from "../components/roomrentals/MyBookings";
 
 function UserOnlyDashboard({
   apiBaseUrl,
@@ -119,45 +119,45 @@ function UserOnlyDashboard({
   }, [user, apiBaseUrl, t]);
 
   // --------- UseEffect for the rooms liating and booking ------------
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    const q = new URLSearchParams({
-      archived: "false",
-      limit: "100",
-    }).toString();
-    axios
-      .get(`/api/rooms?${q}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-      .then((res) => {
-        if (!mounted) return;
-        const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-        setRooms(data);
-        setError(null);
-      })
-      .catch((err) => {
-        console.error("Failed to load rooms", err);
-        if (!mounted) return;
-        setError("Unable to load rooms");
-      })
-      .finally(() => mounted && setLoading(false));
-    return () => {
-      mounted = false;
-    };
-  }, [token, refreshKey]);
+  // useEffect(() => {
+  //   let mounted = true;
+  //   setLoading(true);
+  //   const q = new URLSearchParams({
+  //     archived: "false",
+  //     limit: "100",
+  //   }).toString();
+  //   axios
+  //     .get(`/api/rooms?${q}`, {
+  //       headers: token ? { Authorization: `Bearer ${token}` } : {},
+  //     })
+  //     .then((res) => {
+  //       if (!mounted) return;
+  //       const data = Array.isArray(res.data) ? res.data : res.data.data || [];
+  //       setRooms(data);
+  //       setError(null);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Failed to load rooms", err);
+  //       if (!mounted) return;
+  //       setError("Unable to load rooms");
+  //     })
+  //     .finally(() => mounted && setLoading(false));
+  //   return () => {
+  //     mounted = false;
+  //   };
+  // }, [token, refreshKey]);
 
-  function openBooking(room) {
-    setSelectedRoom(room);
-    setBookingOpen(true);
-  }
+  // function openBooking(room) {
+  //   setSelectedRoom(room);
+  //   setBookingOpen(true);
+  // }
 
-  // when booking succeeds, bump refreshKey to refresh MyBookings and rooms if needed
-  function onBooked(result) {
-    setBookingOpen(false);
-    setSelectedRoom(null);
-    setRefreshKey((k) => k + 1);
-  }
+  // // when booking succeeds, bump refreshKey to refresh MyBookings and rooms if needed
+  // function onBooked(result) {
+  //   setBookingOpen(false);
+  //   setSelectedRoom(null);
+  //   setRefreshKey((k) => k + 1);
+  // }
 
   function openRequestModal() {
     setRequestModalOpen(true);
@@ -293,8 +293,8 @@ function UserOnlyDashboard({
         />
         <hr />
 
-        <Container className="py-4">
-          {/* ----------------- AVAILABLE ROOMS & LISTING ------------------------- */}
+        {/* <Container className="py-4">
+          
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h3>Available Rooms</h3>
             <div>
@@ -316,7 +316,6 @@ function UserOnlyDashboard({
 
           <hr style={{ margin: "2rem 0" }} />
 
-          {/* ----------------- My bookings panel ------------------- */}
           <MyBookings refreshKey={refreshKey} />
 
           <BookingModal
@@ -331,7 +330,7 @@ function UserOnlyDashboard({
             onHide={() => setRequestModalOpen(false)}
             onSubmitted={onRequestSubmitted}
           />
-        </Container>
+        </Container>*/}
 
         <hr />
         <div className="dashboard-container">

@@ -5,13 +5,13 @@ import { LinkContainer } from "react-router-bootstrap";
 import { AuthContext } from "../contexts/AuthContext";
 import logo from "../assets/logo-v01.png";
 import ProfileModal from "./ProfileModal";
-import BookRoomModal from "../components/roomrentals/BookRoomModal";
+// import BookRoomModal from "../components/roomrentals/BookRoomModal";
 
 const NavigationBar = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showBookModal, setShowBookModal] = useState(false);
+  // const [showBookModal, setShowBookModal] = useState(false);
 
   const initials = user?.fullName
     ? user.fullName
@@ -83,7 +83,7 @@ const NavigationBar = () => {
                 Services
               </Nav.Link>
 
-              <NavDropdown title="Rooms" id="rooms-nav-dropdown" align="end" role="menu">
+              {/* <NavDropdown title="Rooms" id="rooms-nav-dropdown" align="end" role="menu">
                 <LinkContainer to="/rooms/list">
                   <NavDropdown.Item>List Rooms</NavDropdown.Item>
                 </LinkContainer>
@@ -91,7 +91,7 @@ const NavigationBar = () => {
                 <NavDropdown.Item onClick={() => setShowBookModal(true)}>
                   Book Room
                 </NavDropdown.Item>
-              </NavDropdown>
+              </NavDropdown> */}
 
               {!user ? (
                 <>
@@ -142,7 +142,7 @@ const NavigationBar = () => {
         <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />
       )}
 
-      <BookRoomModal show={showBookModal} onHide={() => setShowBookModal(false)} />
+      {/* <BookRoomModal show={showBookModal} onHide={() => setShowBookModal(false)} /> */}
     </>
   );
 };

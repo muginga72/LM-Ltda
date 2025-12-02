@@ -5,7 +5,7 @@ import ServicesPromo from "./components/ServicesPromo";
 import NewAdminDashboard from "./pages/NewAdminDashboard";
 import UserOnlyDashboard from "./pages/UserOnlyDashboard"; // fixed typo: was UserOnlyDashboar
 import AdminRoute from "./components/admin/AdminRoute";
-import Room from "../../client/src/pages/roomrental/Room";
+// import Room from "../../client/src/pages/roomrental/Room";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminLogin from "./pages/AdminLogin";
 import LearnMore from "./pages/LearnMore";
@@ -45,7 +45,7 @@ function App() {
         <Route path="/who-we-are" element={<WhoWeAre />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/rooms/:id" element={<Room />} />
+        {/* <Route path="/rooms/:id" element={<Room />} /> */}
 
         {/* Protected User Dashboard */}
         <Route
