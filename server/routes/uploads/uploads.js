@@ -1,66 +1,40 @@
-// server/routes/uploads.js
 const express = require('express');
 const path = require('path');
-const upload = require('../ulpoads');
+const multer = require('multer');
+const fs = require('fs');
+
 const router = express.Router();
 
-// Fields we expect across forms
-const fields = [
-  { name: 'roomImages', maxCount: 8 },
-  { name: 'bookingImages', maxCount: 8 },
-  { name: 'id', maxCount: 1 },
-  { name: 'passport', maxCount: 1 },
-  { name: 'paymentReceipt', maxCount: 3 },
-  { name: 'serviceFile', maxCount: 5 },
-];
+// Ensure upload directory exists
+const UPLOAD_DIR = path.join(__dirname, '../../public/uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// Generic combined upload endpoint used by room form booking modal services and payments
-router.post('/upload-docs', (req, res) => {
-  const uploader = upload.fields(fields);
-  uploader(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    }
-
-    // Build response with accessible URLs
-    const files = {};
-    if (req.files) {
-      for (const field in req.files) {
-        files[field] = req.files[field].map((f) => {
-          const relPath = path.relative(path.join(__dirname, '..', '..', 'uploads'), f.path);
-          const url = `/uploads/${relPath.replace(/\\/g, '/')}`;
-          return {
-            originalName: f.originalname,
-            filename: f.filename,
-            mimeType: f.mimetype,
-            size: f.size,
-            url,
-          };
-        });
-      }
-    }
-
-    return res.json({ success: true, files });
-  });
+// Multer storage config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+  filename: (req, file, cb) => {
+    const safeName = Date.now() + '-' + file.originalname.replace(/\s+/g, '-');
+    cb(null, safeName);
+  }
 });
 
-// Optional: separate endpoints for rooms or services if you prefer
-router.post('/rooms/upload', (req, res) => {
-  const uploader = upload.fields([{ name: 'roomImages', maxCount: 8 }, { name: 'serviceFile', maxCount: 3 }]);
-  uploader(req, res, (err) => {
-    if (err) return res.status(400).json({ success: false, message: err.message });
-    const files = {};
-    if (req.files) {
-      for (const field in req.files) {
-        files[field] = req.files[field].map((f) => {
-          const relPath = path.relative(path.join(__dirname, '..', '..', 'uploads'), f.path);
-          const url = `/uploads/${relPath.replace(/\\/g, '/')}`;
-          return { originalName: f.originalname, filename: f.filename, mimeType: f.mimetype, size: f.size, url };
-        });
-      }
-    }
-    return res.json({ success: true, files });
-  });
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10 MB
+});
+
+// POST /uploads/upload  -> single file upload (field name: file)
+router.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const publicPath = `/uploads/${req.file.filename}`;
+  res.json({ filename: req.file.filename, url: publicPath });
+});
+
+// GET /uploads/:filename -> serve uploaded file
+router.get('/:filename', (req, res) => {
+  const filePath = path.join(UPLOAD_DIR, req.params.filename);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Not found' });
+  res.sendFile(filePath);
 });
 
 module.exports = router;
