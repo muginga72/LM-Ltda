@@ -1,15 +1,7 @@
-// src/components/roomrentals/RoomCard.jsx
+// src/components/roomrentals/RoomCardWithPay.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { resolveRoomImage } from "../../utils/imageUtils";
-
-/**
- * RoomCard (user-facing)
- * - Image left, content right
- * - Buttons: Book, Details, Pay (if available)
- * - Shows price, capacity (guests), bedrooms, bathrooms
- * - Displays rules as badges
- */
 
 const PLACEHOLDER = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
   `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'>
@@ -59,7 +51,7 @@ export default function RoomCardWithPay({ room, onBook, onDetails, onPay, classN
             src={imgUrl}
             alt={title}
             className="img-fluid rounded-start"
-            style={{ width: "100%", height: 160, objectFit: "cover" }}
+            style={{ width: "100%", height: 195, objectFit: "cover" }}
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PLACEHOLDER; }}
           />
         </div>
@@ -79,7 +71,7 @@ export default function RoomCardWithPay({ room, onBook, onDetails, onPay, classN
               <p className="card-text text-truncate" style={{ maxHeight: 48 }}>{desc}</p>
 
               {rules.length > 0 && (
-                <div className="mt-2">
+                <div className="my-2">
                   {rules.map((r, idx) => (
                     <span key={idx} className="badge bg-secondary me-1" title={r}>
                       {r}
