@@ -13,168 +13,315 @@ import {
   Row,
   Col,
   Modal,
+  Tabs,
+  Tab,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import { useTranslation } from "react-i18next";
+import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
+// import PaymentModal from "../components/roomrentals/PaymentModal";
 
-// import RoomCardUser from "../components/roomrentals/RoomCardUser";
-// import BookingModal from "../components/roomrentals/BookingModal";
-// import RequestListRoomModal from "../components/roomrentals/RequestListRoomModal";
-// import MyBookings from "../components/roomrentals/MyBookings";
-
-function UserOnlyDashboard({
+export default function UserOnlyDashboard({
   apiBaseUrl,
   token,
   initialServices,
   onProofSubmitted,
   onServiceSelect,
   userId,
-  headers,
+  headers = {},
 }) {
   const { user } = useContext(AuthContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const [requestedServices, setRequestedServices] = useState([]);
-  const [scheduledServices, setScheduledServices] = useState([]);
-  const [sharedServices, setSharedServices] = useState([]);
+  // Determine whether current viewer is a non-admin user
+  const isUser = Boolean(user && user.role !== "admin");
 
-  const [loading, setLoading] = useState(true);
+  // Services state
+  const [requestedServices, setRequestedServices] = useState(
+    initialServices?.requested || []
+  );
+  const [scheduledServices, setScheduledServices] = useState(
+    initialServices?.scheduled || []
+  );
+  const [sharedServices, setSharedServices] = useState(
+    initialServices?.shared || []
+  );
+
+  const [loadingServices, setLoadingServices] = useState(!initialServices);
   const [errorRequested, setErrorRequested] = useState("");
   const [errorScheduled, setErrorScheduled] = useState("");
   const [errorShared, setErrorShared] = useState("");
-  const [showModal, setShowModal] = useState(false);
+
+  // Rooms state
+  const [rooms, setRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [errorRooms, setErrorRooms] = useState(null);
+
+  // Bookings (placeholder)
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [errorBookings, setErrorBookings] = useState(null);
+
+  // UI state
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [emailSupportModal, setEmailSupportModal] = useState(false);
 
-  const [rooms, setRooms] = useState([]);
-  const [error, setError] = useState(null);
+  // Payment / booking selection state
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+  const [showPayModal, setShowPayModal] = useState(false);
+
+  // Room payment modal
+  const [paymentRoom, setPaymentRoom] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // Room details / booking state
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [requestModalOpen, setRequestModalOpen] = useState(false);
 
-  // bump this to refresh both room list and bookings
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const handlePayClick = (serviceId) => {
-    setSelectedServiceId(serviceId);
-    setShowModal(true);
+  // refresh key to re-fetch lists when needed
+  const [refreshKey] = useState(0);
+  
+  // Build headers (prefer token prop, otherwise use user.token)
+  const authToken =
+    token || user?.token || localStorage.getItem("authToken") || null;
+  const defaultHeaders = {
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    "Cache-Control": "no-cache",
+    ...headers,
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedServiceId(null);
-  };
-
+  // Fetch services (requested, scheduled, shared)
   useEffect(() => {
-    if (!user || user.role === "admin") return;
+    let mounted = true;
+    if (!isUser) {
+      setLoadingServices(false);
+      return () => {
+        mounted = false;
+      };
+    }
 
-    const headers = {
-      Authorization: `Bearer ${user.token}`,
-      "Cache-Control": "no-cache",
-    };
+    setLoadingServices(true);
+    setErrorRequested("");
+    setErrorScheduled("");
+    setErrorShared("");
 
     const fetchRequested = async () => {
       try {
-        const res = await axios.get("/api/requests", { headers });
-        const filtered = res.data.filter(
-          (item) => item.email === user.email || item.fullName === user.fullName
-        );
+        const res = await axios.get("/api/requests", {
+          headers: defaultHeaders,
+        });
+        const filtered = Array.isArray(res.data)
+          ? res.data.filter(
+              (item) =>
+                item.email === user.email || item.fullName === user.fullName
+            )
+          : [];
+        if (!mounted) return;
         setRequestedServices(filtered);
       } catch (err) {
         console.error("Requested services error:", err);
-        setErrorRequested(t("dashboard.failedRequested"));
+        if (!mounted) return;
+        setErrorRequested(
+          t("dashboard.failedRequested") || "Failed to load requested services."
+        );
       }
     };
 
     const fetchScheduled = async () => {
       try {
-        const res = await axios.get("/api/schedules", { headers });
-        const filtered = res.data.filter(
-          (item) => item.fullName === user.fullName
-        );
+        const res = await axios.get("/api/schedules", {
+          headers: defaultHeaders,
+        });
+        const filtered = Array.isArray(res.data)
+          ? res.data.filter((item) => item.fullName === user.fullName)
+          : [];
+        if (!mounted) return;
         setScheduledServices(filtered);
       } catch (err) {
         console.error("Scheduled services error:", err);
-        setErrorScheduled(t("dashboard.failedScheduled"));
+        if (!mounted) return;
+        setErrorScheduled(
+          t("dashboard.failedScheduled") || "Failed to load scheduled services."
+        );
       }
     };
 
     const fetchShared = async () => {
       try {
-        const res = await axios.get("/api/shares", { headers });
-        const filtered = res.data.filter((item) => item.email === user.email);
+        const res = await axios.get("/api/shares", { headers: defaultHeaders });
+        const filtered = Array.isArray(res.data)
+          ? res.data.filter((item) => item.email === user.email)
+          : [];
+        if (!mounted) return;
         setSharedServices(filtered);
       } catch (err) {
         console.error("Shared services error:", err);
-        setErrorShared(t("dashboard.failedShared"));
+        if (!mounted) return;
+        setErrorShared(
+          t("dashboard.failedShared") || "Failed to load shared services."
+        );
       }
     };
 
     Promise.all([fetchRequested(), fetchScheduled(), fetchShared()]).finally(
-      () => setLoading(false)
+      () => {
+        if (mounted) setLoadingServices(false);
+      }
     );
-  }, [user, apiBaseUrl, t]);
 
-  // --------- UseEffect for the rooms liating and booking ------------
-  // useEffect(() => {
-  //   let mounted = true;
-  //   setLoading(true);
-  //   const q = new URLSearchParams({
-  //     archived: "false",
-  //     limit: "100",
-  //   }).toString();
-  //   axios
-  //     .get(`/api/rooms?${q}`, {
-  //       headers: token ? { Authorization: `Bearer ${token}` } : {},
-  //     })
-  //     .then((res) => {
-  //       if (!mounted) return;
-  //       const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-  //       setRooms(data);
-  //       setError(null);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to load rooms", err);
-  //       if (!mounted) return;
-  //       setError("Unable to load rooms");
-  //     })
-  //     .finally(() => mounted && setLoading(false));
-  //   return () => {
-  //     mounted = false;
-  //   };
-  // }, [token, refreshKey]);
+    return () => {
+      mounted = false;
+    };
+  }, [user, refreshKey, apiBaseUrl, t, isUser]);
 
-  // function openBooking(room) {
-  //   setSelectedRoom(room);
-  //   setBookingOpen(true);
-  // }
+  // Fetch rooms
+  useEffect(() => {
+    let mounted = true;
+    if (!isUser) {
+      setLoadingRooms(false);
+      return () => {
+        mounted = false;
+      };
+    }
 
-  // // when booking succeeds, bump refreshKey to refresh MyBookings and rooms if needed
-  // function onBooked(result) {
-  //   setBookingOpen(false);
-  //   setSelectedRoom(null);
-  //   setRefreshKey((k) => k + 1);
-  // }
+    setLoadingRooms(true);
+    setErrorRooms(null);
 
-  function openRequestModal() {
-    setRequestModalOpen(true);
-  }
+    (async () => {
+      try {
+        const res = await axios.get("/api/rooms", { headers: defaultHeaders });
+        const data = Array.isArray(res.data) ? res.data : res.data?.rooms || [];
+        if (!mounted) return;
+        setRooms(data);
+      } catch (err) {
+        console.error("Rooms fetch error:", err);
+        if (!mounted) return;
+        setErrorRooms("Failed to load rooms.");
+      } finally {
+        if (mounted) setLoadingRooms(false);
+      }
+    })();
 
-  function onRequestSubmitted() {
-    setRequestModalOpen(false);
-  }
+    return () => {
+      mounted = false;
+    };
+  }, [user, refreshKey]);
 
-  if (loading) {
+  // Fetch bookings (placeholder) — replace endpoint with your real bookings API
+  useEffect(() => {
+    let mounted = true;
+    if (!isUser) {
+      setLoadingBookings(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    setLoadingBookings(true);
+    setErrorBookings(null);
+
+    (async () => {
+      try {
+        const res = await axios.get("/api/bookings/my", {
+          headers: defaultHeaders,
+        });
+        if (!mounted) return;
+        setBookings(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.warn("Bookings fetch warning:", err);
+        if (!mounted) return;
+        setBookings([]);
+      } finally {
+        if (mounted) setLoadingBookings(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user, refreshKey]);
+
+  // UI handlers
+  const handlePayService = (serviceId) => {
+    setSelectedServiceId(serviceId);
+    setShowPayModal(true);
+  };
+
+  const handleClosePayModal = () => {
+    setShowPayModal(false);
+    setSelectedServiceId(null);
+  };
+
+  const handleDetails = (room) => {
+    navigate(`/rooms/${room._id}/details`);
+  };
+
+  const handlePayRoom = (room) => {
+    setPaymentRoom(room);
+    setShowPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+    setPaymentRoom(null);
+  };
+
+  // Render helpers
+  const renderServiceSummary = (services, title) => {
+    if (!services || services.length === 0) {
+      return (
+        <Card className="mb-3">
+          <Card.Body>
+            <Card.Title>{title}</Card.Title>
+            <div className="text-muted">
+              {t("dashboard.noServicesShort") || "No items"}
+            </div>
+          </Card.Body>
+        </Card>
+      );
+    }
+
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" />
-      </Container>
+      <Row className="mb-3">
+        {services.slice(0, 3).map((s) => (
+          <Col key={s._id} md={6} lg={4} className="mb-2">
+            <Card>
+              <Card.Body>
+                <Card.Title className="mb-1">
+                  {s.serviceTitle || s.title}
+                </Card.Title>
+                <Card.Text className="text-muted small">
+                  {s.serviceType || s.details || s.date}
+                </Card.Text>
+                <div className="d-flex gap-2 mt-2">
+                  <Button
+                    size="sm"
+                    variant={s.paid ? "success" : "outline-primary"}
+                    onClick={() => handlePayService(s._id)}
+                  >
+                    {s.paid
+                      ? t("dashboard.paid") || "Paid"
+                      : t("dashboard.pay") || "Pay"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="link"
+                    onClick={() => onServiceSelect?.(s)}
+                  >
+                    {t("dashboard.view") || "View"}
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
     );
-  }
-  // ------------------ End of rooms code -----------------------
+  };
 
   const renderServiceCards = (titleKey, services, error, typeKey) => (
     <>
@@ -215,7 +362,7 @@ function UserOnlyDashboard({
                         ) : (
                           <Button
                             variant="outline-primary"
-                            onClick={() => handlePayClick(item._id)}
+                            onClick={() => handlePayService(item._id)}
                           >
                             {t("dashboard.payInstructions")}
                           </Button>
@@ -230,8 +377,8 @@ function UserOnlyDashboard({
                     >
                       {item.imagePath ? (
                         <img
-                          src="/api/requests/uploads/default.png"
-                          alt="Default"
+                          src={item.imagePath}
+                          alt={item.serviceTitle || "Service"}
                           className="img-fluid rounded"
                           style={{
                             maxHeight: "180px",
@@ -257,11 +404,163 @@ function UserOnlyDashboard({
     </>
   );
 
-  if (!user || user.role === "admin") {
+  const renderRooms = () => {
+    if (loadingRooms) {
+      return (
+        <div className="text-center py-4">
+          <Spinner animation="border" />
+        </div>
+      );
+    }
+
+    if (errorRooms) {
+      return <Alert variant="danger">{errorRooms}</Alert>;
+    }
+
+    if (!rooms || rooms.length === 0) {
+      return <div className="text-muted">No rooms available.</div>;
+    }
+
+    return (
+      <Row>
+        {rooms.map((r) => (
+          <Col key={r._id} md={6} lg={4} className="mb-3">
+            <RoomCardWithPay
+              room={r}
+              onDetails={(room) => handleDetails(room)}
+              onPay={(room) => handlePayRoom(room)}
+            />
+          </Col>
+        ))}
+      </Row>
+    );
+  };
+
+  const renderBookings = () => {
+    if (loadingBookings) {
+      return (
+        <div className="text-center py-4">
+          <Spinner animation="border" />
+        </div>
+      );
+    }
+
+    if (errorBookings) {
+      return <Alert variant="danger">{errorBookings}</Alert>;
+    }
+
+    if (!bookings || bookings.length === 0) {
+      return <div className="text-muted">You have no bookings yet.</div>;
+    }
+
+    return (
+      <Row>
+        {bookings.map((b) => (
+          <Col key={b._id} md={6} lg={4} className="mb-3">
+            <Card>
+              <Card.Body>
+                <Card.Title>{b.roomTitle || b.title || "Booking"}</Card.Title>
+                <Card.Text>
+                  {b.startDate
+                    ? `${new Date(
+                        b.startDate
+                      ).toLocaleDateString()} - ${new Date(
+                        b.endDate
+                      ).toLocaleDateString()}`
+                    : "Dates not specified"}
+                </Card.Text>
+                <div className="d-flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => navigate(`/rooms/${b.roomId}/details`)}
+                  >
+                    View room
+                  </Button>
+                  <Button size="sm" variant="outline-secondary" disabled>
+                    Manage
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    );
+  };
+
+  // Overview tab: show UserDashboard, calendars, and compact services + rooms
+  const renderOverview = () => (
+    <>
+      <h4 className="mb-3 text-center">{t("dashboard.overview")}</h4>
+
+      <h5 className="mt-4 mb-3">
+        {t("dashboard.availableRooms") || "Available rooms"}
+      </h5>
+
+      {/* ------------ Rendering Rooms ----------- */}
+      {renderRooms()}
+
+      <UserDashboard
+        apiBaseUrl={apiBaseUrl}
+        user={user}
+        token={authToken}
+        initialServices={initialServices}
+        onProofSubmitted={onProofSubmitted}
+        onServiceSelect={onServiceSelect}
+      />
+
+      <hr />
+
+      <div className="dashboard-container">
+        <ServiceCalendar userId={userId} />
+      </div>
+
+      <hr />
+
+      <div>
+        <UserCalendar apiBaseUrl={apiBaseUrl} headers={headers} user={user} />
+      </div>
+
+      <hr />
+
+      {loadingServices || loadingRooms ? (
+        <div className="text-center">
+          <Spinner animation="border" />
+          <p>{t("dashboard.loading")}</p>
+        </div>
+      ) : (
+        <>
+          {renderServiceCards(
+            "dashboard.requested",
+            requestedServices,
+            errorRequested,
+            "dashboard.requested"
+          )}
+          {renderServiceCards(
+            "dashboard.scheduled",
+            scheduledServices,
+            errorScheduled,
+            "dashboard.scheduled"
+          )}
+          {renderServiceCards(
+            "dashboard.shared",
+            sharedServices,
+            errorShared,
+            "dashboard.shared"
+          )}
+        </>
+      )}
+    </>
+  );
+
+  // Final render: if not allowed, show access denied; hooks already ran above.
+  if (!isUser) {
     return (
       <Container style={{ padding: "2rem" }}>
         <Alert variant="warning" className="text-center">
-          {t("dashboard.accessDenied")}
+          {t("dashboard.accessDenied") ||
+            "Access denied. This area is for users only."}
         </Alert>
       </Container>
     );
@@ -274,101 +573,117 @@ function UserOnlyDashboard({
         <h5 className="text-center mb-4">
           {t("dashboard.welcome", { name: user.fullName })}
         </h5>
-        <p>
-          {t("dashboard.email")}: {user.email}
-        </p>
-        <p>
-          {t("dashboard.role")}: {user.role}
-        </p>
 
-        <hr />
+        <div className="mb-3 text-center">
+          <small className="text-muted">
+            {t("dashboard.email")}: {user.email} · {t("dashboard.role")}:{" "}
+            {user.role}
+          </small>
+        </div>
 
-        <UserDashboard
-          apiBaseUrl={apiBaseUrl}
-          user={user}
-          token={token}
-          initialServices={initialServices}
-          onProofSubmitted={onProofSubmitted}
-          onServiceSelect={onServiceSelect}
-        />
-        <hr />
+        <Tabs
+          defaultActiveKey="overview"
+          id="user-dashboard-tabs"
+          className="mb-3"
+        >
+          <Tab
+            eventKey="overview"
+            title={t("dashboard.tabOverview") || "Overview"}
+          >
+            <div className="mt-3">{renderOverview()}</div>
+          </Tab>
 
-        {/* <Container className="py-4">
-          
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h3>Available Rooms</h3>
-            <div>
-              <Button variant="outline-primary" onClick={openRequestModal}>
-                Request a Listing
-              </Button>
+          <Tab
+            eventKey="services"
+            title={t("dashboard.tabServices") || "Services"}
+          >
+            <div className="mt-3">
+              {loadingServices ? (
+                <div className="text-center py-4">
+                  <Spinner animation="border" />
+                </div>
+              ) : (
+                <>
+                  {renderServiceCards(
+                    "dashboard.requested",
+                    requestedServices,
+                    errorRequested,
+                    "dashboard.requestedType"
+                  )}
+                  {renderServiceCards(
+                    "dashboard.scheduled",
+                    scheduledServices,
+                    errorScheduled,
+                    "dashboard.scheduledType"
+                  )}
+                  {renderServiceCards(
+                    "dashboard.shared",
+                    sharedServices,
+                    errorShared,
+                    "dashboard.sharedType"
+                  )}
+                </>
+              )}
             </div>
-          </div>
+          </Tab>
 
-          {error && <Alert variant="danger">{error}</Alert>}
+          <Tab eventKey="rooms" title={t("dashboard.tabRooms") || "Rooms"}>
+            <div className="mt-3">{renderRooms()}</div>
+          </Tab>
 
-          <Row xs={1} sm={2} md={3} className="g-3">
-            {rooms.map((room) => (
-              <Col key={room._id}>
-                <RoomCardUser room={room} onBook={() => openBooking(room)} />
-              </Col>
-            ))}
-          </Row>
+          <Tab
+            eventKey="bookings"
+            title={t("dashboard.tabBookings") || "My Bookings"}
+          >
+            <div className="mt-3">{renderBookings()}</div>
+          </Tab>
+        </Tabs>
 
-          <hr style={{ margin: "2rem 0" }} />
+        {/* Upload / Support modals */}
+        <UploadDocumentModal
+          show={showUploadModal}
+          onHide={() => setShowUploadModal(false)}
+          onSubmitted={onProofSubmitted}
+        />
+        <EmailSupportModal
+          show={emailSupportModal}
+          onHide={() => setEmailSupportModal(false)}
+          userEmail={user?.email}
+          serviceId={selectedServiceId}
+        />
 
-          <MyBookings refreshKey={refreshKey} />
+        {/* Service pay confirmation modal */}
+        <Modal show={showPayModal} onHide={handleClosePayModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>{t("dashboard.pay") || "Pay"}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              {t("dashboard.payConfirm") ||
+                "You will be redirected to a secure payment page."}
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClosePayModal}>
+              {t("dashboard.cancel") || "Cancel"}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (selectedServiceId) {
+                  // Example: redirect to payment for selectedServiceId
+                  // To be replaced with real payment flow
+                  window.location.href = `/payments/checkout?serviceId=${selectedServiceId}`;
+                }
+              }}
+            >
+              {t("dashboard.proceedToPay") || "Proceed to payment"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-          <BookingModal
-            show={bookingOpen}
-            onHide={() => setBookingOpen(false)}
-            room={selectedRoom}
-            onBooked={onBooked}
-          />
-
-          <RequestListRoomModal
-            show={requestModalOpen}
-            onHide={() => setRequestModalOpen(false)}
-            onSubmitted={onRequestSubmitted}
-          />
-        </Container>*/}
-
-        <hr />
-        <div className="dashboard-container">
-          <ServiceCalendar userId={userId} />
-        </div>
-        <hr />
-        <div>
-          <UserCalendar apiBaseUrl={apiBaseUrl} headers={headers} user={user} />
-        </div>
-        <hr />
-        <h4 className="mb-3 text-center">{t("dashboard.overview")}</h4>
-        {loading ? (
-          <div className="text-center">
-            <Spinner animation="border" />
-            <p>{t("dashboard.loading")}</p>
-          </div>
-        ) : (
-          <>
-            {renderServiceCards(
-              "dashboard.requested",
-              requestedServices,
-              errorRequested,
-              "dashboard.requested"
-            )}
-            {renderServiceCards(
-              "dashboard.scheduled",
-              scheduledServices,
-              errorScheduled,
-              "dashboard.scheduled"
-            )}
-            {renderServiceCards(
-              "dashboard.shared",
-              sharedServices,
-              errorShared,
-              "dashboard.shared"
-            )}
-          </>
-        )}
+        {/* Room payment modal ---- For the Future ------- */}
+        {/* <PaymentModal show={showPaymentModal} onHide={handleClosePaymentModal} room={paymentRoom} token={authToken} /> */}
       </Container>
 
       {/* ---------------------------  FOOTER  ---------------------------- */}
@@ -384,53 +699,6 @@ function UserOnlyDashboard({
           {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
-
-      {/* Payment Instructions Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{t("modal.paymentInstructions.title")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>{t("modal.paymentInstructions.intro")}</p>
-          <ul>
-            <li>
-              <strong>{t("modal.paymentInstructions.bankName")}:</strong> BFA
-            </li>
-            <li>
-              <strong>{t("modal.paymentInstructions.accountName")}:</strong>{" "}
-              Maria Miguel
-            </li>
-            <li>
-              <strong>{t("modal.paymentInstructions.accountNumber")}:</strong>{" "}
-              342295560 30 001
-            </li>
-            <li>
-              <strong>{t("modal.paymentInstructions.routingNumber")}:</strong>{" "}
-              AO06 0006 0000 42295560301 25
-            </li>
-            <li>
-              <strong>{t("modal.paymentInstructions.customerName")}:</strong>{" "}
-              {t("fullNameId")}
-            </li>
-          </ul>
-          <hr />
-          <p>{t("modal.paymentInstructions.footer")}</p>
-        </Modal.Body>
-
-        <UploadDocumentModal
-          show={showUploadModal}
-          handleClose={() => setShowUploadModal(false)}
-          user={user}
-        />
-        <EmailSupportModal
-          show={emailSupportModal}
-          handleClose={() => setEmailSupportModal(false)}
-          userEmail={user?.email}
-          serviceId={selectedServiceId}
-        />
-      </Modal>
     </>
   );
 }
-
-export default UserOnlyDashboard;

@@ -1,5 +1,5 @@
 // src/components/roomrental/RoomManager.jsx
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { Button, Alert, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
@@ -35,6 +35,19 @@ export default function RoomManager() {
   const [editingRoom, setEditingRoom] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  const handleAuthError = useCallback(
+    (err) => {
+      if (err && err.status === 401) {
+        setError("Session expired. Please log in again.");
+        localStorage.removeItem("authToken");
+        setTimeout(() => navigate("/login"), 700);
+      } else {
+        setError(err?.message || "An error occurred.");
+      }
+    },
+    [navigate]
+  );
+
   // Load rooms on mount (and when token changes)
   useEffect(() => {
     let mounted = true;
@@ -44,17 +57,10 @@ export default function RoomManager() {
       try {
         const data = await fetchRooms(token);
         if (!mounted) return;
-        // API may return array or { rooms: [...] }
         setRooms(Array.isArray(data) ? data : data.rooms || []);
       } catch (err) {
         console.error("fetchRooms error", err);
-        if (err && err.status === 401) {
-          setError("Session expired. Please log in again.");
-          localStorage.removeItem("authToken");
-          setTimeout(() => navigate("/login"), 700);
-        } else {
-          setError(err?.message || "Failed to load rooms.");
-        }
+        handleAuthError(err);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -63,7 +69,7 @@ export default function RoomManager() {
     return () => {
       mounted = false;
     };
-  }, [token, navigate]);
+  }, [token, handleAuthError]);
 
   // Open modal for creating a new room
   function openCreateModal() {
@@ -79,7 +85,7 @@ export default function RoomManager() {
     setShowModal(true);
   }
 
-  // Called after a room is created (RoomForm or createRoom path)
+  // Called after a room is created
   function handleCreated(newRoom) {
     setRooms((prev) => [newRoom, ...prev]);
     setShowModal(false);
@@ -101,18 +107,18 @@ export default function RoomManager() {
     try {
       const created = await createRoom(formData, token, true, {
         useCredentials: false,
-        onProgress,
+        onProgress: (evt) => {
+          if (evt && evt.total) {
+            const pct = Math.round((evt.loaded / evt.total) * 100);
+            setUploadProgress(pct);
+            if (typeof onProgress === "function") onProgress(pct);
+          }
+        },
       });
       handleCreated(created);
     } catch (err) {
       console.error("createRoom error", err);
-      if (err && err.status === 401) {
-        setError("Session expired. Please log in again.");
-        localStorage.removeItem("authToken");
-        setTimeout(() => navigate("/login"), 700);
-      } else {
-        setError(err?.message || "Failed to create room.");
-      }
+      handleAuthError(err);
     } finally {
       setUploadProgress(0);
     }
@@ -123,20 +129,22 @@ export default function RoomManager() {
     setError("");
     setUploadProgress(0);
     try {
-      // appendImages is passed via query string in apiUpdateRoom call
       const idWithQuery = `${id}?appendImages=${appendImages ? "true" : "false"}`;
-      const result = await updateRoom(idWithQuery, formData, token, true, { useCredentials: false });
+      const result = await updateRoom(idWithQuery, formData, token, true, {
+        useCredentials: false,
+        onProgress: (evt) => {
+          if (evt && evt.total) {
+            const pct = Math.round((evt.loaded / evt.total) * 100);
+            setUploadProgress(pct);
+            if (typeof onProgress === "function") onProgress(pct);
+          }
+        },
+      });
       const updated = result.room || result;
       handleUpdated(updated);
     } catch (err) {
       console.error("updateRoom error", err);
-      if (err && err.status === 401) {
-        setError("Session expired. Please log in again.");
-        localStorage.removeItem("authToken");
-        setTimeout(() => navigate("/login"), 700);
-      } else {
-        setError(err?.message || "Failed to update room.");
-      }
+      handleAuthError(err);
     } finally {
       setUploadProgress(0);
     }
@@ -147,18 +155,27 @@ export default function RoomManager() {
     if (!window.confirm("Delete this room?")) return;
     setError("");
     try {
-      await deleteRoom(id, token, { useCredentials: false });
+      // optimistic update
+      const previous = rooms;
       setRooms((prev) => prev.filter((r) => r._id !== id));
+      await deleteRoom(id, token, { useCredentials: false });
     } catch (err) {
       console.error("deleteRoom error", err);
-      if (err && err.status === 401) {
-        setError("Session expired. Please log in again.");
-        localStorage.removeItem("authToken");
-        setTimeout(() => navigate("/login"), 700);
-      } else {
-        setError(err?.message || "Failed to delete room.");
+      handleAuthError(err);
+      // rollback
+      try {
+        const data = await fetchRooms(token);
+        setRooms(Array.isArray(data) ? data : data.rooms || []);
+      } catch (e) {
+        // ignore
       }
     }
+  }
+
+  // View handler (navigate to room detail)
+  function handleView(room) {
+    if (!room?._id) return;
+    navigate(`/rooms/${room._id}`);
   }
 
   // Helper to render grid of RoomCard components
@@ -170,7 +187,13 @@ export default function RoomManager() {
       <div className="row">
         {rooms.map((r) => (
           <div key={r._id} className="col-md-4 mb-3">
-            <RoomCard room={r} onEdit={startEdit} onDelete={handleDelete} isAdmin={isAdmin} />
+            <RoomCard
+              room={r}
+              onEdit={startEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+              isAdmin={isAdmin}
+            />
           </div>
         ))}
       </div>
@@ -196,7 +219,12 @@ export default function RoomManager() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>Rooms</h4>
         <div>
-          <Button variant="outline-primary" onClick={openCreateModal} disabled={!isAdmin} title={!isAdmin ? "Admin only" : "Add room"}>
+          <Button
+            variant="outline-primary"
+            onClick={openCreateModal}
+            disabled={!isAdmin}
+            title={!isAdmin ? "Admin only" : "Add room"}
+          >
             ➕ Room
           </Button>
         </div>
@@ -227,11 +255,8 @@ export default function RoomManager() {
             token={token}
             isAdmin={isAdmin}
             initialData={editingRoom || null}
-            // RoomForm should call onCreated(createdRoom) after successful create
             onCreated={(created) => handleCreated(created)}
-            // RoomForm should call onUpdated(updatedRoom) after successful update
             onUpdated={(updated) => handleUpdated(updated)}
-            // If RoomForm wants to use the XHR upload path, it can call this helper
             createRoomWithUpload={(formData, onProgress) => handleCreateWithFormData(formData, onProgress)}
             updateRoomWithUpload={(id, formData, onProgress, appendImages = true) =>
               handleUpdateWithFormData(id, formData, onProgress, appendImages)

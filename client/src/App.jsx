@@ -3,9 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import NavigationBar from "./components/NavigationBar";
 import ServicesPromo from "./components/ServicesPromo";
 import NewAdminDashboard from "./pages/NewAdminDashboard";
-import UserOnlyDashboard from "./pages/UserOnlyDashboard"; // fixed typo: was UserOnlyDashboar
+import UserOnlyDashboard from "./pages/UserOnlyDashboard"; 
 import AdminRoute from "./components/admin/AdminRoute";
-// import Room from "../../client/src/pages/roomrental/Room";
+import Rooms from "../../client/src/pages/roomrental/Rooms";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminLogin from "./pages/AdminLogin";
 import LearnMore from "./pages/LearnMore";
@@ -25,13 +25,11 @@ function App() {
 
       {/* Add a Learn React link so the test passes */}
       <header className="App-header">
-        {/* <h1>Welcome to LM Ltd</h1> */}
         <a
           href="https://react.dev/learn"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {/* Learn React */}
         </a>
       </header>
 
@@ -45,7 +43,9 @@ function App() {
         <Route path="/who-we-are" element={<WhoWeAre />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin-login" element={<AdminLogin />} />
-        {/* <Route path="/rooms/:id" element={<Room />} /> */}
+        <Route path="/rooms" element={<Rooms />} />
+        {/* <Route path="/rooms/:id/details" element={<RoomDetails />} />
+        <Route path="/payments/success" element={<PaymentSuccess />} /> */}
 
         {/* Protected User Dashboard */}
         <Route
