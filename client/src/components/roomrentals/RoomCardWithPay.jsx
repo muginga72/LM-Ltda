@@ -91,7 +91,7 @@ export default function RoomCardWithPay({ room, onBook, onDetails, onPay, classN
         <div className="row g-0 align-items-center">
           <div className="col-4">
             {/* fixed-height container prevents image from shrinking */}
-            <div style={{ height: 195, overflow: "hidden" }}>
+            <div style={{ height: 220, overflow: "hidden" }}>
               <img
                 src={imgUrl}
                 alt={title}
