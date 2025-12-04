@@ -1,124 +1,7 @@
-// // src/components/roomrentals/RoomDetails.jsx
-// import React, { useEffect, useState } from "react";
-// import PropTypes from "prop-types";
-// import { resolveRoomImage } from "../../utils/imageUtils";
-
-// /**
-//  * RoomDetails
-//  * - If `room` prop provided, uses it. Otherwise fetches `fetchUrl`.
-//  * - Renders images, full description, amenities, rules, bedrooms, bathrooms, capacity.
-//  */
-
-// export default function RoomDetails({ room: roomProp, fetchUrl = null, token }) {
-//   const [room, setRoom] = useState(roomProp || null);
-//   const [loading, setLoading] = useState(!roomProp && !!fetchUrl);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     if (roomProp) return;
-//     if (!fetchUrl) return;
-//     let mounted = true;
-//     setLoading(true);
-//     fetch(fetchUrl, { headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } })
-//       .then((res) => {
-//         if (!res.ok) throw new Error(`Failed to load (${res.status})`);
-//         return res.json();
-//       })
-//       .then((data) => { if (mounted) setRoom(data); })
-//       .catch((err) => { if (mounted) setError(err.message || "Failed to load"); })
-//       .finally(() => { if (mounted) setLoading(false); });
-//     return () => { mounted = false; };
-//   }, [fetchUrl, roomProp, token]);
-
-//   if (loading) return <div className="text-center py-4">Loading...</div>;
-//   if (error) return <div className="alert alert-danger">{error}</div>;
-//   if (!room) return <div className="text-muted">No room data</div>;
-
-//   const images = Array.isArray(room.images) ? room.images.map(resolveRoomImage).filter(Boolean) : (room.images ? [resolveRoomImage(room.images)] : []);
-//   const title = room.roomTitle || room.title || "Untitled room";
-
-//   return (
-//     <div className="container py-3">
-//       <h3>{title}</h3>
-
-//       <div className="row">
-//         <div className="col-md-6">
-//           {images.length ? (
-//             <div className="mb-3">
-//               {images.map((src, i) => (
-//                 <img key={i} src={src} alt={title} className="img-fluid mb-2" style={{ width: "100%", objectFit: "cover" }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ""; }} />
-//               ))}
-//             </div>
-//           ) : (
-//             <div className="bg-light p-5 text-center">No images</div>
-//           )}
-//         </div>
-
-//         <div className="col-md-6">
-//           <h5>Description</h5>
-//           <p>{room.roomDescription || room.description || "No description provided."}</p>
-
-//           <h6>Details</h6>
-//           <ul>
-//             <li>Price: {room.pricePerNight?.amount ?? "N/A"} {room.pricePerNight?.currency ?? ""}</li>
-//             <li>Capacity: {room.roomCapacity ?? room.capacity ?? "—"} guests</li>
-//             <li>Bedrooms: {room.bedrooms ?? "—"}</li>
-//             <li>Bathrooms: {room.bathrooms ?? "—"}</li>
-//           </ul>
-
-//           {room.amenities && room.amenities.length > 0 && (
-//             <>
-//               <h6>Amenities</h6>
-//               <ul>{room.amenities.map((a, idx) => <li key={idx}>{a}</li>)}</ul>
-//             </>
-//           )}
-
-//           {room.rules && room.rules.length > 0 && (
-//             <>
-//               <h6>Rules</h6>
-//               <ul>{room.rules.map((r, idx) => <li key={idx}>{r}</li>)}</ul>
-//             </>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// RoomDetails.propTypes = {
-//   room: PropTypes.object,
-//   fetchUrl: PropTypes.string,
-//   token: PropTypes.string,
-// };
-
-// RoomDetails.defaultProps = {
-//   room: null,
-//   fetchUrl: null,
-//   token: null,
-// };
-
-
 // src/components/roomrentals/RoomDetails.jsx
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { resolveRoomImage } from "../../utils/imageUtils";
-
-/**
- * RoomDetails (Modal)
- *
- * Props:
- * - show: boolean to control visibility
- * - onClose: function called when modal should close
- * - room: optional room object (if provided, no fetch)
- * - fetchUrl: optional URL to fetch room data when room not provided
- * - token: optional auth token for fetch
- *
- * Behavior:
- * - When `show` becomes true and no `room` prop is provided, the component
- *   will fetch room data from `fetchUrl`.
- * - Renders a Bootstrap-style modal (no dependency on JS; uses classes).
- * - Closes on backdrop click or Escape key by calling onClose.
- */
 
 const PLACEHOLDER =
   "data:image/svg+xml;charset=UTF-8," +
@@ -262,8 +145,26 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
 
   const title = room.roomTitle || room.title || "Untitled room";
 
+  // Extract location similar to RoomCardWithPay
+  const city =
+    room?.roomLocation?.address?.city ??
+    room?.roomLocation?.city ??
+    room?.city ??
+    "";
+  const region =
+    room?.roomLocation?.address?.region ??
+    room?.roomLocation?.region ??
+    room?.region ??
+    "";
+  const country =
+    room?.roomLocation?.address?.country ??
+    room?.roomLocation?.country ??
+    room?.country ??
+    "";
+  const locParts = [city, region, country].filter(Boolean);
+  const locationString = locParts.length ? locParts.join(", ") : "";
+
   function backdropClick(e) {
-    // close when clicking the backdrop (not the modal content)
     if (e.target.classList.contains("modal")) {
       if (typeof onClose === "function") onClose();
     }
@@ -298,7 +199,7 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
                             src={src || PLACEHOLDER}
                             alt={`${title} ${i + 1}`}
                             className="img-fluid mb-2"
-                            style={{ width: "100%", objectFit: "cover" }}
+                            style={{ width: "100%", height: 300, objectFit: "cover", display: "block", borderRadius: "24px" }}
                             onError={(e) => {
                               e.currentTarget.onerror = null;
                               e.currentTarget.src = PLACEHOLDER;
@@ -314,6 +215,13 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
                   <div className="col-md-6">
                     <h6>Description</h6>
                     <p>{room.roomDescription || room.description || "No description provided."}</p>
+
+                    {locationString && (
+                      <>
+                        <h6>Location</h6>
+                        <div className="text-muted mb-3">{locationString}</div>
+                      </>
+                    )}
 
                     <h6>Details</h6>
                     <ul>

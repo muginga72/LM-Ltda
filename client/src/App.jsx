@@ -6,6 +6,7 @@ import NewAdminDashboard from "./pages/NewAdminDashboard";
 import UserOnlyDashboard from "./pages/UserOnlyDashboard"; 
 import AdminRoute from "./components/admin/AdminRoute";
 import Rooms from "../../client/src/pages/roomrental/Rooms";
+import RoomDetails from "./components/roomrentals/RoomDetails";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminLogin from "./pages/AdminLogin";
 import LearnMore from "./pages/LearnMore";
@@ -44,8 +45,8 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/rooms" element={<Rooms />} />
-        {/* <Route path="/rooms/:id/details" element={<RoomDetails />} />
-        <Route path="/payments/success" element={<PaymentSuccess />} /> */}
+        <Route path="/rooms/:id/details" element={<RoomDetails />} />
+        {/* <Route path="/payments/success" element={<PaymentSuccess />} />  */}
 
         {/* Protected User Dashboard */}
         <Route

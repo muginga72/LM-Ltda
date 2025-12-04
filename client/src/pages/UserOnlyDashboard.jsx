@@ -22,6 +22,7 @@ import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import { useTranslation } from "react-i18next";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
+import RoomDetails from "../components/roomrentals/RoomDetails";
 // import PaymentModal from "../components/roomrentals/PaymentModal";
 
 export default function UserOnlyDashboard({
@@ -80,6 +81,7 @@ export default function UserOnlyDashboard({
 
   // Room details / booking state
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
 
   // refresh key to re-fetch lists when needed
@@ -270,6 +272,17 @@ export default function UserOnlyDashboard({
     setPaymentRoom(null);
   };
 
+  function handleOpenDetails(room) {
+    setSelectedRoom(room);      // pass full object
+    setShowDetails(true);
+  }
+
+  function handleClose() {
+    setShowDetails(false);
+    setSelectedRoom(null);
+  }
+
+
   // Render helpers
   const renderServiceSummary = (services, title) => {
     if (!services || services.length === 0) {
@@ -427,11 +440,19 @@ export default function UserOnlyDashboard({
           <Col key={r._id} md={6} lg={4} className="mb-3">
             <RoomCardWithPay
               room={r}
-              onDetails={(room) => handleDetails(room)}
+              // onDetails={(room) => handleDetails(room)}
+              onDetails={handleOpenDetails}
               onPay={(room) => handlePayRoom(room)}
             />
           </Col>
         ))}
+
+        <RoomDetails
+        show={showDetails}
+        onClose={handleClose}
+        room={selectedRoom}
+        token={token}
+      />
       </Row>
     );
   };
