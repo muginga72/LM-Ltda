@@ -24,7 +24,7 @@ const roomSchema = new mongoose.Schema(
       region: { type: String, default: "" },
       country: { type: String, default: "" },
       coordinates: {
-        type: [Number], 
+        type: [Number],
         default: [],
       },
     },
@@ -46,8 +46,14 @@ const roomSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-  },
-  { timestamps: true }
+    blockedDates: [
+      {
+        from: { type: Date, required: true },
+        to: { type: Date, required: true },
+        reason: { type: String, default: "" },
+      },
+    ],
+  }, { timestamps: true }
 );
 
 module.exports = mongoose.model("Room", roomSchema);

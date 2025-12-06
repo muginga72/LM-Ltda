@@ -26,10 +26,23 @@ const BookingSchema = new mongoose.Schema({
 
   // New fields
   dateOfBirth: { type: Date, required: true },
+
   idDocument: { type: DocumentSchema, required: true },
 
-  createdAt: { type: Date, default: Date.now }
-});
+  createdAt: { type: Date, default: Date.now },
+
+  expiresAt: { type: Date, required: true },
+
+  paymentInfo: {
+    method: { type: String, enum: ['bank_transfer', 'deposit'], default: 'bank_transfer' },
+    accountNumber: { type: String },
+    iban: { type: String },
+    branch: { type: String }, 
+    paidAt: { type: Date },
+    notes: { type: String },
+  },
+  notes: { type: String },
+}, { timestamps: true });
 
 BookingSchema.index({ room: 1, startDate: 1, endDate: 1 });
 
