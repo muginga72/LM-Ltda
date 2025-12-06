@@ -22,7 +22,6 @@ import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import { useTranslation } from "react-i18next";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
-import RoomDetails from "../components/roomrentals/RoomDetails";
 // import PaymentModal from "../components/roomrentals/PaymentModal";
 
 export default function UserOnlyDashboard({
@@ -446,13 +445,6 @@ export default function UserOnlyDashboard({
             />
           </Col>
         ))}
-
-        <RoomDetails
-        show={showDetails}
-        onClose={handleClose}
-        room={selectedRoom}
-        token={token}
-      />
       </Row>
     );
   };

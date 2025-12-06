@@ -83,7 +83,7 @@ const NavigationBar = () => {
                 Services
               </Nav.Link>
 
-              <Nav.Link as={NavLink} to="/rooms">Rooms</Nav.Link>
+              {/* <Nav.Link as={NavLink} to="/rooms">Rooms</Nav.Link> */}
 
               {/* <NavDropdown title="Rooms" id="rooms-nav-dropdown" align="end" role="menu">
                 <LinkContainer to="/rooms/list">

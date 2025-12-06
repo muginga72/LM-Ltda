@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import NavigationBar from "./components/NavigationBar";
 import ServicesPromo from "./components/ServicesPromo";
 import NewAdminDashboard from "./pages/NewAdminDashboard";
-import UserOnlyDashboard from "./pages/UserOnlyDashboard"; 
+import UserOnlyDashboard from "./pages/UserOnlyDashboard";
 import AdminRoute from "./components/admin/AdminRoute";
 import Rooms from "../../client/src/pages/roomrental/Rooms";
 import RoomDetails from "./components/roomrentals/RoomDetails";
@@ -30,8 +30,7 @@ function App() {
           href="https://react.dev/learn"
           target="_blank"
           rel="noopener noreferrer"
-        >
-        </a>
+        ></a>
       </header>
 
       <Routes>

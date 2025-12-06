@@ -12,7 +12,13 @@ const PLACEHOLDER =
     </svg>`
   );
 
-export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = null, token }) {
+export default function RoomDetails({
+  show,
+  onClose,
+  room: roomProp,
+  fetchUrl = null,
+  token,
+}) {
   const [room, setRoom] = useState(roomProp || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -78,12 +84,25 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
     return (
       <>
         <div className="modal-backdrop fade show" />
-        <div className="modal d-block" tabIndex="-1" role="dialog" aria-modal="true">
-          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div
+          className="modal d-block"
+          tabIndex="-1"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-dialog modal-lg modal-dialog-centered"
+            role="document"
+          >
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Loading...</h5>
-                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={onClose}
+                />
               </div>
               <div className="modal-body">
                 <div className="text-center py-4">Loading room details…</div>
@@ -99,12 +118,25 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
     return (
       <>
         <div className="modal-backdrop fade show" />
-        <div className="modal d-block" tabIndex="-1" role="dialog" aria-modal="true">
-          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div
+          className="modal d-block"
+          tabIndex="-1"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-dialog modal-lg modal-dialog-centered"
+            role="document"
+          >
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Error</h5>
-                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={onClose}
+                />
               </div>
               <div className="modal-body">
                 <div className="alert alert-danger">{error}</div>
@@ -120,12 +152,25 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
     return (
       <>
         <div className="modal-backdrop fade show" />
-        <div className="modal d-block" tabIndex="-1" role="dialog" aria-modal="true">
-          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div
+          className="modal d-block"
+          tabIndex="-1"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="modal-dialog modal-lg modal-dialog-centered"
+            role="document"
+          >
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">No data</h5>
-                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={onClose}
+                />
               </div>
               <div className="modal-body">
                 <div className="text-muted">No room data available.</div>
@@ -146,6 +191,11 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
   const title = room.roomTitle || room.title || "Untitled room";
 
   // Extract location similar to RoomCardWithPay
+  const address =
+    room?.roomLocation?.address?.address ??
+    room?.roomLocation?.address ??
+    room?.address ??
+    "";
   const city =
     room?.roomLocation?.address?.city ??
     room?.roomLocation?.city ??
@@ -161,7 +211,7 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
     room?.roomLocation?.country ??
     room?.country ??
     "";
-  const locParts = [city, region, country].filter(Boolean);
+  const locParts = [address, city, region, country].filter(Boolean);
   const locationString = locParts.length ? locParts.join(", ") : "";
 
   function backdropClick(e) {
@@ -180,11 +230,19 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
         aria-modal="true"
         onMouseDown={backdropClick}
       >
-        <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div
+          className="modal-dialog modal-lg modal-dialog-centered"
+          role="document"
+        >
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">{title}</h5>
-              <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Close"
+                onClick={onClose}
+              />
             </div>
 
             <div className="modal-body">
@@ -199,7 +257,13 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
                             src={src || PLACEHOLDER}
                             alt={`${title} ${i + 1}`}
                             className="img-fluid mb-2"
-                            style={{ width: "100%", height: 300, objectFit: "cover", display: "block", borderRadius: "24px" }}
+                            style={{
+                              width: "100%",
+                              height: 300,
+                              objectFit: "cover",
+                              display: "block",
+                              borderRadius: "24px",
+                            }}
                             onError={(e) => {
                               e.currentTarget.onerror = null;
                               e.currentTarget.src = PLACEHOLDER;
@@ -214,7 +278,11 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
 
                   <div className="col-md-6">
                     <h6>Description</h6>
-                    <p>{room.roomDescription || room.description || "No description provided."}</p>
+                    <p>
+                      {room.roomDescription ||
+                        room.description ||
+                        "No description provided."}
+                    </p>
 
                     {locationString && (
                       <>
@@ -227,10 +295,12 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
                     <ul>
                       <li>
                         <strong>Price:</strong>{" "}
-                        {room.pricePerNight?.amount ?? "N/A"} {room.pricePerNight?.currency ?? ""}
+                        {room.pricePerNight?.amount ?? "N/A"}{" "}
+                        {room.pricePerNight?.currency ?? ""}
                       </li>
                       <li>
-                        <strong>Capacity:</strong> {room.roomCapacity ?? room.capacity ?? "—"} guests
+                        <strong>Capacity:</strong>{" "}
+                        {room.roomCapacity ?? room.capacity ?? "—"} guests
                       </li>
                       <li>
                         <strong>Bedrooms:</strong> {room.bedrooms ?? "—"}
@@ -267,7 +337,11 @@ export default function RoomDetails({ show, onClose, room: roomProp, fetchUrl = 
             </div>
 
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onClose}
+              >
                 Close
               </button>
             </div>
