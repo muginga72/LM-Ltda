@@ -2,7 +2,6 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import RoomDetails from "./RoomDetails";
-import Bookings from "./Bookings";
 import { resolveRoomImage } from "../../utils/imageUtils";
 
 const PLACEHOLDER =
@@ -37,7 +36,7 @@ function firstImage(images) {
 
 export default function RoomCardWithPay({
   room,
-  onBook,
+  onRequestBooking,
   onDetails,
   onPay,
   className,
@@ -46,13 +45,11 @@ export default function RoomCardWithPay({
   imageHeight = 250, // px
 }) {
   const [showDetails, setShowDetails] = useState(false);
-  const [showBookings, setShowBookings] = useState(false);
 
   const imgUrl = firstImage(room?.images) || PLACEHOLDER;
   const title = room?.roomTitle || room?.title || "Untitled room";
   const desc = room?.roomDescription || room?.description || "";
 
-  // Safe extraction of location fields from common room models:
   const address =
     room?.roomLocation?.address?.address ??
     room?.roomLocation?.address ??
@@ -86,108 +83,28 @@ export default function RoomCardWithPay({
 
   // Inline styles to guarantee consistent sizing without external CSS
   const styles = {
-    card: {
-      height: `${cardHeight}px`,
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",
-      borderRadius: 24,
-      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-      background: "#fff",
-    },
-    row: {
-      display: "flex",
-      height: "100%",
-      gap: 0,
-    },
-    imageCol: {
-      flex: "0 0 40%",
-      maxWidth: "40%",
-      minWidth: 160,
-      display: "flex",
-      alignItems: "stretch",
-      overflow: "hidden",
-    },
-    imageWrap: {
-      width: "100%",
-      height: `${imageHeight}px`,
-      overflow: "hidden",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "#f6f6f6",
-    },
-    img: {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      display: "block",
-    },
-    contentCol: {
-      flex: "1 1 60%",
-      padding: "12px 14px",
-      display: "flex",
-      flexDirection: "column",
-      minWidth: 0, // allow text truncation
-    },
-    headerRow: {
-      marginBottom: 6,
-    },
-    metaRow: {
-      color: "#6c757d",
-      fontSize: 13,
-      marginBottom: 8,
-    },
-    desc: {
-      fontSize: 14,
-      color: "#333",
-      lineHeight: 1.3,
-      marginBottom: 8,
-      // make description area flexible and scrollable if too long
-      overflow: "auto",
-      maxHeight: `${cardHeight - imageHeight - 140}px`, // dynamic remaining space
-      paddingRight: 6,
-    },
-    badges: {
-      marginBottom: 8,
-      display: "flex",
-      gap: 6,
-      flexWrap: "wrap",
-    },
-    actions: {
-      marginTop: "auto",
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-    },
-    btnPrimary: {
-      padding: "6px 10px",
-      fontSize: 13,
-    },
-    btnOutline: {
-      padding: "6px 10px",
-      fontSize: 13,
-    },
+    card: { height: `${cardHeight}px`, display: "flex", flexDirection: "column", overflow: "hidden", borderRadius: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.16)", background: "#fff", },
+    row: { display: "flex", height: "100%", gap: 0, },
+    imageCol: { flex: "0 0 40%", maxWidth: "40%", minWidth: 160, display: "flex", alignItems: "stretch", overflow: "hidden", },
+    imageWrap: { width: "100%", height: `${imageHeight}px`, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#f6f6f6", },
+    img: { width: "100%", height: "100%", objectFit: "cover", display: "block", },
+    contentCol: { flex: "1 1 60%", padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0, },
+    headerRow: { marginBottom: 6, },
+    metaRow: { color: "#6c757d", fontSize: 13, marginBottom: 8, },
+    desc: { fontSize: 14, color: "#333", lineHeight: 1.3, marginBottom: 8, overflow: "auto", maxHeight: `${cardHeight - imageHeight - 140}px`, paddingRight: 6, },
+    badges: { marginBottom: 8, display: "flex", gap: 6, flexWrap: "wrap", },
+    actions: { marginTop: "auto", display: "flex", gap: 8, alignItems: "center", },
+    btnPrimary: { padding: "6px 10px", fontSize: 13, },
+    btnOutline: { padding: "6px 10px", fontSize: 13, },
   };
 
-  // Book button: always open local modal; call onBook(booking) after success
-  const handleBookingsClick = useCallback(() => {
-    setShowBookings(true);
-  }, []);
-
-  const handleBooked = useCallback(
-    (booking) => {
-      setShowBookings(false);
-      if (typeof onBook === "function") {
-        try {
-          onBook(booking);
-        } catch {
-          // ignore parent errors
-        }
-      }
-    },
-    [onBook]
-  );
+  const handleBookClick = useCallback(() => {
+    if (typeof onRequestBooking === "function") {
+      onRequestBooking(room);
+    } else {
+      console.warn("❌ onRequestBooking not provided");
+    }
+  }, [onRequestBooking, room]);
 
   // Details button: always open local modal; notify parent asynchronously
   const handleDetailsClick = useCallback(() => {
@@ -274,12 +191,7 @@ export default function RoomCardWithPay({
             )}
 
             <div style={styles.actions}>
-              <button
-                type="button"
-                className="btn btn-primary"
-                style={styles.btnPrimary}
-                onClick={handleBookingsClick}
-              >
+              <button type="button" className="btn btn-primary" style={styles.btnPrimary} onClick={handleBookClick}>
                 Book
               </button>
 
@@ -320,7 +232,7 @@ export default function RoomCardWithPay({
 
 RoomCardWithPay.propTypes = {
   room: PropTypes.object.isRequired,
-  onBook: PropTypes.func,
+  onRequestBooking: PropTypes.func.isRequired,
   onDetails: PropTypes.func,
   onPay: PropTypes.func,
   className: PropTypes.string,
@@ -330,11 +242,11 @@ RoomCardWithPay.propTypes = {
 };
 
 RoomCardWithPay.defaultProps = {
-  onBook: undefined,
+  // onBook: undefined,
   onDetails: undefined,
   onPay: undefined,
   className: "",
   token: null,
-  cardHeight: 340,
-  imageHeight: 160,
+  cardHeight: 250,
+  imageHeight: 250,
 };
