@@ -2,18 +2,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
-import {
-  Container,
-  Spinner,
-  Alert,
-  Button,
-  Col,
-  Row,
-  Modal,
-  Tab,
-  Nav,
-  Card,
-} from "react-bootstrap";
+import { Container, Spinner, Alert, Button, Col, Row, Modal, Tab, Nav, Card, } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
 import AdminAddService from "../components/admin/AdminAddService";
@@ -29,14 +18,17 @@ import AdminScheduledServicesTable from "../components/admin/adminTables/AdminSc
 import AdminSharedServicesTable from "../components/admin/adminTables/AdminSharedServicesTable.jsx";
 
 import RoomManager from "../components/roomrentals/RoomManager.jsx";
-// import RoomList from "../components/roomrentals/RoomList.jsx";
+import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay.jsx";
 
-function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
+function NewAdminDashboard({ apiBaseUrl = '', isAdmin, token: propToken, userId }) {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
   const token = user?.token || propToken;
 
   const [users, setUsers] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
+
   const [requestedServices, setRequestedServices] = useState([]);
   const [scheduledServices, setScheduledServices] = useState([]);
   const [sharedServices, setSharedServices] = useState([]);
@@ -51,6 +43,12 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalRoomOpen, setModalRoomOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    fetchServices()
+      .then(setServices)
+      .catch((err) => console.error("Error fetching services:", err));
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -111,10 +109,30 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
   }, [user, token]);
 
   useEffect(() => {
-    fetchServices()
-      .then(setServices)
-      .catch((err) => console.error("Error fetching services:", err));
-  }, []);
+    const fetchRooms = async () => {
+      if (!token) {
+        setRooms([]);
+        setLoadingRooms(false);
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+
+      try {
+        // Use fallback if apiBaseUrl is not provided
+        const baseUrl = apiBaseUrl || "";
+        const res = await axios.get(`${baseUrl}/api/rooms`, { headers });
+        setRooms(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Error fetching rooms:", err);
+        setRooms([]);
+      } finally {
+        setLoadingRooms(false);
+      }
+    };
+
+    fetchRooms();
+  }, [token, apiBaseUrl, refreshKey]);
 
   const handleServiceCreated = () => {
     fetchServices()
@@ -205,6 +223,70 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                     </p>
                   </div>
 
+                  {/* -------- Listing Rooms Section -------- */}
+                  {loadingRooms ? (
+                    <Spinner animation="border" />
+                  ) : rooms.length > 0 ? (
+                    <Row className="mb-4 gap-3">
+                      {rooms.map((room, index) => (
+                        <Col key={index} md={4}>
+                          <RoomCardWithPay
+                            room={room}
+                            onRequestBooking={async (selectedRoom) => {
+                              try {
+                                console.log(
+                                  "Booking requested for:",
+                                  selectedRoom.id
+                                );
+
+                                // Construct request body with required fields
+                                const bookingPayload = {
+                                  roomId: selectedRoom.id,
+                                  userId: userId, 
+                                  date: new Date().toISOString(),  
+                                };
+
+                                const response = await axios.post(
+                                  `${apiBaseUrl}/api/bookings`,
+                                  bookingPayload,
+                                  {
+                                    headers: {
+                                      Authorization: `Bearer ${token}`,
+                                      "Content-Type": "application/json",
+                                    },
+                                  }
+                                );
+
+                                // Handle success
+                                alert(
+                                  `Booking confirmed for room: ${selectedRoom.name}`
+                                );
+                                console.log(
+                                  "Booking confirmed:",
+                                  response.data
+                                );
+                              } catch (err) {
+                                // Handle error
+                                console.error(
+                                  "Booking failed:",
+                                  err.response?.data || err.message
+                                );
+                                alert(
+                                  `Booking failed: ${
+                                    err.response?.data?.message ||
+                                    "Please try again."
+                                  }`
+                                );
+                              }
+                            }}
+                          />
+                        </Col>
+                      ))}
+                    </Row>
+                  ) : (
+                    <Alert variant="info">No rooms available</Alert>
+                  )}
+
                   <div className="container py-3">
                     <div className="row mb-4">
                       <div className="col-md-12">
@@ -221,43 +303,12 @@ function NewAdminDashboard({ apiBaseUrl, isAdmin, token: propToken, userId }) {
                   </div>
                 </Tab.Pane>
 
-                <Tab.Pane eventKey="rooms">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    {/* <div>
-                      <h4 style={{ margin: 0 }}>Manage Rooms</h4>
-                      <p className="text-muted mb-0">
-                        Create, edit and remove rooms. Admin access required.
-                      </p>
-                    </div>
-                    <div>
-                      <Button
-                        variant="primary"
-                        onClick={() => setModalRoomOpen(true)}
-                      >
-                        Add Room
-                      </Button>
-                    </div> */}
-                  </div>
-
-                  {/* RoomManager handles listing, creating and refreshing rooms */}
+                <Tab.Pane eventKey="rooms">                  
                   <RoomManager
                     currentUser={user}
                     token={token}
                     onCreated={handleRoomCreated}
                   />
-
-                  <div
-                    className="mt-4"
-                    style={{
-                      maxHeight: "80vh", 
-                      overflowY: "auto",
-                      paddingRight: 8, 
-                    }}
-                  >
-                    {/* <Row className="g-3">
-                      <RoomList refreshKey={refreshKey} />
-                    </Row> */}
-                  </div>
                 </Tab.Pane>
 
                 <Tab.Pane eventKey="services">

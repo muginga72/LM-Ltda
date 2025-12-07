@@ -98,13 +98,13 @@ export default function RoomCardWithPay({
     btnOutline: { padding: "6px 10px", fontSize: 13, },
   };
 
-  const handleBookClick = useCallback(() => {
-    if (typeof onRequestBooking === "function") {
+  const handleClick = () => {
+    if (onRequestBooking) {
       onRequestBooking(room);
     } else {
-      console.warn("❌ onRequestBooking not provided");
+      console.warn("onRequestBooking not provided");
     }
-  }, [onRequestBooking, room]);
+  };
 
   // Details button: always open local modal; notify parent asynchronously
   const handleDetailsClick = useCallback(() => {
@@ -191,7 +191,9 @@ export default function RoomCardWithPay({
             )}
 
             <div style={styles.actions}>
-              <button type="button" className="btn btn-outline-primary" style={styles.btnPrimary} onClick={handleBookClick}>
+              <button type="button" className="btn btn-outline-primary" style={styles.btnPrimary} 
+                onClick={handleClick}
+              >
                 Book
               </button>
 
@@ -231,22 +233,14 @@ export default function RoomCardWithPay({
 }
 
 RoomCardWithPay.propTypes = {
-  room: PropTypes.object.isRequired,
+  room: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    description: PropTypes.string,
+  }).isRequired,
   onRequestBooking: PropTypes.func.isRequired,
-  onDetails: PropTypes.func,
-  onPay: PropTypes.func,
-  className: PropTypes.string,
-  token: PropTypes.string,
-  cardHeight: PropTypes.number,
-  imageHeight: PropTypes.number,
 };
 
 RoomCardWithPay.defaultProps = {
-  // onBook: undefined,
-  onDetails: undefined,
-  onPay: undefined,
-  className: "",
-  token: null,
-  cardHeight: 250,
-  imageHeight: 250,
+  onRequestBooking: () => console.warn("Booking handler not implemented"),
 };

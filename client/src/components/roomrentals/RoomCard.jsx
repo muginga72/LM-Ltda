@@ -148,152 +148,165 @@ export default function RoomCard({ room, onEdit, onDelete, onView, isAdmin }) {
   const priceCurrency = priceObj && (priceObj.currency ?? priceObj.curr ?? "USD");
 
   return (
-    <div className="card mb-3">
-      <div className="row g-0 align-items-stretch">
-        {/* Left: image / carousel */}
-        <div className="col-md-4">
-          {images.length > 1 ? (
-            <div
-              id={carouselId}
-              className="carousel slide h-100"
-              data-bs-ride="carousel"
-              aria-label={`${altText} images`}
-            >
-              <div className="carousel-inner h-100">
-                {images.map((src, i) => (
-                  <div
-                    key={`${room?._id ?? "r"}-${i}`}
-                    className={`carousel-item ${i === 0 ? "active" : ""} h-100`}
-                  >
-                    <img
-                      src={src}
-                      className="d-block w-100 h-100"
-                      alt={altText}
-                      style={{ objectFit: "cover" }}
-                      onError={handleImgError}
-                    />
-                  </div>
+<div
+  className="card mb-3"
+  style={{ borderRadius: "24px", overflow: "hidden" }}
+>
+  <div className="row g-0 align-items-stretch">
+    {/* Left: image / carousel */}
+    <div className="col-md-4">
+      {images.length > 1 ? (
+        <div
+          id={carouselId}
+          className="carousel slide h-100"
+          data-bs-ride="carousel"
+          aria-label={`${altText} images`}
+          style={{ borderTopLeftRadius: "24px", borderTopRightRadius: "24px", overflow: "hidden" }}
+        >
+          <div className="carousel-inner h-100">
+            {images.map((src, i) => (
+              <div
+                key={`${room?._id ?? "r"}-${i}`}
+                className={`carousel-item ${i === 0 ? "active" : ""} h-100`}
+              >
+                <img
+                  src={src}
+                  className="d-block w-100 h-100"
+                  alt={altText}
+                  style={{
+                    objectFit: "cover",
+                    borderTopLeftRadius: "24px",
+                    borderTopRightRadius: "24px",
+                  }}
+                  onError={handleImgError}
+                />
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="carousel-control-prev"
+            type="button"
+            data-bs-target={`#${carouselId}`}
+            data-bs-slide="prev"
+          >
+            <span className="carousel-control-prev-icon" aria-hidden="true" />
+            <span className="visually-hidden">Previous</span>
+          </button>
+
+          <button
+            className="carousel-control-next"
+            type="button"
+            data-bs-target={`#${carouselId}`}
+            data-bs-slide="next"
+          >
+            <span className="carousel-control-next-icon" aria-hidden="true" />
+            <span className="visually-hidden">Next</span>
+          </button>
+        </div>
+      ) : cover ? (
+        <img
+          src={cover}
+          className="img-fluid h-100 w-100"
+          alt={altText}
+          style={{
+            objectFit: "cover",
+            borderTopLeftRadius: "24px",
+            borderTopRightRadius: "24px",
+          }}
+          onError={handleImgError}
+        />
+      ) : (
+        <div className="bg-light d-flex align-items-center justify-content-center h-100">
+          <img
+            src={PLACEHOLDER}
+            alt={altText}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              borderTopLeftRadius: "24px",
+              borderTopRightRadius: "24px",
+            }}
+          />
+        </div>
+      )}
+    </div>
+
+    {/* Right: content */}
+    <div className="col-md-8">
+      <div className="card-body d-flex flex-column h-100">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 className="card-title mb-1">{altText}</h5>
+            {locationText ? <p className="text-muted mb-1">{locationText}</p> : null}
+
+            <div className="mb-2">
+              <span className="me-2">
+                <strong>{capacityValue}</strong> guests
+              </span>
+              <span className="me-2">
+                <strong>{bedrooms}</strong> bd
+              </span>
+              <span>
+                <strong>{bathrooms}</strong> ba
+              </span>
+            </div>
+
+            {rules.length > 0 && (
+              <div className="mb-2" aria-label="rules">
+                {rules.map((r, idx) => (
+                  <span key={idx} className="badge bg-secondary me-1">
+                    {r}
+                  </span>
                 ))}
               </div>
+            )}
 
-              <button
-                className="carousel-control-prev"
-                type="button"
-                data-bs-target={`#${carouselId}`}
-                data-bs-slide="prev"
-              >
-                <span className="carousel-control-prev-icon" aria-hidden="true" />
-                <span className="visually-hidden">Previous</span>
-              </button>
+            {amenities.length > 0 && (
+              <div className="mb-2" aria-label="amenities">
+                {amenities.map((a, idx) => (
+                  <span key={idx} className="badge bg-light text-dark border me-1">
+                    {a}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
-              <button
-                className="carousel-control-next"
-                type="button"
-                data-bs-target={`#${carouselId}`}
-                data-bs-slide="next"
-              >
-                <span className="carousel-control-next-icon" aria-hidden="true" />
-                <span className="visually-hidden">Next</span>
-              </button>
-            </div>
-          ) : cover ? (
-            <img
-              src={cover}
-              className="img-fluid h-100 w-100"
-              alt={altText}
-              style={{ objectFit: "cover" }}
-              onError={handleImgError}
-            />
-          ) : (
-            <div className="bg-light d-flex align-items-center justify-content-center h-100">
-              <img
-                src={PLACEHOLDER}
-                alt={altText}
-                style={{ maxWidth: "100%", maxHeight: "100%" }}
-              />
-            </div>
-          )}
+          <div className="text-end">
+            {priceAmount != null ? (
+              <div className="h5 mb-0">
+                {priceCurrency === "USD" ? "$" : ""}
+                {priceAmount}
+                {priceCurrency && priceCurrency !== "USD" ? ` ${priceCurrency}` : ""}
+                <div className="small text-muted">/ night</div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
-        {/* Right: content */}
-        <div className="col-md-8">
-          <div className="card-body d-flex flex-column h-100">
-            <div className="d-flex justify-content-between align-items-start">
-              <div>
-                <h5 className="card-title mb-1">{altText}</h5>
-                {locationText ? <p className="text-muted mb-1">{locationText}</p> : null}
+        <div className="mt-auto d-flex justify-content-between align-items-center">
+          <div>
+            <button
+              type="button"
+              className="btn btn-sm btn-primary me-2"
+              onClick={() => safeOnView(room)}
+            >
+              View
+            </button>
 
-                <div className="mb-2">
-                  <span className="me-2">
-                    <strong>{capacityValue}</strong> guests
-                  </span>
-                  <span className="me-2">
-                    <strong>{bedrooms}</strong> bd
-                  </span>
-                  <span>
-                    <strong>{bathrooms}</strong> ba
-                  </span>
-                </div>
-
-                {rules.length > 0 && (
-                  <div className="mb-2" aria-label="rules">
-                    {rules.map((r, idx) => (
-                      <span key={idx} className="badge bg-secondary me-1">
-                        {r}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {amenities.length > 0 && (
-                  <div className="mb-2" aria-label="amenities">
-                    {amenities.map((a, idx) => (
-                      <span key={idx} className="badge bg-light text-dark border me-1">
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="text-end">
-                {priceAmount != null ? (
-                  <div className="h5 mb-0">
-                    {priceCurrency === "USD" ? "$" : ""}
-                    {priceAmount}
-                    {priceCurrency && priceCurrency !== "USD" ? ` ${priceCurrency}` : ""}
-                    <div className="small text-muted">/ night</div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            {/* {room?.roomDescription ? (
-              <p className="card-text text-truncate mb-3">{room.roomDescription}</p>
-            ) : null} */}
-
-            <div className="mt-auto d-flex justify-content-between align-items-center">
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-primary me-2"
-                  onClick={() => safeOnView(room)}
-                >
-                  View
-                </button>
-
-                {isAdmin && (
-                  <>
-                    <EditButton onEdit={safeOnEdit} room={room} />
-                    <DeleteButton onDelete={safeOnDelete} roomId={room?._id} />
-                  </>
-                )}
-              </div>
-            </div>
+            {isAdmin && (
+              <>
+                <EditButton onEdit={safeOnEdit} room={room} />
+                <DeleteButton onDelete={safeOnDelete} roomId={room?._id} />
+              </>
+            )}
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   );
 }
 
