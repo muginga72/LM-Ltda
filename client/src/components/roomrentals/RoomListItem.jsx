@@ -1,17 +1,7 @@
-// src/components/roomrental/ListRoomItem.jsx
+// src/components/roomrental/RoomListItem.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import { resolveRoomImage } from "../../utils/imageUtils";
-
-/**
- * ListRoomItem
- * Compact list item for a room used in admin lists.
- *
- * Fixes applied:
- * - Uses an inline SVG data-URI placeholder so missing assets don't cause additional 404s.
- * - Robustly resolves image URLs via resolveRoomImage and falls back to the placeholder.
- * - Ensures onError handler sets a safe placeholder and removes itself to avoid loops.
- */
 
 const PLACEHOLDER_DATA_URI =
   "data:image/svg+xml;charset=UTF-8," +
@@ -32,7 +22,7 @@ function getThumb(img) {
   }
 }
 
-export default function ListRoomItem({
+export default function RoomListItem({
   room,
   onEdit,
   onDelete,
@@ -115,7 +105,7 @@ export default function ListRoomItem({
   );
 }
 
-ListRoomItem.propTypes = {
+RoomListItem.propTypes = {
   room: PropTypes.object.isRequired,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
@@ -123,7 +113,7 @@ ListRoomItem.propTypes = {
   isAdmin: PropTypes.bool,
 };
 
-ListRoomItem.defaultProps = {
+RoomListItem.defaultProps = {
   onEdit: () => {},
   onDelete: () => {},
   onSelect: undefined,
