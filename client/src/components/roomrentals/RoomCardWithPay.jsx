@@ -191,7 +191,7 @@ export default function RoomCardWithPay({
             )}
 
             <div style={styles.actions}>
-              <button type="button" className="btn btn-primary" style={styles.btnPrimary} onClick={handleBookClick}>
+              <button type="button" className="btn btn-outline-primary" style={styles.btnPrimary} onClick={handleBookClick}>
                 Book
               </button>
 

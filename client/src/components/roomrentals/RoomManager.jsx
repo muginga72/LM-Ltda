@@ -6,7 +6,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import { fetchRooms, createRoom, updateRoom, deleteRoom } from "../../api/roomsApi";
 import RoomForm from "./RoomForm";
 import RoomCard from "./RoomCard";
-import ListRoomItem from "./ListRoomItem";
+import RoomListItem from "./RoomListItem";
 
 function parseRoleFromToken(token) {
   if (!token) return null;
@@ -208,7 +208,7 @@ export default function RoomManager() {
     return (
       <div className="list-group">
         {rooms.map((r) => (
-          <ListRoomItem key={r._id} room={r} onEdit={startEdit} onDelete={handleDelete} isAdmin={isAdmin} />
+          <RoomListItem key={r._id} room={r} onEdit={startEdit} onDelete={handleDelete} isAdmin={isAdmin} />
         ))}
       </div>
     );
