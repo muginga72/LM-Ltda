@@ -32,17 +32,6 @@ import AdminSharedServicesTable from "../components/admin/adminTables/AdminShare
 import RoomManager from "../components/roomrentals/RoomManager.jsx";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay.jsx";
 
-/**
- * BookingForm component (embedded)
- *
- * Props:
- * - show: boolean
- * - onHide: function
- * - room: object { _id or id, name }
- * - userId: string (required)
- * - token: optional auth token
- * - apiBaseUrl: optional base URL (e.g., "http://localhost:5000")
- */
 function BookingForm({ show, onHide, room, userId, token, apiBaseUrl = "" }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -128,11 +117,9 @@ function BookingForm({ show, onHide, room, userId, token, apiBaseUrl = "" }) {
         formData.append("guestsCount", String(guestsCount));
         formData.append("idDocument", selectedFile);
 
-        // Let browser set Content-Type (boundary)
         const headers = {};
         if (token) headers.Authorization = `Bearer ${token}`;
 
-        // Use fetch to allow browser-managed multipart header
         const res = await fetch(url, {
           method: "POST",
           headers,
@@ -254,15 +241,6 @@ function BookingForm({ show, onHide, room, userId, token, apiBaseUrl = "" }) {
   );
 }
 
-/**
- * NewAdminDashboard main component
- *
- * Props:
- * - apiBaseUrl: optional base URL for API (e.g., "http://localhost:5000")
- * - isAdmin: boolean
- * - token: optional token prop (fallback)
- * - userId: optional user id prop (fallback)
- */
 function NewAdminDashboard({ apiBaseUrl = "", isAdmin, token: propToken, userId: propUserId }) {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
