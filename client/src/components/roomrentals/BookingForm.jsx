@@ -1,213 +1,168 @@
-// BookingForm.jsx
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Alert, Spinner } from "react-bootstrap";
+import axios from "axios";
 
-function BookingForm({ show, onHide, room, userId, token, apiBaseUrl = "" }) {
+/**
+ * BookingForm: small, focused booking form that POSTs to /api/bookings (fallback /bookings).
+ * - onBooked(createdBooking) is called when booking is created successfully.
+ * - onCancel() closes the form without creating a booking.
+ */
+function BookingForm({
+  room,
+  user,
+  token,
+  apiBaseUrl,
+  headers = {},
+  onBooked,
+  onCancel,
+}) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [guestsCount, setGuestsCount] = useState(1);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [guests, setGuests] = useState(
+    room?.roomCapacity || room?.capacity || 1
+  );
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!show) {
-      setStartDate("");
-      setEndDate("");
-      setGuestsCount(1);
-      setSelectedFile(null);
-      setError("");
-      setLoading(false);
-    }
-  }, [show]);
+  const authToken =
+    token || user?.token || localStorage.getItem("authToken") || null;
+  const defaultHeaders = {
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    "Cache-Control": "no-cache",
+    ...headers,
+  };
+
+  const buildUrl = (path) => {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    if (!apiBaseUrl) return normalizedPath;
+    const base = apiBaseUrl.replace(/\/+$/, "");
+    return `${base}${normalizedPath}`;
+  };
 
   const validate = () => {
-    setError("");
-    const roomId = room?._id || room?.id;
-    if (!roomId) {
-      setError("No room selected.");
-      return false;
-    }
-    if (!userId) {
-      setError("No user id available. Please sign in.");
-      return false;
-    }
+    setError(null);
     if (!startDate || !endDate) {
-      setError("Start date and end date are required.");
+      setError("Please select start and end dates.");
       return false;
     }
     const s = new Date(startDate);
     const e = new Date(endDate);
     if (isNaN(s.getTime()) || isNaN(e.getTime())) {
-      setError("Invalid date format.");
+      setError("Invalid dates.");
       return false;
     }
-    if (s > e) {
-      setError("Start date must be before or equal to end date.");
+    if (e < s) {
+      setError("End date must be the same or after start date.");
       return false;
     }
-    if (!Number.isInteger(Number(guestsCount)) || Number(guestsCount) < 1) {
-      setError("Guests must be a positive integer.");
+    if (guests < 1) {
+      setError("Guests must be at least 1.");
       return false;
     }
     return true;
   };
 
-  const parseServerResponse = async (res) => {
-    try {
-      return await res.json();
-    } catch {
-      try {
-        return await res.text();
-      } catch {
-        return null;
-      }
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
     if (!validate()) return;
+    setLoading(true);
+    setError(null);
 
-    const roomId = room._id || room.id;
-    const base = apiBaseUrl ? apiBaseUrl.replace(/\/$/, "") : "";
-    const url = base ? `${base}/api/bookings` : "/api/bookings";
+    const payload = {
+      roomId: room._id,
+      roomTitle: room.roomTitle || room.title || room.name || "",
+      startDate,
+      endDate,
+      guests,
+      userId: user?._id || null,
+      userEmail: user?.email || null,
+    };
+
+    const candidates = ["/api/bookings", "/bookings"];
 
     try {
-      setLoading(true);
-
-      // If a file is selected, send multipart/form-data
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append("roomId", roomId);
-        formData.append("userId", userId);
-        formData.append("startDate", startDate); // send as YYYY-MM-DD
-        formData.append("endDate", endDate);
-        formData.append("guestsCount", String(guestsCount));
-        formData.append("idDocument", selectedFile);
-
-        const headers = {};
-        if (token) headers.Authorization = `Bearer ${token}`;
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers,
-          body: formData,
-        });
-
-        const body = await parseServerResponse(res);
-        if (!res.ok) {
-          const msg = (body && (body.message || body.error)) || `Server responded with ${res.status}`;
-          throw new Error(msg);
+      let created = null;
+      for (const path of candidates) {
+        try {
+          const res = await axios.post(buildUrl(path), payload, {
+            headers: { "Content-Type": "application/json", ...defaultHeaders },
+          });
+          created = res?.data;
+          break;
+        } catch (err) {
+          const status = err?.response?.status;
+          if (status === 404) {
+            continue;
+          } else {
+            throw err;
+          }
         }
-
-        onHide();
-        return;
       }
 
-      // No file: send JSON
-      const payload = {
-        roomId,
-        userId,
-        startDate,
-        endDate,
-        guestsCount: Number(guestsCount),
-      };
-
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers.Authorization = `Bearer ${token}`;
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-
-      const body = await parseServerResponse(res);
-      if (!res.ok) {
-        const msg = (body && (body.message || body.error)) || `Server responded with ${res.status}`;
-        throw new Error(msg);
+      if (!created) {
+        throw new Error("No bookings endpoint accepted the request (404).");
       }
 
-      onHide();
+      onBooked && onBooked(created);
     } catch (err) {
-      console.error("Booking failed:", err);
-      setError(err.message || "Booking failed.");
+      console.error("Booking create error:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err.message ||
+        "Failed to create booking. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal show={show} onHide={() => { if (!loading) onHide(); }} centered>
-      <Form onSubmit={handleSubmit}>
-        <Modal.Header closeButton>
-          <Modal.Title>Book {room?.name || "Room"}</Modal.Title>
-        </Modal.Header>
+    <form onSubmit={handleSubmit}>
+      {error && <Alert variant="danger">{error}</Alert>}
 
-        <Modal.Body>
-          {error && <Alert variant="danger">{error}</Alert>}
+      <div className="mb-2">
+        <label className="form-label">Start date</label>
+        <input
+          className="form-control"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          required
+        />
+      </div>
 
-          <Form.Group className="mb-3" controlId="bookingStartDate">
-            <Form.Label>Start Date</Form.Label>
-            <Form.Control
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </Form.Group>
+      <div className="mb-2">
+        <label className="form-label">End date</label>
+        <input
+          className="form-control"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          required
+        />
+      </div>
 
-          <Form.Group className="mb-3" controlId="bookingEndDate">
-            <Form.Label>End Date</Form.Label>
-            <Form.Control
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </Form.Group>
+      <div className="mb-3">
+        <label className="form-label">Guests</label>
+        <input
+          className="form-control"
+          type="number"
+          min={1}
+          value={guests}
+          onChange={(e) => setGuests(Number(e.target.value))}
+        />
+      </div>
 
-          <Form.Group className="mb-3" controlId="bookingGuests">
-            <Form.Label>Guests</Form.Label>
-            <Form.Control
-              type="number"
-              min="1"
-              value={guestsCount}
-              onChange={(e) => setGuestsCount(e.target.value)}
-              disabled={loading}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3" controlId="bookingIdDocument">
-            <Form.Label>ID Document (optional)</Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              disabled={loading}
-            />
-            {selectedFile && (
-              <div className="mt-2">
-                <small>Selected file: <strong>{selectedFile.name}</strong></small>
-              </div>
-            )}
-          </Form.Group>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => { if (!loading) onHide(); }} disabled={loading}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? <Spinner animation="border" size="sm" /> : "Confirm Booking"}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </Modal>
+      <div className="d-flex justify-content-end gap-2">
+        <Button variant="secondary" onClick={onCancel} disabled={loading}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" disabled={loading}>
+          {loading ? <Spinner animation="border" size="sm" /> : "Book room"}
+        </Button>
+      </div>
+    </form>
   );
 }
 

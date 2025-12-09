@@ -22,7 +22,172 @@ import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import { useTranslation } from "react-i18next";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
+// import BookingForm from "../components/roomrentals/BookingForm";
 // import PaymentModal from "../components/roomrentals/PaymentModal";
+
+/**
+ * BookingForm: small, focused booking form that POSTs to /api/bookings (fallback /bookings).
+ * - onBooked(createdBooking) is called when booking is created successfully.
+ * - onCancel() closes the form without creating a booking.
+ */
+export function BookingForm({
+  room,
+  user,
+  token,
+  apiBaseUrl,
+  headers = {},
+  onBooked,
+  onCancel,
+}) {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [guests, setGuests] = useState(
+    room?.roomCapacity || room?.capacity || 1
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const authToken =
+    token || user?.token || localStorage.getItem("authToken") || null;
+  const defaultHeaders = {
+    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    "Cache-Control": "no-cache",
+    ...headers,
+  };
+
+  const buildUrl = (path) => {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    if (!apiBaseUrl) return normalizedPath;
+    const base = apiBaseUrl.replace(/\/+$/, "");
+    return `${base}${normalizedPath}`;
+  };
+
+  const validate = () => {
+    setError(null);
+    if (!startDate || !endDate) {
+      setError("Please select start and end dates.");
+      return false;
+    }
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) {
+      setError("Invalid dates.");
+      return false;
+    }
+    if (e < s) {
+      setError("End date must be the same or after start date.");
+      return false;
+    }
+    if (guests < 1) {
+      setError("Guests must be at least 1.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
+    setError(null);
+
+    const payload = {
+      roomId: room._id,
+      roomTitle: room.roomTitle || room.title || room.name || "",
+      startDate,
+      endDate,
+      guests,
+      userId: user?._id || null,
+      userEmail: user?.email || null,
+    };
+
+    const candidates = ["/api/bookings", "/bookings"];
+
+    try {
+      let created = null;
+      for (const path of candidates) {
+        try {
+          const res = await axios.post(buildUrl(path), payload, {
+            headers: { "Content-Type": "application/json", ...defaultHeaders },
+          });
+          created = res?.data;
+          break;
+        } catch (err) {
+          const status = err?.response?.status;
+          if (status === 404) {
+            continue;
+          } else {
+            throw err;
+          }
+        }
+      }
+
+      if (!created) {
+        throw new Error("No bookings endpoint accepted the request (404).");
+      }
+
+      onBooked && onBooked(created);
+    } catch (err) {
+      console.error("Booking create error:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err.message ||
+        "Failed to create booking. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      <div className="mb-2">
+        <label className="form-label">Start date</label>
+        <input
+          className="form-control"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-2">
+        <label className="form-label">End date</label>
+        <input
+          className="form-control"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Guests</label>
+        <input
+          className="form-control"
+          type="number"
+          min={1}
+          value={guests}
+          onChange={(e) => setGuests(Number(e.target.value))}
+        />
+      </div>
+
+      <div className="d-flex justify-content-end gap-2">
+        <Button variant="secondary" onClick={onCancel} disabled={loading}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" disabled={loading}>
+          {loading ? <Spinner animation="border" size="sm" /> : "Book room"}
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 export default function UserOnlyDashboard({
   apiBaseUrl,
@@ -32,10 +197,12 @@ export default function UserOnlyDashboard({
   onServiceSelect,
   userId,
   headers = {},
+  userId: propUserId,
 }) {
   const { user } = useContext(AuthContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const effectiveUserId = user?._id || propUserId || (user && user.id) || null;
 
   // Determine whether current viewer is a non-admin user
   const isUser = Boolean(user && user.role !== "admin");
@@ -74,18 +241,18 @@ export default function UserOnlyDashboard({
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [showPayModal, setShowPayModal] = useState(false);
 
-  // Room payment modal
-  const [paymentRoom, setPaymentRoom] = useState(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+   // Booking modal state (used for room booking)
+  const [bookingRoom, setBookingRoom] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   // Room details / booking state
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [bookingOpen, setBookingOpen] = useState(false);
 
   // refresh key to re-fetch lists when needed
   const [refreshKey] = useState(0);
-  
+
   // Build headers (prefer token prop, otherwise use user.token)
   const authToken =
     token || user?.token || localStorage.getItem("authToken") || null;
@@ -173,10 +340,7 @@ export default function UserOnlyDashboard({
         if (mounted) setLoadingServices(false);
       }
     );
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [user, refreshKey, apiBaseUrl, t, isUser]);
 
   // Fetch rooms
@@ -206,10 +370,7 @@ export default function UserOnlyDashboard({
         if (mounted) setLoadingRooms(false);
       }
     })();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [user, refreshKey]);
 
   // Fetch bookings (placeholder) — replace endpoint with your real bookings API
@@ -240,10 +401,7 @@ export default function UserOnlyDashboard({
         if (mounted) setLoadingBookings(false);
       }
     })();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [user, refreshKey]);
 
   // UI handlers
@@ -257,22 +415,8 @@ export default function UserOnlyDashboard({
     setSelectedServiceId(null);
   };
 
-  const handleDetails = (room) => {
-    navigate(`/rooms/${room._id}/details`);
-  };
-
-  const handlePayRoom = (room) => {
-    setPaymentRoom(room);
-    setShowPaymentModal(true);
-  };
-
-  const handleClosePaymentModal = () => {
-    setShowPaymentModal(false);
-    setPaymentRoom(null);
-  };
-
   function handleOpenDetails(room) {
-    setSelectedRoom(room);      // pass full object
+    setSelectedRoom(room);
     setShowDetails(true);
   }
 
@@ -281,6 +425,11 @@ export default function UserOnlyDashboard({
     setSelectedRoom(null);
   }
 
+  // Booking flow: open booking modal for a room
+  const handleBookRoom = (room) => {
+    setBookingRoom(room);
+    setShowBookingModal(true);
+  };
 
   // Render helpers
   const renderServiceSummary = (services, title) => {
@@ -437,12 +586,7 @@ export default function UserOnlyDashboard({
       <Row>
         {rooms.map((r) => (
           <Col key={r._id} md={6} lg={4} className="mb-3">
-            <RoomCardWithPay
-              room={r}
-              // onDetails={(room) => handleDetails(room)}
-              onDetails={handleOpenDetails}
-              onPay={(room) => handlePayRoom(room)}
-            />
+            <RoomCardWithPay room={r} onDetails={handleOpenDetails} onBook={handleBookRoom} />
           </Col>
         ))}
       </Row>
@@ -522,48 +666,6 @@ export default function UserOnlyDashboard({
         onProofSubmitted={onProofSubmitted}
         onServiceSelect={onServiceSelect}
       />
-
-      <hr />
-
-      <div className="dashboard-container">
-        <ServiceCalendar userId={userId} />
-      </div>
-
-      <hr />
-
-      <div>
-        <UserCalendar apiBaseUrl={apiBaseUrl} headers={headers} user={user} />
-      </div>
-
-      <hr />
-
-      {loadingServices || loadingRooms ? (
-        <div className="text-center">
-          <Spinner animation="border" />
-          <p>{t("dashboard.loading")}</p>
-        </div>
-      ) : (
-        <>
-          {renderServiceCards(
-            "dashboard.requested",
-            requestedServices,
-            errorRequested,
-            "dashboard.requested"
-          )}
-          {renderServiceCards(
-            "dashboard.scheduled",
-            scheduledServices,
-            errorScheduled,
-            "dashboard.scheduled"
-          )}
-          {renderServiceCards(
-            "dashboard.shared",
-            sharedServices,
-            errorShared,
-            "dashboard.shared"
-          )}
-        </>
-      )}
     </>
   );
 
@@ -617,6 +719,31 @@ export default function UserOnlyDashboard({
                 </div>
               ) : (
                 <>
+                  <UserDashboard
+                    apiBaseUrl={apiBaseUrl}
+                    user={user}
+                    token={authToken}
+                    initialServices={initialServices}
+                    onProofSubmitted={onProofSubmitted}
+                    onServiceSelect={onServiceSelect}
+                  />
+
+                  <hr />
+
+                  <div>
+                    <UserCalendar
+                      apiBaseUrl={apiBaseUrl}
+                      headers={headers}
+                      user={user}
+                    />
+                  </div>
+
+                  <hr />
+
+                  <div className="dashboard-container">
+                    <ServiceCalendar userId={userId} />
+                  </div>
+
                   {renderServiceCards(
                     "dashboard.requested",
                     requestedServices,
@@ -698,6 +825,16 @@ export default function UserOnlyDashboard({
         {/* Room payment modal ---- For the Future ------- */}
         {/* <PaymentModal show={showPaymentModal} onHide={handleClosePaymentModal} room={paymentRoom} token={authToken} /> */}
       </Container>
+
+      {/* Booking modal */}
+      <BookingForm
+        show={bookingModalOpen}
+        onHide={() => setBookingModalOpen(false)}
+        room={bookingRoom}
+        userId={effectiveUserId}
+        token={token}
+        apiBaseUrl={apiBaseUrl}
+      />
 
       {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-4 border-top">
