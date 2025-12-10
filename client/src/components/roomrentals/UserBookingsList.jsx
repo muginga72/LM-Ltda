@@ -34,8 +34,8 @@ export default function UserBookingsList({
     guests: 1,
     notes: "",
   });
-  const [saving, setSaving] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
+  const [ saving ] = useState(false);
+  const [ cancelling ] = useState(false);
   const [manageError, setManageError] = useState(null);
   const [manageSuccess, setManageSuccess] = useState(null);
 
@@ -133,27 +133,27 @@ export default function UserBookingsList({
   //   }
   // };
 
-  const handleCancelBooking = async () => {
-    if (!selectedBooking) return;
-    setManageError(null);
-    setManageSuccess(null);
-    setCancelling(true);
-    try {
-      if (onCancelBooking) {
-        await onCancelBooking(selectedBooking._id);
-      } else {
-        // await defaultCancelBooking(selectedBooking._id);
-      }
-      setManageSuccess("Booking cancelled.");
-      setTimeout(() => {
-        setCancelling(false);
-        closeManageModal();
-      }, 700);
-    } catch (err) {
-      setManageError(err?.message || "Failed to cancel booking.");
-      setCancelling(false);
-    }
-  };
+  // const handleCancelBooking = async () => {
+  //   if (!selectedBooking) return;
+  //   setManageError(null);
+  //   setManageSuccess(null);
+  //   setCancelling(true);
+  //   try {
+  //     if (onCancelBooking) {
+  //       await onCancelBooking(selectedBooking._id);
+  //     } else {
+  //       // await defaultCancelBooking(selectedBooking._id);
+  //     }
+  //     setManageSuccess("Booking cancelled.");
+  //     setTimeout(() => {
+  //       setCancelling(false);
+  //       closeManageModal();
+  //     }, 700);
+  //   } catch (err) {
+  //     setManageError(err?.message || "Failed to cancel booking.");
+  //     setCancelling(false);
+  //   }
+  // };
 
   // Render logic (replaces your renderBookings)
   if (loadingBookings) {

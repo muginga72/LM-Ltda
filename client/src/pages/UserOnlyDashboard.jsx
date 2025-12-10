@@ -1,5 +1,5 @@
 // client/src/pages/UserOnlyDashboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import {
   Container,
@@ -13,7 +13,6 @@ import {
   Tabs,
   Tab,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../contexts/AuthContext";
 import UploadDocumentModal from "../components/UploadDocumentModal";
@@ -297,7 +296,7 @@ export default function UserOnlyDashboard({
 }) {
   const { user } = React.useContext(AuthContext);
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const isUser = Boolean(user && user.role !== "admin");
 
@@ -347,18 +346,21 @@ export default function UserOnlyDashboard({
   // auth headers
   const authToken =
     token || user?.token || localStorage.getItem("authToken") || null;
-  const defaultHeaders = {
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    "Cache-Control": "no-cache",
-    ...headers,
-  };
+  const defaultHeaders = useMemo(() => {
+    return {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      // include any dynamic header values here (e.g. auth token)
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    };
+  }, [authToken]);
 
-  const buildUrl = (path) => {
+  const buildUrl = useCallback((path) => {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     if (!apiBaseUrl) return normalizedPath;
     const base = apiBaseUrl.replace(/\/+$/, "");
     return `${base}${normalizedPath}`;
-  };
+  }, [apiBaseUrl]);
 
   // Fetch services (requested, scheduled, shared)
   React.useEffect(() => {
@@ -440,7 +442,7 @@ export default function UserOnlyDashboard({
     );
 
     return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl, t, isUser]);
+  }, [user, refreshKey, apiBaseUrl, t, isUser, buildUrl, defaultHeaders]);
 
   // Fetch rooms
   React.useEffect(() => {
@@ -471,7 +473,7 @@ export default function UserOnlyDashboard({
     })();
 
     return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl]);
+  }, [user, refreshKey, apiBaseUrl, buildUrl, defaultHeaders, isUser]);
 
   // Fetch bookings
   React.useEffect(() => {
@@ -517,7 +519,7 @@ export default function UserOnlyDashboard({
     })();
 
     return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl]);
+  }, [user, refreshKey, apiBaseUrl, buildUrl, defaultHeaders, isUser]);
 
   // UI handlers
   const handlePayService = (serviceId) => {
