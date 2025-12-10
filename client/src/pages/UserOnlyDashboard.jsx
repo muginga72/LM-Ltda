@@ -826,16 +826,6 @@ export default function UserOnlyDashboard({
         {/* <PaymentModal show={showPaymentModal} onHide={handleClosePaymentModal} room={paymentRoom} token={authToken} /> */}
       </Container>
 
-      {/* Booking modal */}
-      <BookingForm
-        show={bookingModalOpen}
-        onHide={() => setBookingModalOpen(false)}
-        room={bookingRoom}
-        userId={effectiveUserId}
-        token={token}
-        apiBaseUrl={apiBaseUrl}
-      />
-
       {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-4 border-top">
         <small>
