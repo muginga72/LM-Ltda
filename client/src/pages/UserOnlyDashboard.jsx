@@ -1,5 +1,5 @@
 // client/src/pages/UserOnlyDashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Container,
@@ -23,12 +23,7 @@ import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
 
-/**
- * BookingForm: small, focused booking form that POSTs to /api/bookings (fallback /bookings).
- * - onBooked(createdBooking) is called when booking is created successfully.
- * - onCancel() closes the form without creating a booking.
- */
-function BookingForm({
+const BookingForm = ({
   room,
   user,
   token,
@@ -36,17 +31,18 @@ function BookingForm({
   headers = {},
   onBooked,
   onCancel,
-}) {
+}) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [guests, setGuests] = useState(
-    room?.roomCapacity || room?.capacity || 1
-  );
+  const [guests, setGuests] = useState(room?.roomCapacity || room?.capacity || 1);
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [idFile, setIdFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(null);
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
-  const authToken =
-    token || user?.token || localStorage.getItem("authToken") || null;
+  const authToken = token || user?.token || localStorage.getItem("authToken") || null;
   const defaultHeaders = {
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     "Cache-Control": "no-cache",
@@ -59,6 +55,12 @@ function BookingForm({
     const base = apiBaseUrl.replace(/\/+$/, "");
     return `${base}${normalizedPath}`;
   };
+
+  useEffect(() => {
+    // reset messages when inputs change
+    setError(null);
+    setSuccessMsg(null);
+  }, [startDate, endDate, guests, dateOfBirth, idFile]);
 
   const validate = () => {
     setError(null);
@@ -80,46 +82,77 @@ function BookingForm({
       setError("Guests must be at least 1.");
       return false;
     }
+    if (!dateOfBirth) {
+      setError("Date of birth is required.");
+      return false;
+    }
+    if (!idFile) {
+      setError("Government ID / passport upload (idDocument) is required.");
+      return false;
+    }
+    // file size check (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (idFile.size > maxSize) {
+      setError("ID file is too large. Maximum 10MB allowed.");
+      return false;
+    }
     return true;
+  };
+
+  const handleFileChange = (e) => {
+    setError(null);
+    const file = e.target.files?.[0] || null;
+    setIdFile(file);
   };
 
   const handleSubmit = async (ev) => {
     ev.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
-    const payload = {
-      roomId: room._id,
-      roomTitle: room.roomTitle || room.title || room.name || "",
-      startDate,
-      endDate,
-      guests,
-      userId: user?._id || null,
-      userEmail: user?.email || null,
-    };
+    if (!validate()) return;
 
-    // Try primary endpoint then fallback
+    setLoading(true);
+    setProgress(0);
+
+    // Build form data
+    const formData = new FormData();
+    formData.append("roomId", room?._id || "");
+    formData.append("roomTitle", room?.roomTitle || room?.title || room?.name || "");
+    formData.append("startDate", new Date(startDate).toISOString());
+    formData.append("endDate", new Date(endDate).toISOString());
+    formData.append("guestsCount", String(guests));
+    formData.append("dateOfBirth", new Date(dateOfBirth).toISOString());
+    formData.append("userId", user?._id || "");
+    formData.append("userEmail", user?.email || "");
+
+    formData.append("idDocument", idFile, idFile.name);
+
     const candidates = ["/api/bookings", "/bookings"];
 
     try {
       let created = null;
       for (const path of candidates) {
         try {
-          const res = await axios.post(buildUrl(path), payload, {
-            headers: { "Content-Type": "application/json", ...defaultHeaders },
-          });
+          const config = {
+            headers: { ...defaultHeaders },
+            onUploadProgress: (progressEvent) => {
+              if (progressEvent.lengthComputable) {
+                const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                setProgress(percent);
+              }
+            },
+            timeout: 120000, 
+          };
+          const res = await axios.post(buildUrl(path), formData, config);
           created = res?.data;
           break;
         } catch (err) {
           const status = err?.response?.status;
           if (status === 404) {
-            // try next candidate
             continue;
-          } else {
-            // other error: rethrow to outer catch
-            throw err;
           }
+          throw err;
         }
       }
 
@@ -127,6 +160,8 @@ function BookingForm({
         throw new Error("No bookings endpoint accepted the request (404).");
       }
 
+      setSuccessMsg("Booking created successfully.");
+      setProgress(null);
       onBooked && onBooked(created);
     } catch (err) {
       console.error("Booking create error:", err);
@@ -138,12 +173,14 @@ function BookingForm({
       setError(msg);
     } finally {
       setLoading(false);
+      setProgress(null);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} encType="multipart/form-data">
       {error && <Alert variant="danger">{error}</Alert>}
+      {successMsg && <Alert variant="success">{successMsg}</Alert>}
 
       <div className="mb-2">
         <label className="form-label">Start date</label>
@@ -177,6 +214,46 @@ function BookingForm({
           onChange={(e) => setGuests(Number(e.target.value))}
         />
       </div>
+
+      <div className="mb-3">
+        <label className="form-label">Date of birth</label>
+        <input
+          className="form-control"
+          type="date"
+          value={dateOfBirth}
+          onChange={(e) => setDateOfBirth(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Government ID / Passport (required)</label>
+        <input
+          className="form-control"
+          type="file"
+          accept=".pdf,image/*"
+          onChange={handleFileChange}
+          required
+        />
+        <small className="text-muted">Max 10MB. PDF or image formats accepted.</small>
+      </div>
+
+      {progress !== null && (
+        <div className="mb-2">
+          <div className="progress" style={{ height: 18 }}>
+            <div
+              className="progress-bar"
+              role="progressbar"
+              style={{ width: `${progress}%` }}
+              aria-valuenow={progress}
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              {progress}%
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="d-flex justify-content-end gap-2">
         <Button variant="secondary" onClick={onCancel} disabled={loading}>
@@ -383,7 +460,7 @@ export default function UserOnlyDashboard({
     return () => (mounted = false);
   }, [user, refreshKey, apiBaseUrl]);
 
-  // Fetch bookings: try a single sensible endpoint and avoid noisy probing
+  // Fetch bookings
   React.useEffect(() => {
     let mounted = true;
     if (!isUser) {
@@ -396,7 +473,7 @@ export default function UserOnlyDashboard({
 
     (async () => {
       try {
-        // Try a single reasonable endpoint: backend may implement filtering by userId
+        // Single reasonable endpoint
         const path = user?._id
           ? `/api/bookings?userId=${encodeURIComponent(user._id)}`
           : "/api/bookings";
@@ -410,10 +487,9 @@ export default function UserOnlyDashboard({
           : res.data?.bookings || res.data || [];
         setBookings(Array.isArray(data) ? data : []);
       } catch (err) {
-        // If 404, backend doesn't expose a GET bookings endpoint; show friendly message but keep UI functional
         const status = err?.response?.status;
         if (status === 404) {
-          setBookings([]); // empty initial list
+          setBookings([]); 
           setErrorBookings(
             "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation."
           );
@@ -502,6 +578,7 @@ export default function UserOnlyDashboard({
               <Card className="h-100">
                 <Card.Body>
                   <Row className="h-100">
+
                     {/* Left: Text Content */}
                     <Col xs={6} className="d-flex flex-column">
                       <Card.Title>{item.serviceTitle}</Card.Title>

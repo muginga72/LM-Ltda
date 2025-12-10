@@ -28,6 +28,7 @@ const roomsRoutes = require('./routes/roomrental/roomRoutes');
 const listingsRouter = require('./routes/roomrental/listingRoutes');
 const uploadsRouter = require('./routes/uploads/uploads');
 const roomRequestRoutes = require('./routes/roomrental/roomRequestRoutes');
+const bookingRoutes = require("./routes/roomrental/bookingRoutes");
 
 const { Server } = require('socket.io');
 const multer = require('multer');
@@ -73,13 +74,12 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// Configure multer to store uploads in uploads directory (adjust storage as needed)
+// Multer store uploads in uploads directory
 const upload = multer({
   dest: UPLOADS_DIR,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB limit (adjust as needed)
+    fileSize: 5 * 1024 * 1024, // 5 MB limit 
   },
-  // Optionally add fileFilter to restrict types:
   fileFilter: (req, file, cb) => {
     // allow images and pdfs
     if (/image\/|pdf$/.test(file.mimetype)) cb(null, true);
@@ -127,13 +127,11 @@ app.use('/api/testimonials', testimonialsRoute);
 
 // Room rental routes
 app.use('/api/rooms', roomsRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // ---------- Booking route (accepts JSON or multipart/form-data) ----------
-// Note: upload.single('idDocument') is now defined using the configured multer instance.
 app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
   try {
-    // If multipart was used, multer populates req.file and req.body
-    // If JSON was used, req.body contains the fields
     const isMultipart = !!req.file;
     const body = req.body || {};
 
@@ -148,8 +146,6 @@ app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
     if (!roomId || !userId || !startDate || !endDate) {
       return res.status(400).json({ message: 'roomId, userId, startDate and endDate are required.' });
     }
-
-    // Optional: validate date formats (simple check)
     const s = new Date(startDate);
     const e = new Date(endDate);
     if (isNaN(s.getTime()) || isNaN(e.getTime())) {
@@ -162,11 +158,9 @@ app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
     // If file uploaded, req.file contains file info
     if (isMultipart) {
       console.log('Received file:', req.file.originalname, 'stored at', req.file.path);
-      // You may want to move/rename file or store path in DB
     }
 
-    // TODO: Save booking to DB (create Booking model and persist)
-    // Example response:
+    // Save booking to DB 
     const booking = {
       roomId,
       userId,
@@ -202,7 +196,6 @@ app.use((req, res, next) => {
 
 // Multer-aware error handler and generic error handler
 app.use((err, req, res, next) => {
-  // Multer errors (e.g., Unexpected field, file too large)
   if (err && err.name === 'MulterError') {
     const status = 400;
     return res.status(status).json({
