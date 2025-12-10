@@ -22,7 +22,7 @@ import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
-import BookingsList from "../components/roomrentals/UserBookingsList";
+import UserBookingsList from "../components/roomrentals/UserBookingsList";
 
 const BookingForm = ({
   room,
@@ -554,7 +554,6 @@ export default function UserOnlyDashboard({
   // Called when booking is created by BookingForm
   const handleBooked = (createdBooking) => {
     if (createdBooking) {
-      // If server returned created booking, add it; otherwise create a minimal local booking
       const b = createdBooking._id
         ? createdBooking
         : {
@@ -690,64 +689,6 @@ export default function UserOnlyDashboard({
     );
   };
 
-  // const renderBookings = () => {
-  //   if (loadingBookings) {
-  //     return (
-  //       <div className="text-center py-4">
-  //         <Spinner animation="border" />
-  //       </div>
-  //     );
-  //   }
-
-  //   if (errorBookings) {
-  //     return <Alert variant="warning">{errorBookings}</Alert>;
-  //   }
-
-  //   if (!bookings || bookings.length === 0) {
-  //     return <div className="text-muted">You have no bookings yet.</div>;
-  //   }
-
-  //   return (
-  //     <Row>
-  //       {bookings.map((b) => (
-  //         <Col
-  //           key={b._id || `${b.roomId}-${b.startDate}`}
-  //           md={6}
-  //           lg={4}
-  //           className="mb-3"
-  //         >
-  //           <Card>
-  //             <Card.Body>
-  //               <Card.Title>{b.roomTitle || b.title || "Booking"}</Card.Title>
-  //               <Card.Text>
-  //                 {b.startDate
-  //                   ? `${new Date(
-  //                       b.startDate
-  //                     ).toLocaleDateString()} - ${new Date(
-  //                       b.endDate
-  //                     ).toLocaleDateString()}`
-  //                   : "Dates not specified"}
-  //               </Card.Text>
-  //               <div className="d-flex gap-2">
-  //                 <Button
-  //                   size="sm"
-  //                   variant="outline-primary"
-  //                   onClick={() => navigate(`/rooms/${b.roomId}/details`)}
-  //                 >
-  //                   View room
-  //                 </Button>
-  //                 <Button size="sm" variant="outline-secondary" disabled>
-  //                   Manage
-  //                 </Button>
-  //               </div>
-  //             </Card.Body>
-  //           </Card>
-  //         </Col>
-  //       ))}
-  //     </Row>
-  //   );
-  // };
-
   if (!isUser) {
     return (
       <Container style={{ padding: "2rem" }}>
@@ -868,7 +809,7 @@ export default function UserOnlyDashboard({
             title={t("dashboard.tabBookings") || "My Bookings"}
           >
             {/* <div className="mt-3">{renderBookings()}</div> */}
-            <BookingsList
+            <UserBookingsList
               bookings={bookings}
               loadingBookings={loadingBookings}
               errorBookings={errorBookings}
