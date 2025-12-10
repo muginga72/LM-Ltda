@@ -1,5 +1,5 @@
 // client/src/pages/UserOnlyDashboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import {
   Container,
@@ -13,7 +13,6 @@ import {
   Tabs,
   Tab,
 } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../contexts/AuthContext";
 import UploadDocumentModal from "../components/UploadDocumentModal";
@@ -22,6 +21,7 @@ import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
+import UserBookingsList from "../components/roomrentals/UserBookingsList";
 
 const BookingForm = ({
   room,
@@ -34,7 +34,9 @@ const BookingForm = ({
 }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [guests, setGuests] = useState(room?.roomCapacity || room?.capacity || 1);
+  const [guests, setGuests] = useState(
+    room?.roomCapacity || room?.capacity || 1
+  );
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [idFile, setIdFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -42,7 +44,8 @@ const BookingForm = ({
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  const authToken = token || user?.token || localStorage.getItem("authToken") || null;
+  const authToken =
+    token || user?.token || localStorage.getItem("authToken") || null;
   const defaultHeaders = {
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     "Cache-Control": "no-cache",
@@ -118,7 +121,10 @@ const BookingForm = ({
     // Build form data
     const formData = new FormData();
     formData.append("roomId", room?._id || "");
-    formData.append("roomTitle", room?.roomTitle || room?.title || room?.name || "");
+    formData.append(
+      "roomTitle",
+      room?.roomTitle || room?.title || room?.name || ""
+    );
     formData.append("startDate", new Date(startDate).toISOString());
     formData.append("endDate", new Date(endDate).toISOString());
     formData.append("guestsCount", String(guests));
@@ -138,11 +144,13 @@ const BookingForm = ({
             headers: { ...defaultHeaders },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.lengthComputable) {
-                const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                const percent = Math.round(
+                  (progressEvent.loaded / progressEvent.total) * 100
+                );
                 setProgress(percent);
               }
             },
-            timeout: 120000, 
+            timeout: 120000,
           };
           const res = await axios.post(buildUrl(path), formData, config);
           created = res?.data;
@@ -227,7 +235,9 @@ const BookingForm = ({
       </div>
 
       <div className="mb-3">
-        <label className="form-label">Government ID / Passport (required)</label>
+        <label className="form-label">
+          Government ID / Passport (required)
+        </label>
         <input
           className="form-control"
           type="file"
@@ -235,7 +245,9 @@ const BookingForm = ({
           onChange={handleFileChange}
           required
         />
-        <small className="text-muted">Max 10MB. PDF or image formats accepted.</small>
+        <small className="text-muted">
+          Max 10MB. PDF or image formats accepted.
+        </small>
       </div>
 
       {progress !== null && (
@@ -265,7 +277,7 @@ const BookingForm = ({
       </div>
     </form>
   );
-}
+};
 
 /**
  * UserOnlyDashboard
@@ -284,7 +296,7 @@ export default function UserOnlyDashboard({
 }) {
   const { user } = React.useContext(AuthContext);
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const isUser = Boolean(user && user.role !== "admin");
 
@@ -334,18 +346,21 @@ export default function UserOnlyDashboard({
   // auth headers
   const authToken =
     token || user?.token || localStorage.getItem("authToken") || null;
-  const defaultHeaders = {
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    "Cache-Control": "no-cache",
-    ...headers,
-  };
+  const defaultHeaders = useMemo(() => {
+    return {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      // include any dynamic header values here (e.g. auth token)
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    };
+  }, [authToken]);
 
-  const buildUrl = (path) => {
+  const buildUrl = useCallback((path) => {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     if (!apiBaseUrl) return normalizedPath;
     const base = apiBaseUrl.replace(/\/+$/, "");
     return `${base}${normalizedPath}`;
-  };
+  }, [apiBaseUrl]);
 
   // Fetch services (requested, scheduled, shared)
   React.useEffect(() => {
@@ -427,7 +442,7 @@ export default function UserOnlyDashboard({
     );
 
     return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl, t, isUser]);
+  }, [user, refreshKey, apiBaseUrl, t, isUser, buildUrl, defaultHeaders]);
 
   // Fetch rooms
   React.useEffect(() => {
@@ -458,7 +473,7 @@ export default function UserOnlyDashboard({
     })();
 
     return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl]);
+  }, [user, refreshKey, apiBaseUrl, buildUrl, defaultHeaders, isUser]);
 
   // Fetch bookings
   React.useEffect(() => {
@@ -489,7 +504,7 @@ export default function UserOnlyDashboard({
       } catch (err) {
         const status = err?.response?.status;
         if (status === 404) {
-          setBookings([]); 
+          setBookings([]);
           setErrorBookings(
             "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation."
           );
@@ -504,7 +519,7 @@ export default function UserOnlyDashboard({
     })();
 
     return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl]);
+  }, [user, refreshKey, apiBaseUrl, buildUrl, defaultHeaders, isUser]);
 
   // UI handlers
   const handlePayService = (serviceId) => {
@@ -541,7 +556,6 @@ export default function UserOnlyDashboard({
   // Called when booking is created by BookingForm
   const handleBooked = (createdBooking) => {
     if (createdBooking) {
-      // If server returned created booking, add it; otherwise create a minimal local booking
       const b = createdBooking._id
         ? createdBooking
         : {
@@ -578,7 +592,6 @@ export default function UserOnlyDashboard({
               <Card className="h-100">
                 <Card.Body>
                   <Row className="h-100">
-
                     {/* Left: Text Content */}
                     <Col xs={6} className="d-flex flex-column">
                       <Card.Title>{item.serviceTitle}</Card.Title>
@@ -672,64 +685,6 @@ export default function UserOnlyDashboard({
               onPay={() => handlePayService(r._id)}
               token={authToken}
             />
-          </Col>
-        ))}
-      </Row>
-    );
-  };
-
-  const renderBookings = () => {
-    if (loadingBookings) {
-      return (
-        <div className="text-center py-4">
-          <Spinner animation="border" />
-        </div>
-      );
-    }
-
-    if (errorBookings) {
-      return <Alert variant="warning">{errorBookings}</Alert>;
-    }
-
-    if (!bookings || bookings.length === 0) {
-      return <div className="text-muted">You have no bookings yet.</div>;
-    }
-
-    return (
-      <Row>
-        {bookings.map((b) => (
-          <Col
-            key={b._id || `${b.roomId}-${b.startDate}`}
-            md={6}
-            lg={4}
-            className="mb-3"
-          >
-            <Card>
-              <Card.Body>
-                <Card.Title>{b.roomTitle || b.title || "Booking"}</Card.Title>
-                <Card.Text>
-                  {b.startDate
-                    ? `${new Date(
-                        b.startDate
-                      ).toLocaleDateString()} - ${new Date(
-                        b.endDate
-                      ).toLocaleDateString()}`
-                    : "Dates not specified"}
-                </Card.Text>
-                <div className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={() => navigate(`/rooms/${b.roomId}/details`)}
-                  >
-                    View room
-                  </Button>
-                  <Button size="sm" variant="outline-secondary" disabled>
-                    Manage
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
           </Col>
         ))}
       </Row>
@@ -855,7 +810,14 @@ export default function UserOnlyDashboard({
             eventKey="bookings"
             title={t("dashboard.tabBookings") || "My Bookings"}
           >
-            <div className="mt-3">{renderBookings()}</div>
+            {/* <div className="mt-3">{renderBookings()}</div> */}
+            <UserBookingsList
+              bookings={bookings}
+              loadingBookings={loadingBookings}
+              errorBookings={errorBookings}
+              // onEditBooking={handleEditBooking}
+              onCancelBooking={handleCancelBooking}
+            />
           </Tab>
         </Tabs>
 
