@@ -174,7 +174,9 @@ export default function UserCalendar({ apiBaseUrl = "", headers = {}, user }) {
       )}
 
       {!loading && !error && events.length === 0 && (
-        <p>{t("calendar.noEvents")}</p>
+        <div role="alert" className="fade alert alert-info show">
+          {t("calendar.noEvents")}
+        </div>
       )}
 
       {!loading && events.length > 0 && (
