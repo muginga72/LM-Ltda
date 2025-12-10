@@ -1,5 +1,5 @@
 // client/src/pages/UserOnlyDashboard.jsx
-import React, { useEffect, useState, useContext } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import {
   Container,
@@ -403,6 +403,7 @@ export default function UserOnlyDashboard({
         const res = await axios.get(buildUrl(path), {
           headers: defaultHeaders,
         });
+
         if (!mounted) return;
         const data = Array.isArray(res.data)
           ? res.data
