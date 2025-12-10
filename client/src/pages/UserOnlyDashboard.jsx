@@ -1,9 +1,6 @@
 // client/src/pages/UserOnlyDashboard.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import UploadDocumentModal from "../components/UploadDocumentModal";
-import EmailSupportModal from "../components/EmailSupportModal";
-import { AuthContext } from "../contexts/AuthContext";
 import {
   Container,
   Spinner,
@@ -17,20 +14,21 @@ import {
   Tab,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { AuthContext } from "../contexts/AuthContext";
+import UploadDocumentModal from "../components/UploadDocumentModal";
+import EmailSupportModal from "../components/EmailSupportModal";
 import UserDashboard from "../components/UserDashboard";
 import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
-import { useTranslation } from "react-i18next";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
-// import BookingForm from "../components/roomrentals/BookingForm";
-// import PaymentModal from "../components/roomrentals/PaymentModal";
 
 /**
  * BookingForm: small, focused booking form that POSTs to /api/bookings (fallback /bookings).
  * - onBooked(createdBooking) is called when booking is created successfully.
  * - onCancel() closes the form without creating a booking.
  */
-export function BookingForm({
+function BookingForm({
   room,
   user,
   token,
@@ -101,6 +99,7 @@ export function BookingForm({
       userEmail: user?.email || null,
     };
 
+    // Try primary endpoint then fallback
     const candidates = ["/api/bookings", "/bookings"];
 
     try {
@@ -115,8 +114,10 @@ export function BookingForm({
         } catch (err) {
           const status = err?.response?.status;
           if (status === 404) {
+            // try next candidate
             continue;
           } else {
+            // other error: rethrow to outer catch
             throw err;
           }
         }
@@ -189,6 +190,12 @@ export function BookingForm({
   );
 }
 
+/**
+ * UserOnlyDashboard
+ * - Uses RoomCardWithPay (which calls onRequestBooking(room))
+ * - Allows booking creation via BookingForm
+ * - Uses apiBaseUrl for all requests; pass apiBaseUrl prop or configure dev proxy
+ */
 export default function UserOnlyDashboard({
   apiBaseUrl,
   token,
@@ -197,63 +204,57 @@ export default function UserOnlyDashboard({
   onServiceSelect,
   userId,
   headers = {},
-  userId: propUserId,
 }) {
-  const { user } = useContext(AuthContext);
+  const { user } = React.useContext(AuthContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const effectiveUserId = user?._id || propUserId || (user && user.id) || null;
 
-  // Determine whether current viewer is a non-admin user
   const isUser = Boolean(user && user.role !== "admin");
 
-  // Services state
-  const [requestedServices, setRequestedServices] = useState(
+  // Services
+  const [requestedServices, setRequestedServices] = React.useState(
     initialServices?.requested || []
   );
-  const [scheduledServices, setScheduledServices] = useState(
+  const [scheduledServices, setScheduledServices] = React.useState(
     initialServices?.scheduled || []
   );
-  const [sharedServices, setSharedServices] = useState(
+  const [sharedServices, setSharedServices] = React.useState(
     initialServices?.shared || []
   );
+  const [loadingServices, setLoadingServices] = React.useState(
+    !initialServices
+  );
+  const [errorRequested, setErrorRequested] = React.useState("");
+  const [errorScheduled, setErrorScheduled] = React.useState("");
+  const [errorShared, setErrorShared] = React.useState("");
 
-  const [loadingServices, setLoadingServices] = useState(!initialServices);
-  const [errorRequested, setErrorRequested] = useState("");
-  const [errorScheduled, setErrorScheduled] = useState("");
-  const [errorShared, setErrorShared] = useState("");
+  // Rooms & bookings
+  const [rooms, setRooms] = React.useState([]);
+  const [loadingRooms, setLoadingRooms] = React.useState(true);
+  const [errorRooms, setErrorRooms] = React.useState(null);
 
-  // Rooms state
-  const [rooms, setRooms] = useState([]);
-  const [loadingRooms, setLoadingRooms] = useState(true);
-  const [errorRooms, setErrorRooms] = useState(null);
-
-  // Bookings (placeholder)
-  const [bookings, setBookings] = useState([]);
-  const [loadingBookings, setLoadingBookings] = useState(true);
-  const [errorBookings, setErrorBookings] = useState(null);
+  const [bookings, setBookings] = React.useState([]);
+  const [loadingBookings, setLoadingBookings] = React.useState(true);
+  const [errorBookings, setErrorBookings] = React.useState(null);
 
   // UI state
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [emailSupportModal, setEmailSupportModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = React.useState(false);
+  const [emailSupportModal, setEmailSupportModal] = React.useState(false);
+  const [selectedServiceId, setSelectedServiceId] = React.useState(null);
+  const [showPayModal, setShowPayModal] = React.useState(false);
 
-  // Payment / booking selection state
-  const [selectedServiceId, setSelectedServiceId] = useState(null);
-  const [showPayModal, setShowPayModal] = useState(false);
+  // Booking modal
+  const [bookingRoom, setBookingRoom] = React.useState(null);
+  const [showBookingModal, setShowBookingModal] = React.useState(false);
 
-   // Booking modal state (used for room booking)
-  const [bookingRoom, setBookingRoom] = useState(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  // Room details
+  const [selectedRoom, setSelectedRoom] = React.useState(null);
+  const [showDetails, setShowDetails] = React.useState(false);
 
-  // Room details / booking state
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
+  // refresh key
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
-  // refresh key to re-fetch lists when needed
-  const [refreshKey] = useState(0);
-
-  // Build headers (prefer token prop, otherwise use user.token)
+  // auth headers
   const authToken =
     token || user?.token || localStorage.getItem("authToken") || null;
   const defaultHeaders = {
@@ -262,14 +263,19 @@ export default function UserOnlyDashboard({
     ...headers,
   };
 
+  const buildUrl = (path) => {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    if (!apiBaseUrl) return normalizedPath;
+    const base = apiBaseUrl.replace(/\/+$/, "");
+    return `${base}${normalizedPath}`;
+  };
+
   // Fetch services (requested, scheduled, shared)
-  useEffect(() => {
+  React.useEffect(() => {
     let mounted = true;
     if (!isUser) {
       setLoadingServices(false);
-      return () => {
-        mounted = false;
-      };
+      return () => (mounted = false);
     }
 
     setLoadingServices(true);
@@ -279,7 +285,7 @@ export default function UserOnlyDashboard({
 
     const fetchRequested = async () => {
       try {
-        const res = await axios.get("/api/requests", {
+        const res = await axios.get(buildUrl("/api/requests"), {
           headers: defaultHeaders,
         });
         const filtered = Array.isArray(res.data)
@@ -301,7 +307,7 @@ export default function UserOnlyDashboard({
 
     const fetchScheduled = async () => {
       try {
-        const res = await axios.get("/api/schedules", {
+        const res = await axios.get(buildUrl("/api/schedules"), {
           headers: defaultHeaders,
         });
         const filtered = Array.isArray(res.data)
@@ -320,7 +326,9 @@ export default function UserOnlyDashboard({
 
     const fetchShared = async () => {
       try {
-        const res = await axios.get("/api/shares", { headers: defaultHeaders });
+        const res = await axios.get(buildUrl("/api/shares"), {
+          headers: defaultHeaders,
+        });
         const filtered = Array.isArray(res.data)
           ? res.data.filter((item) => item.email === user.email)
           : [];
@@ -340,17 +348,16 @@ export default function UserOnlyDashboard({
         if (mounted) setLoadingServices(false);
       }
     );
-    return () => { mounted = false; };
+
+    return () => (mounted = false);
   }, [user, refreshKey, apiBaseUrl, t, isUser]);
 
   // Fetch rooms
-  useEffect(() => {
+  React.useEffect(() => {
     let mounted = true;
     if (!isUser) {
       setLoadingRooms(false);
-      return () => {
-        mounted = false;
-      };
+      return () => (mounted = false);
     }
 
     setLoadingRooms(true);
@@ -358,7 +365,9 @@ export default function UserOnlyDashboard({
 
     (async () => {
       try {
-        const res = await axios.get("/api/rooms", { headers: defaultHeaders });
+        const res = await axios.get(buildUrl("/api/rooms"), {
+          headers: defaultHeaders,
+        });
         const data = Array.isArray(res.data) ? res.data : res.data?.rooms || [];
         if (!mounted) return;
         setRooms(data);
@@ -370,17 +379,16 @@ export default function UserOnlyDashboard({
         if (mounted) setLoadingRooms(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [user, refreshKey]);
 
-  // Fetch bookings (placeholder) — replace endpoint with your real bookings API
-  useEffect(() => {
+    return () => (mounted = false);
+  }, [user, refreshKey, apiBaseUrl]);
+
+  // Fetch bookings: try a single sensible endpoint and avoid noisy probing
+  React.useEffect(() => {
     let mounted = true;
     if (!isUser) {
       setLoadingBookings(false);
-      return () => {
-        mounted = false;
-      };
+      return () => (mounted = false);
     }
 
     setLoadingBookings(true);
@@ -388,21 +396,38 @@ export default function UserOnlyDashboard({
 
     (async () => {
       try {
-        const res = await axios.get("/api/bookings/my", {
+        // Try a single reasonable endpoint: backend may implement filtering by userId
+        const path = user?._id
+          ? `/api/bookings?userId=${encodeURIComponent(user._id)}`
+          : "/api/bookings";
+        const res = await axios.get(buildUrl(path), {
           headers: defaultHeaders,
         });
         if (!mounted) return;
-        setBookings(Array.isArray(res.data) ? res.data : []);
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data?.bookings || res.data || [];
+        setBookings(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.warn("Bookings fetch warning:", err);
-        if (!mounted) return;
-        setBookings([]);
+        // If 404, backend doesn't expose a GET bookings endpoint; show friendly message but keep UI functional
+        const status = err?.response?.status;
+        if (status === 404) {
+          setBookings([]); // empty initial list
+          setErrorBookings(
+            "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation."
+          );
+        } else {
+          console.warn("Bookings fetch error:", err);
+          setBookings([]);
+          setErrorBookings("Failed to load bookings.");
+        }
       } finally {
         if (mounted) setLoadingBookings(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [user, refreshKey]);
+
+    return () => (mounted = false);
+  }, [user, refreshKey, apiBaseUrl]);
 
   // UI handlers
   const handlePayService = (serviceId) => {
@@ -415,73 +440,49 @@ export default function UserOnlyDashboard({
     setSelectedServiceId(null);
   };
 
-  function handleOpenDetails(room) {
+  const handleOpenDetails = (room) => {
     setSelectedRoom(room);
     setShowDetails(true);
-  }
+  };
 
-  function handleClose() {
-    setShowDetails(false);
+  const handleCloseDetails = () => {
     setSelectedRoom(null);
-  }
+    setShowDetails(false);
+  };
 
-  // Booking flow: open booking modal for a room
-  const handleBookRoom = (room) => {
+  // RoomCardWithPay uses onRequestBooking prop
+  const handleRequestBooking = (room) => {
     setBookingRoom(room);
     setShowBookingModal(true);
   };
 
-  // Render helpers
-  const renderServiceSummary = (services, title) => {
-    if (!services || services.length === 0) {
-      return (
-        <Card className="mb-3">
-          <Card.Body>
-            <Card.Title>{title}</Card.Title>
-            <div className="text-muted">
-              {t("dashboard.noServicesShort") || "No items"}
-            </div>
-          </Card.Body>
-        </Card>
-      );
-    }
+  const handleCancelBooking = () => {
+    setBookingRoom(null);
+    setShowBookingModal(false);
+  };
 
-    return (
-      <Row className="mb-3">
-        {services.slice(0, 3).map((s) => (
-          <Col key={s._id} md={6} lg={4} className="mb-2">
-            <Card>
-              <Card.Body>
-                <Card.Title className="mb-1">
-                  {s.serviceTitle || s.title}
-                </Card.Title>
-                <Card.Text className="text-muted small">
-                  {s.serviceType || s.details || s.date}
-                </Card.Text>
-                <div className="d-flex gap-2 mt-2">
-                  <Button
-                    size="sm"
-                    variant={s.paid ? "success" : "outline-primary"}
-                    onClick={() => handlePayService(s._id)}
-                  >
-                    {s.paid
-                      ? t("dashboard.paid") || "Paid"
-                      : t("dashboard.pay") || "Pay"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="link"
-                    onClick={() => onServiceSelect?.(s)}
-                  >
-                    {t("dashboard.view") || "View"}
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    );
+  // Called when booking is created by BookingForm
+  const handleBooked = (createdBooking) => {
+    if (createdBooking) {
+      // If server returned created booking, add it; otherwise create a minimal local booking
+      const b = createdBooking._id
+        ? createdBooking
+        : {
+            _id: `local-${Date.now()}`,
+            roomId: createdBooking.roomId || bookingRoom?._id,
+            roomTitle:
+              createdBooking.roomTitle ||
+              bookingRoom?.roomTitle ||
+              bookingRoom?.title ||
+              bookingRoom?.name,
+            startDate: createdBooking.startDate,
+            endDate: createdBooking.endDate,
+          };
+      setBookings((prev) => [b, ...prev]);
+    }
+    setBookingRoom(null);
+    setShowBookingModal(false);
+    setRefreshKey((k) => k + 1);
   };
 
   const renderServiceCards = (titleKey, services, error, typeKey) => (
@@ -586,7 +587,13 @@ export default function UserOnlyDashboard({
       <Row>
         {rooms.map((r) => (
           <Col key={r._id} md={6} lg={4} className="mb-3">
-            <RoomCardWithPay room={r} onDetails={handleOpenDetails} onBook={handleBookRoom} />
+            <RoomCardWithPay
+              room={r}
+              onRequestBooking={handleRequestBooking}
+              onDetails={handleOpenDetails}
+              onPay={() => handlePayService(r._id)}
+              token={authToken}
+            />
           </Col>
         ))}
       </Row>
@@ -603,7 +610,7 @@ export default function UserOnlyDashboard({
     }
 
     if (errorBookings) {
-      return <Alert variant="danger">{errorBookings}</Alert>;
+      return <Alert variant="warning">{errorBookings}</Alert>;
     }
 
     if (!bookings || bookings.length === 0) {
@@ -613,7 +620,12 @@ export default function UserOnlyDashboard({
     return (
       <Row>
         {bookings.map((b) => (
-          <Col key={b._id} md={6} lg={4} className="mb-3">
+          <Col
+            key={b._id || `${b.roomId}-${b.startDate}`}
+            md={6}
+            lg={4}
+            className="mb-3"
+          >
             <Card>
               <Card.Body>
                 <Card.Title>{b.roomTitle || b.title || "Booking"}</Card.Title>
@@ -646,30 +658,6 @@ export default function UserOnlyDashboard({
     );
   };
 
-  // Overview tab: show UserDashboard, calendars, and compact services + rooms
-  const renderOverview = () => (
-    <>
-      <h4 className="mb-3 text-center">{t("dashboard.overview")}</h4>
-
-      <h5 className="mt-4 mb-3">
-        {t("dashboard.availableRooms") || "Available rooms"}
-      </h5>
-
-      {/* ------------ Rendering Rooms ----------- */}
-      {renderRooms()}
-
-      <UserDashboard
-        apiBaseUrl={apiBaseUrl}
-        user={user}
-        token={authToken}
-        initialServices={initialServices}
-        onProofSubmitted={onProofSubmitted}
-        onServiceSelect={onServiceSelect}
-      />
-    </>
-  );
-
-  // Final render: if not allowed, show access denied; hooks already ran above.
   if (!isUser) {
     return (
       <Container style={{ padding: "2rem" }}>
@@ -705,7 +693,21 @@ export default function UserOnlyDashboard({
             eventKey="overview"
             title={t("dashboard.tabOverview") || "Overview"}
           >
-            <div className="mt-3">{renderOverview()}</div>
+            <div className="mt-3">
+              <h5 className="mt-4 mb-3">
+                {t("dashboard.availableRooms") || "Available rooms"}
+              </h5>
+              {renderRooms()}
+
+              <UserDashboard
+                apiBaseUrl={apiBaseUrl}
+                user={user}
+                token={authToken}
+                initialServices={initialServices}
+                onProofSubmitted={onProofSubmitted}
+                onServiceSelect={onServiceSelect}
+              />
+            </div>
           </Tab>
 
           <Tab
@@ -779,7 +781,6 @@ export default function UserOnlyDashboard({
           </Tab>
         </Tabs>
 
-        {/* Upload / Support modals */}
         <UploadDocumentModal
           show={showUploadModal}
           onHide={() => setShowUploadModal(false)}
@@ -792,7 +793,6 @@ export default function UserOnlyDashboard({
           serviceId={selectedServiceId}
         />
 
-        {/* Service pay confirmation modal */}
         <Modal show={showPayModal} onHide={handleClosePayModal} centered>
           <Modal.Header closeButton>
             <Modal.Title>{t("dashboard.pay") || "Pay"}</Modal.Title>
@@ -811,8 +811,6 @@ export default function UserOnlyDashboard({
               variant="primary"
               onClick={() => {
                 if (selectedServiceId) {
-                  // Example: redirect to payment for selectedServiceId
-                  // To be replaced with real payment flow
                   window.location.href = `/payments/checkout?serviceId=${selectedServiceId}`;
                 }
               }}
@@ -822,11 +820,105 @@ export default function UserOnlyDashboard({
           </Modal.Footer>
         </Modal>
 
-        {/* Room payment modal ---- For the Future ------- */}
-        {/* <PaymentModal show={showPaymentModal} onHide={handleClosePaymentModal} room={paymentRoom} token={authToken} /> */}
+        <Modal
+          show={showBookingModal}
+          onHide={handleCancelBooking}
+          centered
+          size="md"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {bookingRoom
+                ? `Book: ${
+                    bookingRoom.roomTitle ||
+                    bookingRoom.title ||
+                    bookingRoom.name
+                  }`
+                : "Book room"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {bookingRoom ? (
+              <BookingForm
+                room={bookingRoom}
+                user={user}
+                token={authToken}
+                apiBaseUrl={apiBaseUrl}
+                headers={headers}
+                onBooked={handleBooked}
+                onCancel={handleCancelBooking}
+              />
+            ) : (
+              <div className="text-center py-3">
+                <Spinner animation="border" />
+              </div>
+            )}
+          </Modal.Body>
+        </Modal>
+
+        <Modal
+          show={showDetails}
+          onHide={handleCloseDetails}
+          centered
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {selectedRoom?.roomTitle ||
+                selectedRoom?.title ||
+                selectedRoom?.name ||
+                "Room details"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedRoom ? (
+              <>
+                {selectedRoom.imagePath ? (
+                  <img
+                    src={selectedRoom.imagePath}
+                    alt={selectedRoom.title || "Room"}
+                    className="img-fluid mb-3"
+                    style={{
+                      maxHeight: 300,
+                      objectFit: "cover",
+                      width: "100%",
+                    }}
+                  />
+                ) : null}
+                <p>
+                  {selectedRoom.roomDescription ||
+                    selectedRoom.description ||
+                    selectedRoom.summary ||
+                    "No description available."}
+                </p>
+                <p>
+                  <strong>Max guests:</strong>{" "}
+                  {selectedRoom.roomCapacity || selectedRoom.capacity || "N/A"}
+                </p>
+                <div className="d-flex gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      handleCloseDetails();
+                      handleRequestBooking(selectedRoom);
+                    }}
+                  >
+                    Book this room
+                  </Button>
+                  <Button variant="secondary" onClick={handleCloseDetails}>
+                    Close
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-3">
+                <Spinner animation="border" />
+              </div>
+            )}
+          </Modal.Body>
+        </Modal>
       </Container>
 
-      {/* ---------------------------  FOOTER  ---------------------------- */}
       <footer className="text-center py-4 border-top">
         <small>
           <p>
@@ -835,7 +927,7 @@ export default function UserOnlyDashboard({
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} {t("lmLtd")}.{" "}
+          © {new Date().getFullYear()} {t("lmLtd")}.{" "}
           {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
