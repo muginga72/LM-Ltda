@@ -1,7 +1,11 @@
-// RoomListingRequest.jsx
+// client/src/pages/roomrental/RoomListingRequest.jsx
 import React, { useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
 
 export default function RoomListingRequest() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     roomTitle: "",
     description: "",
@@ -68,7 +72,8 @@ export default function RoomListingRequest() {
     const readers = files.map((file) => {
       return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = (ev) => resolve({ name: file.name, src: ev.target.result });
+        reader.onload = (ev) =>
+          resolve({ name: file.name, src: ev.target.result });
         reader.readAsDataURL(file);
       });
     });
@@ -88,7 +93,13 @@ export default function RoomListingRequest() {
       instantBook: false,
       priceAmount: "",
       priceCurrency: "USD",
-      roomLocation: { address: "", city: "", region: "", country: "", coordinates: "" },
+      roomLocation: {
+        address: "",
+        city: "",
+        region: "",
+        country: "",
+        coordinates: "",
+      },
       amenities: "",
       rules: "",
       terms: "1 month",
@@ -109,7 +120,8 @@ export default function RoomListingRequest() {
     if (!form.name.trim()) return "Your name is required.";
     if (!form.email.trim()) return "Email is required.";
     if (!form.phone.trim()) return "Phone is required.";
-    if (!form.priceAmount && form.priceAmount !== 0) return "Price per night is required.";
+    if (!form.priceAmount && form.priceAmount !== 0)
+      return "Price per night is required.";
     if (!form.acknowledge) return "You must acknowledge the listing terms.";
     // basic email pattern
     const emailRe = /\S+@\S+\.\S+/;
@@ -146,12 +158,18 @@ export default function RoomListingRequest() {
       fd.append("instantBook", form.instantBook ? "true" : "false");
 
       // Price as JSON string (server safeParse will parse)
-      const price = { amount: Number(form.priceAmount), currency: form.priceCurrency || "USD" };
+      const price = {
+        amount: Number(form.priceAmount),
+        currency: form.priceCurrency || "USD",
+      };
       fd.append("pricePerNight", JSON.stringify(price));
 
       // Room location as JSON string
       const coords = form.roomLocation.coordinates
-        ? form.roomLocation.coordinates.split(",").map((s) => s.trim()).filter(Boolean)
+        ? form.roomLocation.coordinates
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
       const coordsNum = coords.length === 2 ? coords.map((c) => Number(c)) : [];
       const roomLocation = {
@@ -165,9 +183,17 @@ export default function RoomListingRequest() {
 
       // Amenities & rules as JSON arrays
       const amenitiesArr = form.amenities
-        ? form.amenities.split(",").map((s) => s.trim()).filter(Boolean)
+        ? form.amenities
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
         : [];
-      const rulesArr = form.rules ? form.rules.split(",").map((s) => s.trim()).filter(Boolean) : [];
+      const rulesArr = form.rules
+        ? form.rules
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
       fd.append("amenities", JSON.stringify(amenitiesArr));
       fd.append("rules", JSON.stringify(rulesArr));
 
@@ -194,7 +220,10 @@ export default function RoomListingRequest() {
         const msg = (json && json.description) || `Server error ${resp.status}`;
         setResult({ ok: false, message: msg });
       } else {
-        setResult({ ok: true, message: `Saved (id: ${json && json.id ? json.id : "unknown"})` });
+        setResult({
+          ok: true,
+          message: `Saved (id: ${json && json.id ? json.id : "unknown"})`,
+        });
         resetForm();
       }
     } catch (err) {
@@ -423,7 +452,7 @@ export default function RoomListingRequest() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Images (up to 12)</label>
+              <label className="form-label">You can upload up to 12 images.</label>
               <input
                 ref={fileInputRef}
                 name="images"
@@ -435,11 +464,20 @@ export default function RoomListingRequest() {
               />
               <div className="mt-2 d-flex flex-wrap">
                 {imagePreviews.map((p) => (
-                  <div key={p.name} className="me-2 mb-2" style={{ width: 100 }}>
+                  <div
+                    key={p.name}
+                    className="me-2 mb-2"
+                    style={{ width: 100 }}
+                  >
                     <img
                       src={p.src}
                       alt={p.name}
-                      style={{ width: "100%", height: "auto", objectFit: "cover", borderRadius: 4 }}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        objectFit: "cover",
+                        borderRadius: 4,
+                      }}
                     />
                     <small className="d-block text-truncate">{p.name}</small>
                   </div>
@@ -497,12 +535,25 @@ export default function RoomListingRequest() {
                     onChange={handleChange}
                   />
                   <label htmlFor="acknowledge" className="form-check-label">
-                    I acknowledge the contract for listing and agree to the terms.
+                    I acknowledge the contract for listing and agree to the
+                    terms.{" "}
+                    <Link
+                      to="/room-rental/contract-listing"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ textDecoration: "none" }}
+                    >
+                      listing contract
+                    </Link>
                   </label>
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                  >
                     {submitting ? "Submitting..." : "Submit Listing"}
                   </button>
                   <button
@@ -517,7 +568,9 @@ export default function RoomListingRequest() {
 
                 {result && (
                   <div
-                    className={`mt-3 alert ${result.ok ? "alert-success" : "alert-danger"}`}
+                    className={`mt-3 alert ${
+                      result.ok ? "alert-success" : "alert-danger"
+                    }`}
                     role="alert"
                   >
                     {result.message}
@@ -525,7 +578,8 @@ export default function RoomListingRequest() {
                 )}
 
                 <small className="text-muted d-block mt-2">
-                  Required: room title, description, price, name, email, phone, and acknowledgement.
+                  Required: room title, description, price, name, email, phone,
+                  and acknowledgement.
                 </small>
               </div>
             </div>
@@ -534,8 +588,13 @@ export default function RoomListingRequest() {
               <div className="card-body">
                 <h6>Quick Tips</h6>
                 <ul className="mb-0">
-                  <li>Images are uploaded as multipart/form-data under the "images" field.</li>
-                  <li>Price is sent as a JSON string in the pricePerNight field.</li>
+                  <li>
+                    Images are uploaded as multipart/form-data under the
+                    "images" field.
+                  </li>
+                  <li>
+                    Price is sent as a JSON string in the pricePerNight field.
+                  </li>
                   <li>Amenities and rules are sent as JSON arrays.</li>
                 </ul>
               </div>
@@ -543,6 +602,18 @@ export default function RoomListingRequest() {
           </div>
         </div>
       </form>
+      <footer className="text-center py-4 border-top">
+        <small>
+          <p>
+            <strong>{t("whoWeAre.footer.phones")}:</strong> (+244) 222 022 351;
+            (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <br />
+            {t("whoWeAre.footer.address")}
+          </p>
+          &copy; {new Date().getFullYear()} LM-Ltd Services.{" "}
+          {t("whoWeAre.footer.copyright")}
+        </small>
+      </footer>
     </div>
   );
 }
