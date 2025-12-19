@@ -1,0 +1,291 @@
+// // server/routes/roomrental/roomListingRequestRoutes.js
+// const express = require("express");
+// const router = express.Router();
+// const RoomListingRequest = require("../../models/roomrental/RoomListingRequest");
+
+// // simple server-side validators
+// const isValidEmail = (s) => /\S+@\S+\.\S+/.test(s);
+// const isValidPhone = (s) => /^[\d\s()+-]{7,20}$/.test(s);
+
+// router.post("/", async (req, res) => {
+//   try {
+//     const { name, email, phone, description } = req.body;
+
+//     if (!name || !email || !phone || !description) {
+//       return res.status(400).json({ description: "Missing required fields" });
+//     }
+
+//     if (!isValidEmail(email)) {
+//       return res.status(400).json({ description: "Invalid email" });
+//     }
+
+//     if (!isValidPhone(phone)) {
+//       return res.status(400).json({ description: "Invalid phone" });
+//     }
+
+//     const saved = await RoomListingRequest.create({
+//       name,
+//       email,
+//       phone,
+//       description,
+//       ip: req.ip,
+//       userAgent: req.get("User-Agent") || "",
+//     });
+
+//     return res.status(201).json({ id: saved._id, description: "Saved" });
+//   } catch (err) {
+//     console.error("Listing request POST error:", err);
+//     return res.status(500).json({ description: "Internal server error" });
+//   }
+// });
+
+// // GET /api/room-listing-request — fetch all descriptions
+// router.get("/", async (req, res) => {
+//   try {
+//     const descriptions = await RoomListingRequest.find().sort({ createdAt: -1 }).limit(100);
+//     res.json(descriptions);
+//   } catch (err) {
+//     console.error("Error fetching room listing request descriptions:", err);
+//     res.status(500).json({ description: "Failed to fetch descriptions" });
+//   }
+// });
+
+// module.exports = router;
+
+
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
+
+const router = express.Router();
+
+// Adjust path to where the model actually lives
+const RoomListingRequest = require("../../models/roomrental/RoomListingRequest");
+
+// simple server-side validators
+const isValidEmail = (s) => /\S+@\S+\.\S+/.test(s);
+const isValidPhone = (s) => /^[\d\s()+-]{7,20}$/.test(s);
+
+// Ensure upload directory exists
+const uploadDir = path.join(__dirname, "..", "..", "uploads", "rooms");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+// Multer disk storage so files persist
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(
+      file.originalname || ""
+    )}`;
+    cb(null, unique);
+  },
+});
+
+// Accept images only and limit size
+const fileFilter = (req, file, cb) => {
+  if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+    return cb(new Error("Only image files are allowed"), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
+  fileFilter,
+});
+
+// Match frontend field name exactly: images
+const imagesUpload = upload.array("images", 12);
+
+// Utility: safely parse JSON-like strings sent inside FormData
+function safeParse(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return fallback;
+  }
+}
+
+// Helper: build images metadata from multer files
+function buildImagesArray(files, req) {
+  if (!Array.isArray(files)) return [];
+  return files.map((f) => ({
+    filename: f.filename,
+    originalname: f.originalname,
+    mimetype: f.mimetype,
+    size: f.size,
+    url: `${req.protocol}://${req.get("host")}/uploads/rooms/${f.filename}`,
+    path: f.path,
+  }));
+}
+
+router.post("/", imagesUpload, async (req, res) => {
+  try {
+    // If multer produced an error it would have been thrown earlier; req.files available
+    const files = req.files || [];
+
+    // Accept both JSON body and form-data fields
+    const body = req.body || {};
+
+    // Required fields
+    const roomTitle = body.roomTitle || body.roomTitle === "" ? body.roomTitle : undefined;
+    const description = body.description || body.description === "" ? body.description : undefined;
+    const name = body.name || body.name === "" ? body.name : undefined;
+    const email = body.email || body.email === "" ? body.email : undefined;
+    const phone = body.phone || body.phone === "" ? body.phone : undefined;
+
+    // pricePerNight may be sent as JSON string or as separate fields
+    let pricePerNight = safeParse(body.pricePerNight, null);
+    if (!pricePerNight) {
+      // try separate fields
+      const amountRaw = body.priceAmount || body.price || body.pricePerNightAmount;
+      const currencyRaw = body.priceCurrency || body.currency || "USD";
+      if (amountRaw !== undefined) {
+        const amountNum = Number(amountRaw);
+        if (!Number.isNaN(amountNum)) {
+          pricePerNight = { amount: amountNum, currency: currencyRaw || "USD" };
+        }
+      }
+    }
+
+    // Basic required validation
+    if (!roomTitle || !description || !name || !email || !phone || !pricePerNight || pricePerNight.amount === undefined) {
+      return res.status(400).json({
+        description: "Missing required fields. Required: roomTitle, description, pricePerNight.amount, name, email, phone",
+      });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ description: "Invalid email" });
+    }
+
+    if (!isValidPhone(phone)) {
+      return res.status(400).json({ description: "Invalid phone" });
+    }
+
+    // Parse numeric fields (allow strings from form-data)
+    const roomCapacity = Number(body.roomCapacity ?? body.capacity ?? 1);
+    const bedrooms = Number(body.bedrooms ?? 1);
+    const bathrooms = Number(body.bathrooms ?? 1);
+    const minNights = Number(body.minNights ?? 1);
+    const maxNights = Number(body.maxNights ?? 30);
+
+    // Parse booleans
+    const instantBook = body.instantBook === "true" || body.instantBook === true || body.instantBook === "1";
+    const acknowledge = body.acknowledge === "true" || body.acknowledge === true || body.acknowledge === "1";
+
+    // Parse arrays (amenities, rules) - may be JSON string or comma-separated
+    let amenities = safeParse(body.amenities, null);
+    if (amenities === null) {
+      if (typeof body.amenities === "string") {
+        amenities = body.amenities ? body.amenities.split(",").map((s) => s.trim()).filter(Boolean) : [];
+      } else {
+        amenities = [];
+      }
+    }
+
+    let rules = safeParse(body.rules, null);
+    if (rules === null) {
+      if (typeof body.rules === "string") {
+        rules = body.rules ? body.rules.split(",").map((s) => s.trim()).filter(Boolean) : [];
+      } else {
+        rules = [];
+      }
+    }
+
+    // Parse roomLocation (may be JSON string)
+    let roomLocation = safeParse(body.roomLocation, null);
+    if (roomLocation === null) {
+      roomLocation = {
+        address: body.address || "",
+        city: body.city || "",
+        region: body.region || "",
+        country: body.country || "",
+        coordinates: safeParse(body.coordinates, []),
+      };
+    }
+
+    // Ensure pricePerNight.amount is a number
+    pricePerNight.amount = Number(pricePerNight.amount);
+    if (Number.isNaN(pricePerNight.amount)) {
+      return res.status(400).json({ description: "Invalid pricePerNight.amount" });
+    }
+
+    // Build images metadata
+    const images = buildImagesArray(files, req);
+
+    // Build document
+    const doc = {
+      roomTitle: String(roomTitle),
+      description: String(description),
+      roomCapacity: Number.isFinite(roomCapacity) ? roomCapacity : 1,
+      bedrooms: Number.isFinite(bedrooms) ? bedrooms : 1,
+      bathrooms: Number.isFinite(bathrooms) ? bathrooms : 1,
+      minNights: Number.isFinite(minNights) ? minNights : 1,
+      maxNights: Number.isFinite(maxNights) ? maxNights : 30,
+      instantBook: Boolean(instantBook),
+
+      pricePerNight: {
+        amount: pricePerNight.amount,
+        currency: pricePerNight.currency || "USD",
+      },
+
+      roomLocation: {
+        address: roomLocation.address || "",
+        city: roomLocation.city || "",
+        region: roomLocation.region || "",
+        country: roomLocation.country || "",
+        coordinates: Array.isArray(roomLocation.coordinates)
+          ? roomLocation.coordinates.map((n) => Number(n)).filter((n) => !Number.isNaN(n))
+          : [],
+      },
+
+      amenities: Array.isArray(amenities) ? amenities.map(String) : [],
+      rules: Array.isArray(rules) ? rules.map(String) : [],
+
+      images,
+
+      terms: body.terms || "1 month",
+      acknowledge: Boolean(acknowledge),
+
+      name: String(name),
+      email: String(email).toLowerCase(),
+      phone: String(phone),
+
+      ip: req.ip,
+      userAgent: req.get("User-Agent") || "",
+    };
+
+    const saved = await RoomListingRequest.create(doc);
+
+    return res.status(201).json({ id: saved._id, description: "Saved" });
+  } catch (err) {
+    // Multer file filter errors can come through here; provide helpful message
+    console.error("Listing request POST error:", err);
+    // If multer error object
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ description: `File upload error: ${err.message}` });
+    }
+    if (err && err.message && err.message.includes("Only image files are allowed")) {
+      return res.status(400).json({ description: err.message });
+    }
+    return res.status(500).json({ description: "Internal server error" });
+  }
+});
+
+// GET /api/room-listing-request — fetch all (limited)
+router.get("/", async (req, res) => {
+  try {
+    const listings = await RoomListingRequest.find().sort({ createdAt: -1 }).limit(100);
+    res.json(listings);
+  } catch (err) {
+    console.error("Error fetching room listing request descriptions:", err);
+    res.status(500).json({ description: "Failed to fetch descriptions" });
+  }
+});
+
+module.exports = router;

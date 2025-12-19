@@ -36,10 +36,17 @@ function HomePage() {
               </Button>
               <Button
                 variant="outline-primary"
-                style={{ color: "blue" }}
+                style={{ color: "blue", marginRight: "1rem" }}
                 onClick={() => navigate("/contact")}
               >
                 {t("contactUsBtn")}
+              </Button>
+              <Button
+                variant="outline-success"
+                style={{ color: "green" }}
+                onClick={() => navigate("/room-listing-request")}
+              >
+                {t("List a Room")}
               </Button>
             </div>
           </div>
