@@ -1,21 +1,3 @@
-// // server/models/RoomListingRequest.js
-// const mongoose = require("mongoose");
-
-// const RoomListingRequestSchema = new mongoose.Schema(
-//   {
-//     name: { type: String, required: true, trim: true },
-//     email: { type: String, required: true, trim: true, lowercase: true },
-//     phone: { type: String, required: true, trim: true },
-//     description: { type: String, required: true, trim: true },
-//     ip: { type: String },
-//     userAgent: { type: String },
-//   },
-//   { timestamps: true }
-// );
-
-// module.exports = mongoose.models.RoomListingRequest || mongoose.model("RoomListingRequest", RoomListingRequestSchema);
-
-
 const mongoose = require("mongoose");
 
 const RoomListingRequestSchema = new mongoose.Schema(
