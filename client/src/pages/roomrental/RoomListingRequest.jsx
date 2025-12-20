@@ -417,11 +417,11 @@ export default function RoomListingRequest() {
               </div>
             </div>
             <div className="mb-3">
-              <label className="form-label">Coordinates (lat,lng)</label>
+              <label className="form-label">Coordinates (lat, lng)</label>
               <input
                 name="roomLocation.coordinates"
                 className="form-control"
-                placeholder="e.g. 43.6591,-70.2568"
+                placeholder="e.g. 43.6591, -70.2568"
                 value={form.roomLocation.coordinates}
                 onChange={handleChange}
               />
@@ -434,7 +434,7 @@ export default function RoomListingRequest() {
               <input
                 name="amenities"
                 className="form-control"
-                placeholder="WiFi,Kitchen,Heating"
+                placeholder="WiFi, Kitchen, Heating"
                 value={form.amenities}
                 onChange={handleChange}
               />
@@ -445,7 +445,7 @@ export default function RoomListingRequest() {
               <input
                 name="rules"
                 className="form-control"
-                placeholder="No smoking,No pets"
+                placeholder="No smoking, No pets"
                 value={form.rules}
                 onChange={handleChange}
               />
@@ -497,6 +497,7 @@ export default function RoomListingRequest() {
                     name="name"
                     className="form-control"
                     value={form.name}
+                    placeholder="First and last name"
                     onChange={handleChange}
                     required
                   />
@@ -508,6 +509,7 @@ export default function RoomListingRequest() {
                     name="email"
                     type="email"
                     className="form-control"
+                    placeholder="e. g. yourEmail@sample.com"
                     value={form.email}
                     onChange={handleChange}
                     required
@@ -520,6 +522,7 @@ export default function RoomListingRequest() {
                     name="phone"
                     className="form-control"
                     value={form.phone}
+                    placeholder="e. g. +244 xxx xxx xxx"
                     onChange={handleChange}
                     required
                   />
@@ -581,22 +584,6 @@ export default function RoomListingRequest() {
                   Required: room title, description, price, name, email, phone,
                   and acknowledgement.
                 </small>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-body">
-                <h6>Quick Tips</h6>
-                <ul className="mb-0">
-                  <li>
-                    Images are uploaded as multipart/form-data under the
-                    "images" field.
-                  </li>
-                  <li>
-                    Price is sent as a JSON string in the pricePerNight field.
-                  </li>
-                  <li>Amenities and rules are sent as JSON arrays.</li>
-                </ul>
               </div>
             </div>
           </div>

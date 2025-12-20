@@ -30,7 +30,6 @@ const listingsRouter = require('./routes/roomrental/listingRoutes');
 const uploadsRouter = require('./routes/uploads/uploads');
 const roomRequestRoutes = require('./routes/roomrental/roomRequestRoutes');
 const bookingRoutes = require("./routes/roomrental/bookingRoutes");
-const acknowledgements = require("./routes/roomrental/listingContractRoutes");
 
 const { Server } = require('socket.io');
 const multer = require('multer');
@@ -116,7 +115,6 @@ app.use('/api', uploadFilesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use("/api/users", acknowledgements); // listing contracts
 app.use('/api/requests', requestRoutes);
 app.use('/api/cards', cardsRoutes);
 app.use('/api/services', servicesRoutes);

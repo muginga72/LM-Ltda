@@ -1,6 +1,6 @@
 // src/pages/roomrental/ContractPageListing.jsx
 import React, { useEffect, useContext, useState } from "react";
-import { Container, Button, Spinner } from "react-bootstrap";
+import { Container, Button, Spinner, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ export default function ContractPageListing() {
   const nav = useNavigate();
   const { user, token } = useContext(AuthContext);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -23,31 +24,44 @@ export default function ContractPageListing() {
   const handleAgree = async () => {
     if (saving) return;
     setSaving(true);
+    setError(null);
 
     sessionStorage.setItem("listingContractAgreed", new Date().toISOString());
 
-    try {
-      if (token) {
-        const res = await fetch("/api/users/acknowledge-contract", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            acknowledgedAt: new Date().toISOString(),
-            acknowledgedByName: ownerName,
-          }),
-        });
+        // Build request payload
+    const payload = {
+      acknowledgedAt: new Date().toISOString(),
+      acknowledgedByName: ownerName,
+      meta: {
+        // optional metadata; include user id/email if available
+        userEmail: user?.email,
+        userId: user?.id || user?._id || null,
+      },
+    };
 
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          console.warn("Failed to save acknowledgement:", res.status, text);
-        }
+    // Try to save acknowledgement to backend (non-blocking)
+    try {
+      const base = process.env.REACT_APP_API_BASE || "";
+      const res = await fetch(`${base}/api/roomrental/acknowledge-contract`, {
+        method: "POST",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload.error || `Server responded ${res.status}`);
       }
     } catch (err) {
-      console.warn("Contract acknowledgement not saved:", err?.message || err);
+      console.warn("Acknowledgement save failed:", err);
+      setError(
+        "We were unable to save your acknowledgement to the server. Your agreement is stored locally."
+      );
     } finally {
+      // Attempt to close the window; if blocked, navigate to the listing flow
       const fallbackRoute = "/room-listing-request";
       const tryClose = () => {
         try {
@@ -189,6 +203,8 @@ export default function ContractPageListing() {
           Agreement.
         </p>
       </section>
+
+      {error && <Alert variant="warning">{error}</Alert>}
 
       <div className="d-flex justify-content-end" style={{ marginTop: 24 }}>
         <Button variant="primary" onClick={handleAgree} disabled={saving}>
