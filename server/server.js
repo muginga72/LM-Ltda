@@ -22,6 +22,7 @@ const uploadFilesRoutes = require('./routes/uploadFilesRoutes');
 const paymentsRouter = require('./routes/payments/payments');
 const calendarRouter = require('./routes/calendar');
 const contactRouter = require('./routes/contact');
+const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequestRoutes');
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
 const roomsRoutes = require('./routes/roomrental/roomRoutes');
@@ -128,6 +129,7 @@ app.use('/api/testimonials', testimonialsRoute);
 // Room rental routes
 app.use('/api/rooms', roomsRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use('/api/room-listing-request', roomListingRequestRoutes);
 
 // ---------- Booking route (accepts JSON or multipart/form-data) ----------
 app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
