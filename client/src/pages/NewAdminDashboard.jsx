@@ -31,7 +31,6 @@ import AdminSharedServicesTable from "../components/admin/adminTables/AdminShare
 
 import RoomManager from "../components/roomrentals/RoomManager.jsx";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay.jsx";
-// import AdminBookingsPanel from "../components/admin/AdminBookingsPanel.jsx";
 
 function BookingForm({
   show,
@@ -798,14 +797,6 @@ function NewAdminDashboard({
                   eventKey="bookings"
                   style={{ height: "100%", overflow: "hidden" }}
                 >
-                  {/* <h5>Bookings Panel</h5>
-                  <p className="text-muted">List of all bookings made by the users.</p> */}
-
-                  {/* <AdminBookingsTab roomId={selectedRoomId} />  */}
-
-                  {/* <Container>
-                    <AdminBookingsPanel />
-                  </Container>  */}
                 </Tab.Pane>
               </Tab.Content>
             </Card.Body>

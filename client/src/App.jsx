@@ -5,7 +5,8 @@ import ServicesPromo from "./components/ServicesPromo";
 import NewAdminDashboard from "./pages/NewAdminDashboard";
 import UserOnlyDashboard from "./pages/UserOnlyDashboard";
 import AdminRoute from "./components/admin/AdminRoute";
-import Rooms from "../../client/src/pages/roomrental/Rooms";
+// import Rooms from "../../client/src/pages/roomrental/Rooms";
+import RoomPage from "../../client/src/pages/roomrental/RoomPage";
 import RoomDetails from "./components/roomrentals/RoomDetails";
 import ContractPageListing from "./pages/roomrental/ContractPageListing";
 import RoomListingRequest from "./pages/roomrental/RoomListingRequest";
@@ -45,7 +46,8 @@ function App() {
         <Route path="/who-we-are" element={<WhoWeAre />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/rooms" element={<Rooms />} />
+        {/* <Route path="/rooms" element={<Rooms />} /> */}
+        <Route path="/rooms" element={<RoomPage />} />
         <Route path="/rooms/:id/details" element={<RoomDetails />} />
         <Route path="/room-listing-request" element={<RoomListingRequest />} />
         <Route path="/room-rental/contract-listing" element={<ContractPageListing />} />
