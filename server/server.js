@@ -26,7 +26,6 @@ const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequest
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
 const roomsRoutes = require('./routes/roomrental/roomRoutes');
-const listingsRouter = require('./routes/roomrental/listingRoutes');
 const uploadsRouter = require('./routes/uploads/uploads');
 const roomRequestRoutes = require('./routes/roomrental/roomRequestRoutes');
 const bookingRoutes = require("./routes/roomrental/bookingRoutes");
@@ -179,7 +178,6 @@ app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
   }
 });
 
-app.use('/api/listings', listingsRouter);
 app.use('/api/room-requests', roomRequestRoutes);
 
 // mount admin calendar routes with io
