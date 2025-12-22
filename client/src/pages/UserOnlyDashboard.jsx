@@ -1,5 +1,6 @@
 // client/src/pages/UserOnlyDashboard.jsx
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 import {
   Container,
@@ -23,29 +24,28 @@ import UserCalendar from "../components/UserCalendar";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
 import UserBookingsList from "../components/roomrentals/UserBookingsList";
 
-const BookingForm = ({
-  room,
-  user,
-  token,
-  apiBaseUrl,
-  headers = {},
-  onBooked,
-  onCancel,
-}) => {
+const BookingForm = ({ room, user, token, apiBaseUrl = "", headers = {}, onBooked, onCancel }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [guests, setGuests] = useState(
-    room?.roomCapacity || room?.capacity || 1
-  );
+  const [guests, setGuests] = useState(room?.roomCapacity || room?.capacity || 1);
+
+  // Personal / ID fields
+  const [guestOneName, setGuestOneName] = useState(user?.name || "");
+  const [guestOneEmail, setGuestOneEmail] = useState(user?.email || "");
+  const [guestTwoName, setGuestTwoName] = useState("");
+  const [guestTwoEmail, setGuestTwoEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [notes, setNotes] = useState("");
+
   const [idFile, setIdFile] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  const authToken =
-    token || user?.token || localStorage.getItem("authToken") || null;
+  const authToken = token || user?.token || localStorage.getItem("authToken") || null;
   const defaultHeaders = {
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     "Cache-Control": "no-cache",
@@ -60,33 +60,77 @@ const BookingForm = ({
   };
 
   useEffect(() => {
-    // reset messages when inputs change
+    // clear messages when inputs change
     setError(null);
     setSuccessMsg(null);
-  }, [startDate, endDate, guests, dateOfBirth, idFile]);
+  }, [startDate, endDate, guests, dateOfBirth, idFile, guestOneName, guestOneEmail]);
+
+  const computeNights = (s, e) => {
+    if (!s || !e) return 1;
+    const msPerDay = 24 * 60 * 60 * 1000;
+    // Use Math.ceil to count nights as whole days between dates
+    const diff = Math.ceil((e - s) / msPerDay);
+    return diff > 0 ? diff : 1;
+  };
+
+  const computeTotalPrice = (nights) => {
+    // Prefer room.pricePerNight.amount or room.pricePerNight or room.price
+    const perNight = Number(room?.pricePerNight?.amount ?? room?.pricePerNight ?? room?.price ?? 0) || 0;
+    const amount = Math.max(0, perNight * nights);
+    const currency = room?.pricePerNight?.currency || room?.currency || "USD";
+    return { amount, currency };
+  };
 
   const validate = () => {
     setError(null);
+
+    const roomId = room?._id || room?.id;
+    if (!roomId) {
+      setError("No room selected.");
+      return false;
+    }
+    if (!user || !(user._id || user.id)) {
+      setError("No user available. Please sign in.");
+      return false;
+    }
     if (!startDate || !endDate) {
-      setError("Please select start and end dates.");
+      setError("Start date and end date are required.");
       return false;
     }
     const s = new Date(startDate);
     const e = new Date(endDate);
     if (isNaN(s.getTime()) || isNaN(e.getTime())) {
-      setError("Invalid dates.");
+      setError("Invalid date format.");
       return false;
     }
-    if (e < s) {
-      setError("End date must be the same or after start date.");
+    if (s >= e) {
+      setError("End date must be after start date.");
       return false;
     }
-    if (guests < 1) {
-      setError("Guests must be at least 1.");
+    if (!Number.isInteger(Number(guests)) || Number(guests) < 1) {
+      setError("Guests must be a positive integer.");
+      return false;
+    }
+    if (!guestOneName || guestOneName.trim() === "") {
+      setError("Primary guest name is required.");
       return false;
     }
     if (!dateOfBirth) {
       setError("Date of birth is required.");
+      return false;
+    }
+    const dob = new Date(dateOfBirth);
+    if (isNaN(dob.getTime())) {
+      setError("Invalid date of birth.");
+      return false;
+    }
+    // basic age check (server also enforces >=18)
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+    if (today < birthdayThisYear) age--;
+    if (age < 18) {
+      setError("Guest must be at least 18 years old to book.");
       return false;
     }
     if (!idFile) {
@@ -97,6 +141,15 @@ const BookingForm = ({
     const maxSize = 10 * 1024 * 1024;
     if (idFile.size > maxSize) {
       setError("ID file is too large. Maximum 10MB allowed.");
+      return false;
+    }
+    // basic email validation if provided
+    if (guestOneEmail && !/^\S+@\S+\.\S+$/.test(guestOneEmail)) {
+      setError("Primary guest email is invalid.");
+      return false;
+    }
+    if (guestTwoEmail && !/^\S+@\S+\.\S+$/.test(guestTwoEmail)) {
+      setError("Secondary guest email is invalid.");
       return false;
     }
     return true;
@@ -118,54 +171,81 @@ const BookingForm = ({
     setLoading(true);
     setProgress(0);
 
-    // Build form data
-    const formData = new FormData();
-    formData.append("roomId", room?._id || "");
-    formData.append(
-      "roomTitle",
-      room?.roomTitle || room?.title || room?.name || ""
-    );
-    formData.append("startDate", new Date(startDate).toISOString());
-    formData.append("endDate", new Date(endDate).toISOString());
-    formData.append("guestsCount", String(guests));
-    formData.append("dateOfBirth", new Date(dateOfBirth).toISOString());
-    formData.append("userId", user?._id || "");
-    formData.append("userEmail", user?.email || "");
-
-    formData.append("idDocument", idFile, idFile.name);
-
-    const candidates = ["/api/bookings", "/bookings"];
-
     try {
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const nights = computeNights(s, e);
+      const totalPrice = computeTotalPrice(nights);
+
+      // Build form data
+      const formData = new FormData();
+
+      // include both possible field names to match different controllers
+      formData.append("room", room?._id || room?.id || "");
+      formData.append("roomId", room?._id || room?.id || "");
+
+      // guest and host
+      formData.append("guest", user?._id || user?.id || "");
+      if (room?.host) formData.append("host", room.host);
+
+      formData.append("startDate", s.toISOString());
+      formData.append("endDate", e.toISOString());
+      formData.append("nights", String(nights));
+      formData.append("guestsCount", String(guests));
+      formData.append("dateOfBirth", new Date(dateOfBirth).toISOString());
+
+      // personal info
+      formData.append("guestOneName", guestOneName);
+      if (guestOneEmail) formData.append("guestOneEmail", guestOneEmail);
+      if (guestTwoName) formData.append("guestTwoName", guestTwoName);
+      if (guestTwoEmail) formData.append("guestTwoEmail", guestTwoEmail);
+      if (guestPhone) formData.append("guestOnePhone", guestPhone);
+      if (notes) formData.append("notes", notes);
+
+      // totalPrice nested fields (many servers accept totalPrice[amount] style)
+      formData.append("totalPrice[amount]", String(totalPrice.amount));
+      formData.append("totalPrice[currency]", totalPrice.currency);
+
+      // Attach id document file under expected field name
+      formData.append("idDocument", idFile, idFile.name);
+
+      // Candidate endpoints to try
+      const candidates = ["/api/bookings", "/bookings"];
       let created = null;
+      let lastErr = null;
+
       for (const path of candidates) {
         try {
-          const config = {
+          const url = buildUrl(path);
+          const cfg = {
             headers: { ...defaultHeaders },
             onUploadProgress: (progressEvent) => {
               if (progressEvent.lengthComputable) {
-                const percent = Math.round(
-                  (progressEvent.loaded / progressEvent.total) * 100
-                );
+                const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
                 setProgress(percent);
               }
             },
             timeout: 120000,
           };
-          const res = await axios.post(buildUrl(path), formData, config);
+
+          const res = await axios.post(url, formData, cfg);
           created = res?.data;
           break;
         } catch (err) {
+          lastErr = err;
           const status = err?.response?.status;
-          if (status === 404) {
-            continue;
-          }
+          if (status === 404) continue;
           throw err;
         }
       }
 
       if (!created) {
-        throw new Error("No bookings endpoint accepted the request (404).");
+        const msg =
+          lastErr?.response?.data?.message ||
+          lastErr?.response?.data?.error ||
+          lastErr?.message ||
+          "No bookings endpoint accepted the request (404).";
+        throw new Error(msg);
       }
 
       setSuccessMsg("Booking created successfully.");
@@ -176,7 +256,7 @@ const BookingForm = ({
       const msg =
         err?.response?.data?.message ||
         err?.response?.data?.error ||
-        err.message ||
+        err?.message ||
         "Failed to create booking. Please try again.";
       setError(msg);
     } finally {
@@ -223,6 +303,59 @@ const BookingForm = ({
         />
       </div>
 
+      <hr />
+
+      <div className="mb-3">
+        <label className="form-label">Primary guest name</label>
+        <input
+          className="form-control"
+          type="text"
+          value={guestOneName}
+          onChange={(e) => setGuestOneName(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Primary guest email (optional)</label>
+        <input
+          className="form-control"
+          type="email"
+          value={guestOneEmail}
+          onChange={(e) => setGuestOneEmail(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Secondary guest name (optional)</label>
+        <input
+          className="form-control"
+          type="text"
+          value={guestTwoName}
+          onChange={(e) => setGuestTwoName(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Secondary guest email (optional)</label>
+        <input
+          className="form-control"
+          type="email"
+          value={guestTwoEmail}
+          onChange={(e) => setGuestTwoEmail(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Primary guest phone (optional)</label>
+        <input
+          className="form-control"
+          type="tel"
+          value={guestPhone}
+          onChange={(e) => setGuestPhone(e.target.value)}
+        />
+      </div>
+
       <div className="mb-3">
         <label className="form-label">Date of birth</label>
         <input
@@ -235,32 +368,20 @@ const BookingForm = ({
       </div>
 
       <div className="mb-3">
-        <label className="form-label">
-          Government ID / Passport (required)
-        </label>
-        <input
-          className="form-control"
-          type="file"
-          accept=".pdf,image/*"
-          onChange={handleFileChange}
-          required
-        />
-        <small className="text-muted">
-          Max 10MB. PDF or image formats accepted.
-        </small>
+        <label className="form-label">Notes (optional)</label>
+        <textarea className="form-control" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">ID Document / Passport (required)</label>
+        <input className="form-control" type="file" accept=".pdf,image/*" onChange={handleFileChange} required />
+        <small className="text-muted">Max 10MB. PDF or image formats accepted.</small>
       </div>
 
       {progress !== null && (
         <div className="mb-2">
           <div className="progress" style={{ height: 18 }}>
-            <div
-              className="progress-bar"
-              role="progressbar"
-              style={{ width: `${progress}%` }}
-              aria-valuenow={progress}
-              aria-valuemin="0"
-              aria-valuemax="100"
-            >
+            <div className="progress-bar" role="progressbar" style={{ width: `${progress}%` }} aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">
               {progress}%
             </div>
           </div>
@@ -277,6 +398,26 @@ const BookingForm = ({
       </div>
     </form>
   );
+};
+
+BookingForm.propTypes = {
+  room: PropTypes.object,
+  user: PropTypes.object,
+  token: PropTypes.string,
+  apiBaseUrl: PropTypes.string,
+  headers: PropTypes.object,
+  onBooked: PropTypes.func,
+  onCancel: PropTypes.func,
+};
+
+BookingForm.defaultProps = {
+  room: null,
+  user: null,
+  token: null,
+  apiBaseUrl: "",
+  headers: {},
+  onBooked: null,
+  onCancel: () => {},
 };
 
 /**
@@ -754,14 +895,14 @@ export default function UserOnlyDashboard({
                 </div>
               ) : (
                 <>
-                  <UserDashboard
+                  {/* <UserDashboard
                     apiBaseUrl={apiBaseUrl}
                     user={user}
                     token={authToken}
                     initialServices={initialServices}
                     onProofSubmitted={onProofSubmitted}
                     onServiceSelect={onServiceSelect}
-                  />
+                  /> */}
 
                   <hr />
 
@@ -802,9 +943,9 @@ export default function UserOnlyDashboard({
             </div>
           </Tab>
 
-          <Tab eventKey="rooms" title={t("dashboard.tabRooms") || "Rooms"}>
+          {/* <Tab eventKey="rooms" title={t("dashboard.tabRooms") || "Rooms"}>
             <div className="mt-3">{renderRooms()}</div>
-          </Tab>
+          </Tab> */}
 
           <Tab
             eventKey="bookings"

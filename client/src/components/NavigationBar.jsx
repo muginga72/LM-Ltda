@@ -80,7 +80,7 @@ const NavigationBar = () => {
                 Home
               </Nav.Link>
               <Nav.Link as={NavLink} to="/services">
-                Services
+                Plan Services
               </Nav.Link>
 
               {/* <Nav.Link as={NavLink} to="/rooms">Rooms</Nav.Link> */}

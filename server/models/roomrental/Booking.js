@@ -37,6 +37,14 @@ const BookingSchema = new mongoose.Schema(
 
     totalPrice: { type: PriceSchema, required: true },
 
+    // Guest personal info (optional)
+    guestOneName: { type: String },
+    guestOneEmail: { type: String },
+    guestTwoName: { type: String },
+    guestTwoEmail: { type: String },
+    guestOnePhone: { type: String },
+    dateOfBirth: { type: Date },
+
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'cancelled', 'completed', 'rejected'],
