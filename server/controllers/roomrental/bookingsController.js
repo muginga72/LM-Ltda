@@ -4,20 +4,10 @@ const Booking = require("../../models/roomrental/Booking");
 const Room = require("../../models/roomrental/Room");
 const { toUTCDate } = require("../../utils/dateHelpers");
 
-/**
- * Helper: check if two date ranges overlap
- * Overlap when A.start < B.end AND A.end > B.start
- */
 function rangesOverlap(start1, end1, start2, end2) {
   return start1 < end2 && end1 > start2;
 }
 
-/**
- * List bookings
- * - Admins see all bookings (optionally filtered)
- * - Regular users see only their bookings
- * Query params: page, limit, status, roomId, guestId
- */
 const listBookings = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page || "1", 10));
@@ -61,10 +51,6 @@ const listBookings = async (req, res, next) => {
   }
 };
 
-/**
- * Get single booking by id
- * Access: guest (owner), host, or admin
- */
 const getBooking = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -96,15 +82,9 @@ const getBooking = async (req, res, next) => {
   }
 };
 
-/**
- * Create booking
- * Expects multipart/form-data with idDocument file (handled by multer)
- * Body fields: roomId, startDate, endDate, guestsCount, dateOfBirth
- * Requires req.user to be set by auth middleware
- */
 const createBooking = async (req, res, next) => {
   try {
-    const { roomId, startDate, endDate, guestsCount, dateOfBirth } = req.body;
+    const { roomId, startDate, endDate, guestsCount, dateOfBirth, guestOneName, guestOneEmail, guestTwoName, guestTwoEmail, guestOnePhone, notes } = req.body;
 
     // ID document required
     if (!req.file) {
@@ -232,10 +212,17 @@ const createBooking = async (req, res, next) => {
         currency: room.pricePerNight?.currency || "USD",
         amount: totalAmount,
       },
+      guestOneName,
+      guestOneEmail,
+      guestTwoName,
+      guestTwoEmail,
+      guestOnePhone,
+
       status,
       expiresAt,
       dateOfBirth: dob,
       idDocument: docMeta,
+      notes,
     });
 
     // Payment instructions for pending bookings
@@ -259,11 +246,6 @@ const createBooking = async (req, res, next) => {
   }
 };
 
-/**
- * Confirm payment for a booking
- * Body: { bookingId, paidAt? }
- * Only host or admin or guest can confirm depending on your business rules.
- */
 const confirmPayment = async (req, res, next) => {
   try {
     const { bookingId } = req.body;
@@ -294,11 +276,6 @@ const confirmPayment = async (req, res, next) => {
   }
 };
 
-/**
- * Cancel booking
- * - Guest can cancel their pending/confirmed booking (business rules may vary)
- * - Host or admin can cancel as well
- */
 const cancelBooking = async (req, res, next) => {
   try {
     const { id } = req.params;
