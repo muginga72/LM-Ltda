@@ -46,11 +46,11 @@ export default function AdminListBookings({
   }, []);
 
   const renderStatusBadge = useCallback((booking) => {
-    if (!booking || !booking.status) return <Badge bg="secondary">Unknown</Badge>;
+    if (!booking || !booking.status) return <Badge bg="primary">Unknown</Badge>;
     if (booking.status === "paid") return <Badge bg="success">Paid</Badge>;
     if (booking.status === "pending") return <Badge bg="warning">Pending</Badge>;
     if (booking.status === "cancelled") return <Badge bg="danger">Cancelled</Badge>;
-    if (booking.status === "archived") return <Badge bg="primary">Archived</Badge>;
+    if (booking.status === "archived") return <Badge bg="secondary">Archived</Badge>;
     return <Badge bg="secondary">{booking.status}</Badge>;
   }, []);
 
