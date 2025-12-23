@@ -31,6 +31,7 @@ import AdminSharedServicesTable from "../components/admin/adminTables/AdminShare
 
 import RoomManager from "../components/roomrentals/RoomManager.jsx";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay.jsx";
+import AdminListBookings from "../components/admin/adminTables/AdminListBookings.jsx";
 
 function BookingForm({
   show,
@@ -668,7 +669,6 @@ function NewAdminDashboard({
                           <RoomCardWithPay
                             room={room}
                             onRequestBooking={() => {
-                              // Open booking modal so admin can choose dates and optionally upload ID
                               openBookingModal(room);
                             }}
                           />
@@ -700,6 +700,14 @@ function NewAdminDashboard({
                     currentUser={user}
                     token={token}
                     onCreated={handleRoomCreated}
+                  />
+                </Tab.Pane>
+
+                <Tab.Pane eventKey="bookings">
+                  <AdminListBookings
+                    apiBaseUrl={apiBaseUrl}
+                    token={token}
+                    useCookies={true}
                   />
                 </Tab.Pane>
 
