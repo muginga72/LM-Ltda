@@ -22,13 +22,14 @@ const uploadFilesRoutes = require('./routes/uploadFilesRoutes');
 const paymentsRouter = require('./routes/payments/payments');
 const calendarRouter = require('./routes/calendar');
 const contactRouter = require('./routes/contact');
-const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequestRoutes');
+const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequestRoutes'); // user list request
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
 const roomsRoutes = require('./routes/roomrental/roomRoutes');
 const uploadsRouter = require('./routes/uploads/uploads');
 const roomRequestRoutes = require('./routes/roomrental/roomRequestRoutes');
 const bookingRoutes = require("./routes/roomrental/bookingRoutes");
+const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRoutes') // admin list all bookings
 
 const { Server } = require('socket.io');
 const multer = require('multer');
@@ -129,6 +130,7 @@ app.use('/api/testimonials', testimonialsRoute);
 app.use('/api/rooms', roomsRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use('/api/room-listing-request', roomListingRequestRoutes);
+app.use('/admin', adminListBookingsRoutes)
 
 // ---------- Booking route (accepts JSON or multipart/form-data) ----------
 app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
