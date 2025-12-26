@@ -395,7 +395,7 @@ function RoomForm({ onCreated, onCancel }) {
               >
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
-                <option value="BRL">AOA</option>
+                <option value="AOA">AOA</option>
               </Form.Select>
             </InputGroup>
           </Form.Group>

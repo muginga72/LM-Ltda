@@ -1,36 +1,3 @@
-// // src/components/BookingDetails.jsx
-// import React from 'react';
-// import { Modal, Button } from 'react-bootstrap';
-
-// export default function BookingDetails({ booking, onClose }) {
-//   if (!booking) return null;
-//   const start = new Date(booking.startDate).toLocaleDateString();
-//   const end = new Date(booking.endDate).toLocaleDateString();
-
-//   return (
-//     <Modal show={!!booking} onHide={onClose}>
-//       <Modal.Header closeButton>
-//         <Modal.Title>Booking {booking._id}</Modal.Title>
-//       </Modal.Header>
-//       <Modal.Body>
-//         <p><strong>Room:</strong> {booking.room?.roomTitle}</p>
-//         <p><strong>Dates:</strong> {start} — {end} ({booking.nights} nights)</p>
-//         <p><strong>Guest:</strong> {booking.guest?.name || booking.guest?._id}</p>
-//         <p><strong>Status:</strong> {booking.status}</p>
-//         <p><strong>Total:</strong> {booking.totalPrice?.amount || booking.totalAmount} {booking.totalPrice?.currency || booking.currency}</p>
-//         {booking.idDocument && (
-//           <p><strong>ID uploaded:</strong> {booking.idDocument.originalName || booking.idDocument.filename}</p>
-//         )}
-//         {booking.expiresAt && <p><strong>Expires at:</strong> {new Date(booking.expiresAt).toLocaleString()}</p>}
-//       </Modal.Body>
-//       <Modal.Footer>
-//         <Button variant="secondary" onClick={onClose}>Close</Button>
-//       </Modal.Footer>
-//     </Modal>
-//   );
-// }
-
-
 // src/components/BookingDetails.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
