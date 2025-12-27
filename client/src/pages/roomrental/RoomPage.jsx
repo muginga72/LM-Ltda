@@ -1,5 +1,5 @@
 // client/src/pages/RoomPage.jsx
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import {
   Container,
@@ -18,76 +18,79 @@ import UploadDocumentModal from "../../components/UploadDocumentModal";
 import EmailSupportModal from "../../components/EmailSupportModal";
 import RoomCardWithPay from "../../components/roomrentals/RoomCardWithPay";
 import UserBookingsList from "../../components/roomrentals/UserBookingsList";
-import BookingForm from "../../components/roomrentals/BookingForm";
+import BookingFormWithModal from "../../components/roomrentals/BookingFormWithModal";
 
-/**
- * RoomPage
- * - Uses RoomCardWithPay (which calls onRequestBooking(room))
- * - Allows booking creation via BookingForm
- * - Uses apiBaseUrl for all requests; pass apiBaseUrl prop or configure dev proxy
- */
-export default function RoomPage({
-  apiBaseUrl,
-  token,
-  onProofSubmitted,
-  headers = {},
-}) {
-  const { user } = React.useContext(AuthContext);
+export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers = {} }) {
+  const { user } = useContext(AuthContext);
   const { t } = useTranslation();
 
   const isUser = Boolean(user && user.role !== "admin");
 
   // Rooms & bookings
-  const [rooms, setRooms] = React.useState([]);
-  const [loadingRooms, setLoadingRooms] = React.useState(true);
-  const [errorRooms, setErrorRooms] = React.useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [errorRooms, setErrorRooms] = useState(null);
 
-  const [bookings, setBookings] = React.useState([]);
-  const [loadingBookings, setLoadingBookings] = React.useState(true);
-  const [errorBookings, setErrorBookings] = React.useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [errorBookings, setErrorBookings] = useState(null);
 
   // UI state
-  const [showUploadModal, setShowUploadModal] = React.useState(false);
-  const [emailSupportModal, setEmailSupportModal] = React.useState(false);
-  const [selectedServiceId, setSelectedServiceId] = React.useState(null);
-  const [showPayModal, setShowPayModal] = React.useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [emailSupportModal, setEmailSupportModal] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+  const [showPayModal, setShowPayModal] = useState(false);
 
   // Booking modal
-  const [bookingRoom, setBookingRoom] = React.useState(null);
-  const [showBookingModal, setShowBookingModal] = React.useState(false);
+  const [bookingRoom, setBookingRoom] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
   // Room details
-  const [selectedRoom, setSelectedRoom] = React.useState(null);
-  const [showDetails, setShowDetails] = React.useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Bank info modal (shown after booking when bank transfer selected)
+  const [bankInfo, setBankInfo] = useState(null);
+  const [showBankModal, setShowBankModal] = useState(false);
 
   // refresh key
-  const [refreshKey, setRefreshKey] = React.useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // auth headers
-  const authToken =
-    token || user?.token || localStorage.getItem("authToken") || null;
+  // auth token (stable)
+  const authToken = useMemo(() => {
+    return token || user?.token || localStorage.getItem("authToken") || null;
+  }, [token, user?.token]);
+
+  // default headers memoized to avoid recreating object each render
   const defaultHeaders = useMemo(() => {
     return {
       "Content-Type": "application/json",
       Accept: "application/json",
-      // include any dynamic header values here (e.g. auth token)
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...headers,
     };
-  }, [authToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authToken, JSON.stringify(headers)]); // stringify headers to detect changes without recreating object each render
 
-  const buildUrl = useCallback((path) => {
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    if (!apiBaseUrl) return normalizedPath;
-    const base = apiBaseUrl.replace(/\/+$/, "");
-    return `${base}${normalizedPath}`;
-  }, [apiBaseUrl]);
+  // buildUrl memoized only on apiBaseUrl
+  const buildUrl = useCallback(
+    (path) => {
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+      if (!apiBaseUrl) return normalizedPath;
+      const base = apiBaseUrl.replace(/\/+$/, "");
+      return `${base}${normalizedPath}`;
+    },
+    [apiBaseUrl]
+  );
 
   // Fetch rooms
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     if (!isUser) {
       setLoadingRooms(false);
-      return () => (mounted = false);
+      return () => {
+        mounted = false;
+      };
     }
 
     setLoadingRooms(true);
@@ -98,7 +101,7 @@ export default function RoomPage({
         const res = await axios.get(buildUrl("/api/rooms"), {
           headers: defaultHeaders,
         });
-        const data = Array.isArray(res.data) ? res.data : res.data?.rooms || [];
+        const data = Array.isArray(res.data) ? res.data : res.data?.rooms ?? [];
         if (!mounted) return;
         setRooms(data);
       } catch (err) {
@@ -110,15 +113,20 @@ export default function RoomPage({
       }
     })();
 
-    return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl, buildUrl, defaultHeaders, isUser]);
+    return () => {
+      mounted = false;
+    };
+    // Intentionally depend on isUser and refreshKey and authToken only to avoid loops
+  }, [isUser, refreshKey, buildUrl, authToken, defaultHeaders]);
 
   // Fetch bookings
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     if (!isUser) {
       setLoadingBookings(false);
-      return () => (mounted = false);
+      return () => {
+        mounted = false;
+      };
     }
 
     setLoadingBookings(true);
@@ -126,18 +134,16 @@ export default function RoomPage({
 
     (async () => {
       try {
-        // Single reasonable endpoint
         const path = user?._id
           ? `/api/bookings?userId=${encodeURIComponent(user._id)}`
           : "/api/bookings";
+
         const res = await axios.get(buildUrl(path), {
           headers: defaultHeaders,
         });
 
         if (!mounted) return;
-        const data = Array.isArray(res.data)
-          ? res.data
-          : res.data?.bookings || res.data || [];
+        const data = Array.isArray(res.data) ? res.data : res.data?.bookings ?? res.data ?? [];
         setBookings(Array.isArray(data) ? data : []);
       } catch (err) {
         const status = err?.response?.status;
@@ -156,15 +162,17 @@ export default function RoomPage({
       }
     })();
 
-    return () => (mounted = false);
-  }, [user, refreshKey, apiBaseUrl, buildUrl, defaultHeaders, isUser]);
+    return () => {
+      mounted = false;
+    };
+    // Depend on user._id and refreshKey and authToken only
+  }, [isUser, refreshKey, buildUrl, authToken, defaultHeaders, user?._id]);
 
   // UI handlers
   const handlePayService = (serviceId) => {
     setSelectedServiceId(serviceId);
     setShowPayModal(true);
   };
-
   const handleClosePayModal = () => {
     setShowPayModal(false);
     setSelectedServiceId(null);
@@ -185,7 +193,6 @@ export default function RoomPage({
     setBookingRoom(room);
     setShowBookingModal(true);
   };
-
   const handleCancelBooking = () => {
     setBookingRoom(null);
     setShowBookingModal(false);
@@ -197,12 +204,12 @@ export default function RoomPage({
       const b = createdBooking._id
         ? createdBooking
         : {
-            _id: `local-${Date.now()}`,
-            roomId: createdBooking.roomId || bookingRoom?._id,
+            id: `local-${Date.now()}`,
+            roomId: createdBooking.roomId ?? bookingRoom?._id,
             roomTitle:
-              createdBooking.roomTitle ||
-              bookingRoom?.roomTitle ||
-              bookingRoom?.title ||
+              createdBooking.roomTitle ??
+              bookingRoom?.roomTitle ??
+              bookingRoom?.title ??
               bookingRoom?.name,
             startDate: createdBooking.startDate,
             endDate: createdBooking.endDate,
@@ -212,6 +219,17 @@ export default function RoomPage({
     setBookingRoom(null);
     setShowBookingModal(false);
     setRefreshKey((k) => k + 1);
+  };
+
+  // Called by BookingFormWithModal when it wants to show bank instructions
+  const handleShowPayInstructions = (info) => {
+    setBankInfo(info);
+    setShowBankModal(true);
+  };
+
+  const closeBankModal = () => {
+    setShowBankModal(false);
+    setBankInfo(null);
   };
 
   const renderRooms = () => {
@@ -234,12 +252,12 @@ export default function RoomPage({
     return (
       <Row>
         {rooms.map((r) => (
-          <Col key={r._id} md={6} lg={4} className="mb-3">
+          <Col key={r._id ?? r.id} md={6} lg={4} className="mb-3">
             <RoomCardWithPay
               room={r}
               onRequestBooking={handleRequestBooking}
               onDetails={handleOpenDetails}
-              onPay={() => handlePayService(r._id)}
+              onPay={() => handlePayService(r._id ?? r.id)}
               token={authToken}
             />
           </Col>
@@ -252,8 +270,7 @@ export default function RoomPage({
     return (
       <Container style={{ padding: "2rem" }}>
         <Alert variant="warning" className="text-center">
-          {t("dashboard.accessDenied") ||
-            "Access denied. This area is for users only."}
+          {t("dashboard.accessDenied") || "Access denied. This area is for users only."}
         </Alert>
       </Container>
     );
@@ -262,27 +279,15 @@ export default function RoomPage({
   return (
     <>
       <Container style={{ padding: "2rem" }}>
-        <Tabs
-          defaultActiveKey="overview"
-          id="user-dashboard-tabs"
-          className="mb-3"
-        >
-          <Tab
-            eventKey="overview"
-            title={t("dashboard.tabOverview") || "Overview"}
-          >
+        <Tabs defaultActiveKey="overview" id="user-dashboard-tabs" className="mb-3">
+          <Tab eventKey="overview" title={t("dashboard.tabOverview") || "Overview"}>
             <div className="mt-3">
-              <h5 className="mt-4 mb-3">
-                {t("dashboard.availableRooms") || "Available rooms"}
-              </h5>
+              <h5 className="mt-4 mb-3">{t("dashboard.availableRooms") || "Available rooms"}</h5>
               {renderRooms()}
             </div>
           </Tab>
 
-          <Tab
-            eventKey="bookings"
-            title={t("dashboard.tabBookings") || "My Bookings"}
-          >
+          <Tab eventKey="bookings" title={t("dashboard.tabBookings") || "My Bookings"}>
             <UserBookingsList
               bookings={bookings}
               loadingBookings={loadingBookings}
@@ -309,10 +314,7 @@ export default function RoomPage({
             <Modal.Title>{t("dashboard.pay") || "Pay"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p>
-              {t("dashboard.payConfirm") ||
-                "You will be redirected to a secure payment page."}
-            </p>
+            <p>{t("dashboard.payConfirm") || "You will be redirected to a secure payment page."}</p>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClosePayModal}>
@@ -331,33 +333,29 @@ export default function RoomPage({
           </Modal.Footer>
         </Modal>
 
-        <Modal
-          show={showBookingModal}
-          onHide={handleCancelBooking}
-          centered
-          size="md"
-        >
+        {/* Booking modal: contains BookingFormWithModal which will call onShowPayInstructions when needed */}
+        <Modal show={showBookingModal} onHide={handleCancelBooking} centered size="lg">
           <Modal.Header closeButton>
             <Modal.Title>
               {bookingRoom
-                ? `Book: ${
-                    bookingRoom.roomTitle ||
-                    bookingRoom.title ||
-                    bookingRoom.name
-                  }`
+                ? `Book: ${bookingRoom.roomTitle ?? bookingRoom.title ?? bookingRoom.name}`
                 : "Book room"}
             </Modal.Title>
           </Modal.Header>
+
           <Modal.Body>
             {bookingRoom ? (
-              <BookingForm
+              <BookingFormWithModal
                 room={bookingRoom}
                 user={user}
                 token={authToken}
                 apiBaseUrl={apiBaseUrl}
-                headers={headers}
-                onBooked={handleBooked}
+                headers={defaultHeaders}
+                onBooked={(created) => {
+                  handleBooked(created);
+                }}
                 onCancel={handleCancelBooking}
+                onShowPayInstructions={handleShowPayInstructions}
               />
             ) : (
               <div className="text-center py-3">
@@ -367,18 +365,11 @@ export default function RoomPage({
           </Modal.Body>
         </Modal>
 
-        <Modal
-          show={showDetails}
-          onHide={handleCloseDetails}
-          centered
-          size="lg"
-        >
+        {/* Room details modal */}
+        <Modal show={showDetails} onHide={handleCloseDetails} centered size="lg">
           <Modal.Header closeButton>
             <Modal.Title>
-              {selectedRoom?.roomTitle ||
-                selectedRoom?.title ||
-                selectedRoom?.name ||
-                "Room details"}
+              {selectedRoom?.roomTitle ?? selectedRoom?.title ?? selectedRoom?.name ?? "Room details"}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -387,24 +378,20 @@ export default function RoomPage({
                 {selectedRoom.imagePath ? (
                   <img
                     src={selectedRoom.imagePath}
-                    alt={selectedRoom.title || "Room"}
+                    alt={selectedRoom.title ?? "Room"}
                     className="img-fluid mb-3"
-                    style={{
-                      maxHeight: 300,
-                      objectFit: "cover",
-                      width: "100%",
-                    }}
+                    style={{ maxHeight: 300, objectFit: "cover", width: "100%" }}
                   />
                 ) : null}
                 <p>
-                  {selectedRoom.roomDescription ||
-                    selectedRoom.description ||
-                    selectedRoom.summary ||
+                  {selectedRoom.roomDescription ??
+                    selectedRoom.description ??
+                    selectedRoom.summary ??
                     "No description available."}
                 </p>
                 <p>
-                  <strong>Max guests:</strong>{" "}
-                  {selectedRoom.roomCapacity || selectedRoom.capacity || "N/A"}
+                  <strong>Max guests: </strong>
+                  {selectedRoom.roomCapacity ?? selectedRoom.capacity ?? "N/A"}
                 </p>
                 <div className="d-flex gap-2">
                   <Button
@@ -430,16 +417,63 @@ export default function RoomPage({
         </Modal>
       </Container>
 
+      {/* Bank instructions modal shown after booking when payment method is bank transfer */}
+      <Modal show={showBankModal} onHide={closeBankModal} centered size="md">
+        <Modal.Header closeButton>
+          <Modal.Title>Payment instructions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {bankInfo ? (
+            <div>
+              <p style={{ fontWeight: 600, marginBottom: 8 }}>Thank you for your booking</p>
+              <p>Please complete payment using the details below:</p>
+
+              <div>
+                <div>
+                  <strong>Bank:</strong> {bankInfo.bankName}
+                </div>
+                <div>
+                  <strong>Account name:</strong> {bankInfo.accountName ?? bankInfo.owner}
+                </div>
+                <div>
+                  <strong>Account number:</strong> {bankInfo.accountNumber}
+                </div>
+                <div>
+                  <strong>Routing / Sort code:</strong> {bankInfo.routingNumber}
+                </div>
+                <div>
+                  <strong>IBAN:</strong> {bankInfo.iban}
+                </div>
+                <div>
+                  <strong>Reference:</strong> {bankInfo.reference}
+                </div>
+                <div>
+                  <strong>Amount:</strong> {bankInfo.currency ?? "USD"} {bankInfo.amount}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>Loading payment details…</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeBankModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <footer className="text-center py-4 border-top">
         <small>
           <p>
-            <strong>{t("whoWeAre.footer.phones")}:</strong> (+244) 222 022 351;
-            (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <strong>{t("whoWeAre.footer.phones") || "Phones"}:</strong> (+244) 222 022 351; (+244) 942 154 545;
+            (+244) 921 588 083; (+244) 939 207 046
             <br />
-            {t("whoWeAre.footer.address")}
+            {t("whoWeAre.footer.address") || ""}
           </p>
-          © {new Date().getFullYear()} {t("lmLtd")}.{" "}
-          {t("whoWeAre.footer.copyright")}
+          <p>
+            &copy; {new Date().getFullYear()} ImLtd. {t("whoWeAre.footer.copyright") || ""}
+          </p>
         </small>
       </footer>
     </>

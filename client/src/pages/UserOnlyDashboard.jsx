@@ -1,5 +1,5 @@
 // client/src/pages/UserOnlyDashboard.jsx
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import axios from "axios";
 import {
   Container,
@@ -22,7 +22,7 @@ import ServiceCalendar from "../components/ServiceCalendar";
 import UserCalendar from "../components/UserCalendar";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
 import UserBookingsList from "../components/roomrentals/UserBookingsList";
-import BookingForm from "../components/roomrentals/BookingForm"
+import BookingFormWithModal from "../components/roomrentals/BookingFormWithModal";
 
 export default function UserOnlyDashboard({
   apiBaseUrl,
@@ -78,12 +78,17 @@ export default function UserOnlyDashboard({
   const [selectedRoom, setSelectedRoom] = React.useState(null);
   const [showDetails, setShowDetails] = React.useState(false);
 
+  // Bank info modal (shown after booking when bank transfer selected)
+  const [bankInfo, setBankInfo] = useState(null);
+  const [showBankModal, setShowBankModal] = useState(false);
+
   // refresh key
   const [refreshKey, setRefreshKey] = React.useState(0);
 
   // auth headers
   const authToken =
     token || user?.token || localStorage.getItem("authToken") || null;
+
   const defaultHeaders = useMemo(() => {
     return {
       "Content-Type": "application/json",
@@ -93,12 +98,15 @@ export default function UserOnlyDashboard({
     };
   }, [authToken]);
 
-  const buildUrl = useCallback((path) => {
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    if (!apiBaseUrl) return normalizedPath;
-    const base = apiBaseUrl.replace(/\/+$/, "");
-    return `${base}${normalizedPath}`;
-  }, [apiBaseUrl]);
+  const buildUrl = useCallback(
+    (path) => {
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+      if (!apiBaseUrl) return normalizedPath;
+      const base = apiBaseUrl.replace(/\/+$/, "");
+      return `${base}${normalizedPath}`;
+    },
+    [apiBaseUrl]
+  );
 
   // Fetch services (requested, scheduled, shared)
   React.useEffect(() => {
@@ -395,6 +403,17 @@ export default function UserOnlyDashboard({
     </>
   );
 
+  // Called by BookingFormWithModal when it wants to show bank instructions
+  const handleShowPayInstructions = (info) => {
+    setBankInfo(info);
+    setShowBankModal(true);
+  };
+
+  const closeBankModal = () => {
+    setShowBankModal(false);
+    setBankInfo(null);
+  };
+
   const renderRooms = () => {
     if (loadingRooms) {
       return (
@@ -602,14 +621,17 @@ export default function UserOnlyDashboard({
           </Modal.Header>
           <Modal.Body>
             {bookingRoom ? (
-              <BookingForm
+              <BookingFormWithModal
                 room={bookingRoom}
                 user={user}
                 token={authToken}
                 apiBaseUrl={apiBaseUrl}
-                headers={headers}
-                onBooked={handleBooked}
+                headers={defaultHeaders}
+                onBooked={(created) => {
+                  handleBooked(created);
+                }}
                 onCancel={handleCancelBooking}
+                onShowPayInstructions={handleShowPayInstructions}
               />
             ) : (
               <div className="text-center py-3">
@@ -681,6 +703,56 @@ export default function UserOnlyDashboard({
           </Modal.Body>
         </Modal>
       </Container>
+
+      {/* Bank instructions modal shown after booking when payment method is bank transfer */}
+      <Modal show={showBankModal} onHide={closeBankModal} centered size="md">
+        <Modal.Header closeButton>
+          <Modal.Title>Payment instructions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {bankInfo ? (
+            <div>
+              <p style={{ fontWeight: 600, marginBottom: 8 }}>
+                Thank you for your booking
+              </p>
+              <p>Please complete payment using the details below:</p>
+
+              <div>
+                <div>
+                  <strong>Bank:</strong> {bankInfo.bankName}
+                </div>
+                <div>
+                  <strong>Account name:</strong>{" "}
+                  {bankInfo.accountName ?? bankInfo.owner}
+                </div>
+                <div>
+                  <strong>Account number:</strong> {bankInfo.accountNumber}
+                </div>
+                <div>
+                  <strong>Routing / Sort code:</strong> {bankInfo.routingNumber}
+                </div>
+                <div>
+                  <strong>IBAN:</strong> {bankInfo.iban}
+                </div>
+                <div>
+                  <strong>Reference:</strong> {bankInfo.reference}
+                </div>
+                <div>
+                  <strong>Amount:</strong> {bankInfo.currency ?? "USD"}{" "}
+                  {bankInfo.amount}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>Loading payment details…</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeBankModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <footer className="text-center py-4 border-top">
         <small>
