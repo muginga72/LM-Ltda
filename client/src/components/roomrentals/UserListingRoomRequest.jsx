@@ -1,79 +1,6 @@
-// // src/components/CustomerMessages.jsx
-// import { useEffect, useState } from "react";
-
-// const UserListingRoomRequest = () => {
-//   const [listingRequests, setListingRequests] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchListingRequests = async () => {
-//       try {
-//         const res = await fetch("/api/room-listing-request");
-//         if (!res.ok) throw new Error("Failed to fetch listing requests");
-//         const data = await res.json();
-//         setListingRequests(data);
-//       } catch (err) {
-//         setError(err.listingRequests);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchListingRequests();
-//   }, []);
-
-//   return (
-//     <div className="container py-5">
-//       <h5>User Room Listing Requests</h5>
-
-//       {loading && <p>Loading requests...</p>}
-//       {error && <div className="alert alert-danger">{error}</div>}
-
-//       {!loading && !error && listingRequests.length === 0 && <p>No request found.</p>}
-
-//       {!loading && listingRequests.length > 0 && (
-//         <table className="table table-bordered table-hover">
-//           <thead className="table-light">
-//             <tr>
-//               <th>Name</th>
-//               <th>Email</th>
-//               <th>Phone</th>
-//               <th>Description</th>
-//               <th>Date</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {listingRequests.map((msg) => (
-//               <tr key={msg._id}>
-//                 <td>{msg.name}</td>
-//                 <td>{msg.email}</td>
-//                 <td>{msg.phone}</td>
-//                 <td>{msg.description}</td>
-//                 <td>{new Date(msg.createdAt).toLocaleString()}</td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default UserListingRoomRequest;
-
-
-
 // src/components/roomrental/UserListingRoomRequest.jsx
 import { useEffect, useState } from "react";
 
-/**
- * UserListingRoomRequest
- *
- * Fetches room listing requests from the backend and displays them in a table.
- * This version is defensive about different API response shapes and surfaces
- * useful error messages for debugging.
- */
 const UserListingRoomRequest = () => {
   const [listingRequests, setListingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,18 +11,11 @@ const UserListingRoomRequest = () => {
     const controller = new AbortController();
 
     const normalizeResponse = (data) => {
-      // Accept many shapes:
-      //  - Array: [...]
-      //  - { listingRequests: [...] }
-      //  - { data: [...] }
-      //  - { requests: [...] }
-      //  - single object -> wrap in array
       if (Array.isArray(data)) return data;
       if (!data || typeof data !== "object") return [];
       if (Array.isArray(data.listingRequests)) return data.listingRequests;
       if (Array.isArray(data.data)) return data.data;
       if (Array.isArray(data.requests)) return data.requests;
-      // If object looks like a single request (has _id or name/email), wrap it
       if (data._id || data.id || data.name || data.email) return [data];
       return [];
     };

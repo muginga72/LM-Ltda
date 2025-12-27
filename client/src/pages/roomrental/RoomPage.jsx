@@ -425,7 +425,9 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
         <Modal.Body>
           {bankInfo ? (
             <div>
-              <p style={{ fontWeight: 600, marginBottom: 8 }}>Thank you for your booking</p>
+              <p style={{ fontWeight: 600, marginBottom: 8 }}>
+                Thank you for your booking. Pay the booking in the next 48 hours to avoid cancellation. If you need help contact the support team: lmj.muginga@gmail.com.
+              </p>
               <p>Please complete payment using the details below:</p>
 
               <div>
@@ -438,11 +440,11 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
                 <div>
                   <strong>Account number:</strong> {bankInfo.accountNumber}
                 </div>
-                <div>
+                {/* <div>
                   <strong>Routing / Sort code:</strong> {bankInfo.routingNumber}
-                </div>
+                </div> */}
                 <div>
-                  <strong>IBAN:</strong> {bankInfo.iban}
+                  <strong>IBAN:</strong> {bankInfo.routingNumber}
                 </div>
                 <div>
                   <strong>Reference:</strong> {bankInfo.reference}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { Spinner, Alert, Button, Form } from "react-bootstrap";
@@ -15,13 +15,11 @@ export default function BookingForm({
 }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [guests, setGuests] = useState(
-    room?.roomCapacity || room?.capacity || 1
-  );
+  const [guests, setGuests] = useState(room?.roomCapacity ?? room?.capacity ?? 1);
 
   // Personal / ID fields
-  const [guestOneName, setGuestOneName] = useState(user?.name || "");
-  const [guestOneEmail, setGuestOneEmail] = useState(user?.email || "");
+  const [guestOneName, setGuestOneName] = useState(user?.name ?? "");
+  const [guestOneEmail, setGuestOneEmail] = useState(user?.email ?? "");
   const [guestTwoName, setGuestTwoName] = useState("");
   const [guestTwoEmail, setGuestTwoEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
@@ -35,16 +33,22 @@ export default function BookingForm({
   const [successMsg, setSuccessMsg] = useState(null);
 
   // amount state (optional override)
-  const [amount, setAmount] = useState(room?.price || 0);
+  const [amount, setAmount] = useState(room?.price ?? 0);
   const [paymentMethod, setPaymentMethod] = useState("card");
 
-  const authToken =
-    token || user?.token || localStorage.getItem("authToken") || null;
-  const defaultHeaders = {
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    "Cache-Control": "no-cache",
-    ...headers,
-  };
+  const authToken = useMemo(() => token || user?.token || localStorage.getItem("authToken") || null, [
+    token,
+    user?.token,
+  ]);
+
+  const defaultHeaders = useMemo(
+    () => ({
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      "Cache-Control": "no-cache",
+      ...headers,
+    }),
+    [authToken, headers]
+  );
 
   const buildUrl = (path) => {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -57,15 +61,7 @@ export default function BookingForm({
     // clear messages when inputs change
     setError(null);
     setSuccessMsg(null);
-  }, [
-    startDate,
-    endDate,
-    guests,
-    dateOfBirth,
-    idFile,
-    guestOneName,
-    guestOneEmail,
-  ]);
+  }, [startDate, endDate, guests, dateOfBirth, idFile, guestOneName, guestOneEmail]);
 
   const computeNights = (s, e) => {
     if (!s || !e) return 1;
@@ -75,19 +71,16 @@ export default function BookingForm({
   };
 
   const computeTotalPrice = (nights) => {
-    const perNight =
-      Number(
-        room?.pricePerNight?.amount ?? room?.pricePerNight ?? room?.price ?? 0
-      ) || 0;
+    const perNight = Number(room?.pricePerNight?.amount ?? room?.pricePerNight ?? room?.price ?? 0) || 0;
     const amountCalc = Math.max(0, perNight * nights);
-    const currency = room?.pricePerNight?.currency || room?.currency || "USD";
+    const currency = room?.pricePerNight?.currency ?? room?.currency ?? "USD";
     return { amount: amountCalc, currency };
   };
 
   const validate = () => {
     setError(null);
 
-    const roomId = room?._id || room?.id;
+    const roomId = room?._id ?? room?.id;
     if (!roomId) {
       setError("No room selected.");
       return false;
@@ -130,11 +123,7 @@ export default function BookingForm({
     // basic age check (server also enforces >=18)
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
-    const birthdayThisYear = new Date(
-      today.getFullYear(),
-      dob.getMonth(),
-      dob.getDate()
-    );
+    const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
     if (today < birthdayThisYear) age--;
     if (age < 18) {
       setError("Guest must be at least 18 years old to book.");
@@ -170,12 +159,11 @@ export default function BookingForm({
   };
 
   const handleShowBankInfo = (createdBooking, totalAmount) => {
-    // Build bank info object and call parent callback if provided
     const bankInfo = {
-      accountName: "Acme Lodging LLC",
-      accountNumber: "123456789012",
+      accountName: "Maria Miguel",
+      accountNumber: "342295560 30 001",
       routingNumber: "011000015",
-      bankName: "Example Bank",
+      bankName: "BFA",
       reference: `BOOK-${room?.id ?? room?._id ?? "unknown"}`,
       amount: totalAmount,
       currency: "USD",
@@ -190,7 +178,6 @@ export default function BookingForm({
     ev.preventDefault();
     setError(null);
     setSuccessMsg(null);
-
     if (!validate()) return;
 
     setLoading(true);
@@ -203,10 +190,10 @@ export default function BookingForm({
 
       // Build form data
       const formData = new FormData();
-      formData.append("room", room?._id || room?.id || "");
-      formData.append("roomId", room?._id || room?.id || "");
-      formData.append("guest", user?._id || user?.id || "");
-      if (room?.host) formData.append("host", room.host._id || room.host);
+      formData.append("room", room?._id ?? room?.id ?? "");
+      formData.append("roomId", room?._id ?? room?.id ?? "");
+      formData.append("guest", user?._id ?? user?.id ?? "");
+      if (room?.host) formData.append("host", room.host._id ?? room.host);
       formData.append("startDate", s.toISOString());
       formData.append("endDate", e.toISOString());
       formData.append("nights", String(nights));
@@ -234,9 +221,7 @@ export default function BookingForm({
             onUploadProgress: (progressEvent) => {
               try {
                 if (progressEvent.lengthComputable && progressEvent.total) {
-                  const percent = Math.round(
-                    (progressEvent.loaded / progressEvent.total) * 100
-                  );
+                  const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
                   setProgress(percent);
                 }
               } catch (e) {
@@ -297,123 +282,66 @@ export default function BookingForm({
       )}
 
       {successMsg && (
-        <Alert
-          variant="success"
-          dismissible
-          onClose={() => setSuccessMsg(null)}
-        >
+        <Alert variant="success" dismissible onClose={() => setSuccessMsg(null)}>
           {successMsg}
         </Alert>
       )}
 
       <Form.Group className="mb-2">
         <Form.Label>Start date</Form.Label>
-        <Form.Control
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          required
-        />
+        <Form.Control type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-2">
         <Form.Label>End date</Form.Label>
-        <Form.Control
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          required
-        />
+        <Form.Control type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Guests</Form.Label>
-        <Form.Control
-          type="number"
-          min={1}
-          value={guests}
-          onChange={(e) => setGuests(Number(e.target.value))}
-        />
+        <Form.Control type="number" min={1} value={guests} onChange={(e) => setGuests(Number(e.target.value))} />
       </Form.Group>
 
       <hr />
 
       <Form.Group className="mb-3">
         <Form.Label>Primary guest name</Form.Label>
-        <Form.Control
-          type="text"
-          value={guestOneName}
-          onChange={(e) => setGuestOneName(e.target.value)}
-          required
-        />
+        <Form.Control type="text" value={guestOneName} onChange={(e) => setGuestOneName(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Primary guest email</Form.Label>
-        <Form.Control
-          type="email"
-          value={guestOneEmail}
-          onChange={(e) => setGuestOneEmail(e.target.value)}
-          required
-        />
+        <Form.Control type="email" value={guestOneEmail} onChange={(e) => setGuestOneEmail(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Secondary guest name</Form.Label>
-        <Form.Control
-          type="text"
-          value={guestTwoName}
-          onChange={(e) => setGuestTwoName(e.target.value)}
-        />
+        <Form.Label>Secondary guest name (optional)</Form.Label>
+        <Form.Control type="text" value={guestTwoName} onChange={(e) => setGuestTwoName(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Secondary guest email (optional)</Form.Label>
-        <Form.Control
-          type="email"
-          value={guestTwoEmail}
-          onChange={(e) => setGuestTwoEmail(e.target.value)}
-        />
+        <Form.Control type="email" value={guestTwoEmail} onChange={(e) => setGuestTwoEmail(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Primary guest phone</Form.Label>
-        <Form.Control
-          type="tel"
-          value={guestPhone}
-          onChange={(e) => setGuestPhone(e.target.value)}
-          required
-        />
+        <Form.Control type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Date of birth</Form.Label>
-        <Form.Control
-          type="date"
-          value={dateOfBirth}
-          onChange={(e) => setDateOfBirth(e.target.value)}
-          required
-        />
+        <Form.Control type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Amount</Form.Label>
-        <Form.Control
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(Number(e.target.value))}
-          min={0}
-          required
-        />
+        <Form.Control type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} min={0} />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Payment method</Form.Label>
-        <Form.Select
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-          required
-        >
+        <Form.Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
           <option value="card">Bank deposit</option>
           <option value="bank">Bank transfer</option>
         </Form.Select>
@@ -421,25 +349,13 @@ export default function BookingForm({
 
       <Form.Group className="mb-3">
         <Form.Label>Notes (optional)</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={2}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
+        <Form.Control as="textarea" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>ID Document / Passport (required)</Form.Label>
-        <Form.Control
-          type="file"
-          accept=".pdf,image/*"
-          onChange={handleFileChange}
-          required
-        />
-        <Form.Text className="text-muted">
-          Max 10MB. PDF or image formats accepted.
-        </Form.Text>
+        <Form.Control type="file" accept=".pdf,image/*" onChange={handleFileChange} required />
+        <Form.Text className="text-muted">Max 10MB. PDF or image formats accepted.</Form.Text>
       </Form.Group>
 
       {progress !== null && (
@@ -463,7 +379,6 @@ export default function BookingForm({
         <Button variant="secondary" onClick={onCancel} disabled={loading}>
           Cancel
         </Button>
-
         <Button type="submit" variant="primary" disabled={loading}>
           {loading ? <Spinner animation="border" size="sm" /> : "Book room"}
         </Button>
