@@ -338,13 +338,21 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Terms</label>
-                <input
+                <label className="form-label" htmlFor="terms">
+                  Terms
+                </label>
+                <select
+                  id="terms"
                   name="terms"
-                  className="form-control"
+                  className="form-select"
                   value={form.terms}
                   onChange={handleChange}
-                />
+                >
+                  <option value="">Select term</option>
+                  <option value="1">1 month (13.5%)</option>
+                  <option value="3">3 months (10.5%)</option>
+                  <option value="6">6 months (8.5%)</option>
+                </select>
               </div>
             </div>
 
@@ -452,7 +460,9 @@ export default function RoomListingRequest() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">You can upload up to 12 images.</label>
+              <label className="form-label">
+                You can upload up to 12 images.
+              </label>
               <input
                 ref={fileInputRef}
                 name="images"

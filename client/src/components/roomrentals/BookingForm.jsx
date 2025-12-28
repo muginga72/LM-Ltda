@@ -33,7 +33,6 @@ export default function BookingForm({
   const [successMsg, setSuccessMsg] = useState(null);
 
   // amount state (optional override)
-  const [amount, setAmount] = useState(room?.price ?? 0);
   const [paymentMethod, setPaymentMethod] = useState("card");
 
   const authToken = useMemo(() => token || user?.token || localStorage.getItem("authToken") || null, [
