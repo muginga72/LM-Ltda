@@ -335,11 +335,6 @@ export default function BookingForm({
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Amount</Form.Label>
-        <Form.Control type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} min={0} />
-      </Form.Group>
-
-      <Form.Group className="mb-3">
         <Form.Label>Payment method</Form.Label>
         <Form.Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
           <option value="card">Bank deposit</option>
