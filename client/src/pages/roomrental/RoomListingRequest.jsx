@@ -39,6 +39,11 @@ export default function RoomListingRequest() {
   const [result, setResult] = useState(null);
   const fileInputRef = useRef(null);
 
+  // UI states for thank-you alert and payment modal
+  const [showThankYouAlert, setShowThankYouAlert] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [lastSavedId, setLastSavedId] = useState(null);
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     if (name.startsWith("roomLocation.")) {
@@ -112,6 +117,9 @@ export default function RoomListingRequest() {
     setImagePreviews([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
     setResult(null);
+    setShowThankYouAlert(false);
+    setShowPaymentModal(false);
+    setLastSavedId(null);
   }
 
   function validate() {
@@ -220,17 +228,28 @@ export default function RoomListingRequest() {
         const msg = (json && json.description) || `Server error ${resp.status}`;
         setResult({ ok: false, message: msg });
       } else {
-        setResult({
-          ok: true,
-          message: `Saved (id: ${json && json.id ? json.id : "unknown"})`,
-        });
-        resetForm();
+        const id = json && json.id ? json.id : null;
+        setLastSavedId(id);
+        setResult({ ok: true, message: `Saved${id ? ` (id: ${id})` : ""}` });
+        setShowThankYouAlert(true);
       }
     } catch (err) {
       setResult({ ok: false, message: err.message || "Network error" });
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // Called when host closes the thank-you alert
+  function handleCloseThankYou() {
+    setShowThankYouAlert(false);
+    setShowPaymentModal(true);
+  }
+
+  // Called when payment modal is closed (after reading instructions)
+  function handleClosePaymentModal() {
+    setShowPaymentModal(false);
+    resetForm();
   }
 
   return (
@@ -338,13 +357,24 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Terms</label>
-                <input
+                <label className="form-label" htmlFor="terms">
+                  Terms
+                </label>
+                <select
+                  id="terms"
                   name="terms"
-                  className="form-control"
+                  className="form-select"
                   value={form.terms}
                   onChange={handleChange}
-                />
+                >
+                  <option value="">Select term</option>
+                  <option value="1 month (13.5%)">1 month (13.5%)</option>
+                  <option value="3 months (10.5%)">3 months (10.5%)</option>
+                  <option value="6 months (8.5%)">6 months (8.5%)</option>
+                </select>
+                <p>
+                  <strong>Selected</strong>: {form.terms || "none"}
+                </p>
               </div>
             </div>
 
@@ -364,14 +394,26 @@ export default function RoomListingRequest() {
                   required
                 />
               </div>
+
               <div className="col-md-6">
-                <label className="form-label">Currency</label>
-                <input
+                <label className="form-label" htmlFor="terms">
+                  Currency
+                </label>
+                <select
+                  id="priceCurrency"
                   name="priceCurrency"
-                  className="form-control"
+                  className="form-select"
                   value={form.priceCurrency}
                   onChange={handleChange}
-                />
+                >
+                  <option value="">Select Currency</option>
+                  <option value="USD">USD</option>
+                  <option value="EU">EURO</option>
+                  <option value="AOA">KWANZA</option>
+                </select>
+                <p>
+                  <strong>Selected</strong>: {form.priceCurrency || "none"}
+                </p>
               </div>
             </div>
 
@@ -452,7 +494,9 @@ export default function RoomListingRequest() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">You can upload up to 12 images.</label>
+              <label className="form-label">
+                You can upload up to 12 images.
+              </label>
               <input
                 ref={fileInputRef}
                 name="images"
@@ -581,7 +625,7 @@ export default function RoomListingRequest() {
                 )}
 
                 <small className="text-muted d-block mt-2">
-                  Required: room title, description, price, name, email, phone,
+                  <strong>Required:</strong> room title, description, price, name, email, phone,
                   and acknowledgement.
                 </small>
               </div>
@@ -589,6 +633,66 @@ export default function RoomListingRequest() {
           </div>
         </div>
       </form>
+
+      {/* Thank you alert that host must close to see payment modal */}
+      {showThankYouAlert && (
+        <div className="alert alert-success alert-dismissible fade show" role="alert">
+          <strong>Thank you for booking!</strong> Please close this message to view payment instructions.
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            onClick={handleCloseThankYou}
+            style={{ marginLeft: 16 }}
+          />
+        </div>
+      )}
+
+      {/* Payment instructions modal (simple implementation) */}
+      {showPaymentModal && (
+        <div
+          className="modal show"
+          tabIndex="-1"
+          role="dialog"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          aria-modal="true"
+        >
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Payment Instructions</h5>
+                <button type="button" className="btn-close" aria-label="Close" onClick={handleClosePaymentModal} />
+              </div>
+              <div className="modal-body">
+                <p>
+                  <strong>Notice:</strong> Please pay for the listing within <strong>48 hours</strong> or the listing will
+                  be cancelled.
+                </p>
+
+                <h6>Bank Payment Details</h6>
+                <p className="mb-1"><strong>Bank:</strong> BFA</p>
+                <p className="mb-1"><strong>Account name:</strong> Maria Miguel</p>
+                <p className="mb-1"><strong>Account number:</strong> 342295560 30 001</p>
+                <p className="mb-1"><strong>IBAN:</strong> AO06 0006 0000 42295560301 25</p>
+                <p className="mb-1"><strong>Reference:</strong> Please include your listing ID or email{lastSavedId ? ` (ID: ${lastSavedId})` : ""}</p>
+
+                <hr />
+                <p>
+                  After you complete the payment, please reply to the confirmation email or contact support at{" "}
+                  <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a> with your payment receipt so we can
+                  activate your listing.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleClosePaymentModal}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <footer className="text-center py-4 border-top">
         <small>
           <p>
