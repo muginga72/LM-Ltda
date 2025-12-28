@@ -228,11 +228,10 @@ export default function RoomListingRequest() {
         const msg = (json && json.description) || `Server error ${resp.status}`;
         setResult({ ok: false, message: msg });
       } else {
-        setResult({
-          ok: true,
-          message: `Saved (id: ${json && json.id ? json.id : "unknown"})`,
-        });
-        resetForm();
+        const id = json && json.id ? json.id : null;
+        setLastSavedId(id);
+        setResult({ ok: true, message: `Saved${id ? ` (id: ${id})` : ""}` });
+        setShowThankYouAlert(true);
       }
     } catch (err) {
       setResult({ ok: false, message: err.message || "Network error" });
@@ -671,16 +670,16 @@ export default function RoomListingRequest() {
                 </p>
 
                 <h6>Bank Payment Details</h6>
-                <p className="mb-1"><strong>Bank:</strong> LM Bank</p>
-                <p className="mb-1"><strong>Account name:</strong> LM-Ltd Services</p>
-                <p className="mb-1"><strong>Account number:</strong> 123456789</p>
-                <p className="mb-1"><strong>IBAN:</strong> LM00 1234 5678 9012 3456 78</p>
+                <p className="mb-1"><strong>Bank:</strong> BFA</p>
+                <p className="mb-1"><strong>Account name:</strong> Maria Miguel</p>
+                <p className="mb-1"><strong>Account number:</strong> 342295560 30 001</p>
+                <p className="mb-1"><strong>IBAN:</strong> AO06 0006 0000 42295560301 25</p>
                 <p className="mb-1"><strong>Reference:</strong> Please include your listing ID or email{lastSavedId ? ` (ID: ${lastSavedId})` : ""}</p>
 
                 <hr />
                 <p>
                   After you complete the payment, please reply to the confirmation email or contact support at{" "}
-                  <a href="mailto:lmj.muginga@gmail.com">lmj.muginga@gmail.com</a> with your payment receipt so we can
+                  <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a> with your payment receipt so we can
                   activate your listing.
                 </p>
               </div>
