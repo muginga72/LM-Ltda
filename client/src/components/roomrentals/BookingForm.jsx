@@ -162,7 +162,7 @@ export default function BookingForm({
     const bankInfo = {
       accountName: "Maria Miguel",
       accountNumber: "342295560 30 001",
-      routingNumber: "011000015",
+      routingNumber: "AO06 0006 0000 42295560301 25",
       bankName: "BFA",
       reference: `BOOK-${room?.id ?? room?._id ?? "unknown"}`,
       amount: totalAmount,
