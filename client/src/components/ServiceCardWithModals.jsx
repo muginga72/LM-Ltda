@@ -1,12 +1,6 @@
+// components/ServiceCardWithModals.jsx
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Card,
-  Button,
-  ButtonGroup,
-  Modal,
-  Form,
-  Spinner,
-} from "react-bootstrap";
+import { Card, Button, ButtonGroup, Modal, Form, Spinner } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTranslation } from "react-i18next";
 
@@ -23,19 +17,12 @@ const ServiceCardWithModals = ({
 
   // Persist state per service
   const localKey = `serviceCardState-${serviceId || title}`;
-
   const defaultState = {
     showModal: { request: false, schedule: false, share: false },
     activeModalType: "",
     requestData: { fullName: "", email: "", serviceType: "", details: "" },
-    scheduleData: {
-      fullName: "",
-      email: "",
-      serviceType: "",
-      date: "",
-      time: "",
-    },
-    shareData: { fullName: "", email: "" },
+    scheduleData: { fullName: "", email: "", serviceType: "", date: "", time: "" },
+    shareData: { fullName: "", email: "", notes: "" },
   };
 
   const [state, setState] = useState(defaultState);
@@ -92,12 +79,14 @@ const ServiceCardWithModals = ({
   const translateDescription = (rawTitle, rawDescription) =>
     t(`service.${rawTitle}.description`, { defaultValue: rawDescription });
 
-  // Humanize field keys into Title Case (correct label casing)
+  // Humanize field keys into Title Case
   const humanizeField = (key) => {
     if (!key) return "";
-    const snakeHandled = key.replace(/_/g, " ");
-    const withSpaces = snakeHandled.replace(/([A-Z])/g, " $1").trim();
-    return withSpaces
+    const spaced = key
+      .replace(/_/g, " ")
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+      .trim();
+    return spaced
       .split(" ")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
@@ -132,25 +121,30 @@ const ServiceCardWithModals = ({
     if (field === "details")
       return t("placeholder.details", {
         service: translateTitle(title),
-        defaultValue: `Describe your ${translateTitle(title)} request...`,
+        defaultValue: `Describe your ${translateTitle(title)} request ...`,
+      });
+
+    if (field === "notes")
+      return t("placeholder.notes", {
+        service: translateTitle(title),
+        defaultValue: `Add any notes about ${translateTitle(title)}...`,
       });
 
     if (field === "date")
-      return t("placeholder.date", { defaultValue: "e. g. mm/dd/yyyy" });
+      return t("placeholder.date", { defaultValue: "e.g. mm/dd/yyyy" });
 
     if (field === "time")
-      return t("placeholder.time", { defaultValue: " e. g. 10:30 AM" });
+      return t("placeholder.time", { defaultValue: "e.g. 10:30 AM" });
 
     return "";
   };
 
   // ---- Currency conversion logic ----
-  // Static conversion rates here as examples. Replace with live rates or a context if needed.
   const conversionRates = useMemo(
     () => ({
       USD: 1,
-      EUR: 0.8615, // 1 USD ≈ 0.8615 EUR
-      AOA: 912.085, // 1 USD ≈ 912.085 AOA
+      EUR: 0.8615, // 1 USD = 0.8615 EUR
+      AOA: 912.085, // 1 USD = 912.085 AOA
     }),
     []
   );
@@ -164,7 +158,6 @@ const ServiceCardWithModals = ({
 
   const formatPrice = (value) => {
     if (value == null || value === "") return "";
-    // Accept numeric or numeric-string values; if service stores strings like "10.50" this handles it
     const numeric = Number(value);
     if (Number.isNaN(numeric)) return "";
 
@@ -183,7 +176,7 @@ const ServiceCardWithModals = ({
       return `${converted.toFixed(2)} ${currency}`;
     }
   };
-  // ---- end currency conversion logic ----
+  // end currency conversion logic
 
   const handleSubmit = async (type) => {
     setLoading(true);
@@ -194,16 +187,17 @@ const ServiceCardWithModals = ({
         share: "/api/shares",
       }[type];
 
-      const formData = state[`${type}Data`];
+      const formData = state[`${type}Data`] || {};
+      // Build payload so share includes notes (notes are part of formData)
       const payload = {
         ...formData,
         serviceTitle: title,
         serviceId,
       };
 
-      // Required fields
-      const requiredFields = ["serviceId", "fullName", "email"];
-      const missing = requiredFields.filter((field) => !payload[field]);
+      // Required fields (validate against formData)
+      const requiredFields = ["fullName", "email"];
+      const missing = requiredFields.filter((field) => !formData[field]);
       if (missing.length > 0) {
         throw new Error(
           `${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} required.`
@@ -258,13 +252,11 @@ const ServiceCardWithModals = ({
       <Modal.Body>
         <Form>
           {fields.map((field) => {
-            const isTextarea = field === "details";
+            const isTextarea = field === "details" || field === "notes";
             const defaultLabel = humanizeField(field);
             return (
               <Form.Group key={field} className="mb-3">
-                <Form.Label>
-                  {t(`form.${field}`, { defaultValue: defaultLabel })}
-                </Form.Label>
+                <Form.Label>{t(`form.${field}`, { defaultValue: defaultLabel })}</Form.Label>
                 <Form.Control
                   id={field}
                   name={field}
@@ -296,7 +288,10 @@ const ServiceCardWithModals = ({
 
   return (
     <>
-      <Card className="h-100 shadow-sm d-flex flex-column">
+      <Card
+        className="h-100 shadow-sm d-flex flex-column"
+        style={{ borderRadius: 24, overflow: "hidden" }}
+      >
         <div style={{ position: "relative", height: "300px", overflow: "hidden" }}>
           <Card.Img
             src={fullImageUrl}
@@ -306,7 +301,7 @@ const ServiceCardWithModals = ({
               width: "100%",
               height: "100%",
               display: "block",
-              borderRadius: "6px 6px 0 0",
+              borderRadius: "24px 24px 0 0",
             }}
           />
           {price !== "" && price !== null && (
@@ -332,6 +327,7 @@ const ServiceCardWithModals = ({
           <Card.Title>{translateTitle(title)}</Card.Title>
           <Card.Text>{translateDescription(title, description)}</Card.Text>
         </Card.Body>
+
         <div className="px-2 pb-3">
           <ButtonGroup vertical className="w-100 px-3">
             <div className="d-flex gap-4 mt-2 flex-wrap">
@@ -351,7 +347,7 @@ const ServiceCardWithModals = ({
 
       {renderModal("request", ["fullName", "email", "serviceType", "details"])}
       {renderModal("schedule", ["fullName", "email", "serviceType", "date", "time"])}
-      {renderModal("share", ["fullName", "email"])}
+      {renderModal("share", ["fullName", "email", "notes"])}
     </>
   );
 };
