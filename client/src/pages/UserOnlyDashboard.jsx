@@ -713,7 +713,7 @@ export default function UserOnlyDashboard({
           {bankInfo ? (
             <div>
               <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                Thank you for your booking. Pay the booking in the next <srong>48 hours</srong> to avoid cancellation. If you need help contact the support team <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a>. Please complete payment using the details below:
+                Thank you for your booking. Pay the booking in the next <srong>48 hours</srong> to avoid cancellation. If you need help contact the support team <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>. Please complete payment using the details below:
               </p>
 
               <div>

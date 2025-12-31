@@ -40,7 +40,7 @@ export default function PayInstructionsModal({ show, onHide, bankInfo }) {
           {t?.("payment.instructionsNote") ||
             "After you complete the transfer, please upload the proof of payment using the Upload Proof button."}
             <p>
-              <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a>.
+              <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>.
             </p>
         </div>
       </Modal.Body>

@@ -90,8 +90,26 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
         <div className="row">
           {relevantServices.map((s) => (
             <div className="col-md-6 mb-3" key={s._id}>
-              <div className="card h-100">
-                <img src={s.imagePath} className="card-img-top" alt={s.title} style={{ height: 180, objectFit: "cover" }} />
+              <div
+                className="card h-100"
+                style={{
+                  borderRadius: "24px",
+                  overflow: "hidden",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                }}
+              >
+                <img
+                  src={s.imagePath}
+                  className="card-img-top"
+                  alt={s.title}
+                  style={{
+                    height: 250,
+                    objectFit: "cover",
+                    borderRadius: "24px 24px 0 0",
+                    width: "100%",
+                    display: "block",
+                  }}
+                />
                 <div className="card-body d-flex flex-column">
                   <h5>{translateTitle(s.title)}</h5>
                   <p className="mb-1 text-muted">{translateDescription(s.title, s.description)}</p>
@@ -168,9 +186,9 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
       />
 
       {/* Proof of payment (if any) */}
-      <ProofAttachment 
-        filePath={userPayment?.proofFile} 
-        serviceTitle={userPayment?.serviceTitle} 
+      <ProofAttachment
+        filePath={userPayment?.proofFile}
+        serviceTitle={userPayment?.serviceTitle}
       />
     </>
   );

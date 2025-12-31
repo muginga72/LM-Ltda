@@ -239,7 +239,7 @@ function UploadProofModal({ service, onHide, refresh, currentUser }) {
           )}
           <div className="text-muted">
             <p>
-              If you dont see the instructions to pay close it to see instructions. For help contact the support team <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a>.
+              If you dont see the instructions to pay close it to see instructions. For help contact the support team <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>.
             </p>
           </div>
         </Modal.Body>
