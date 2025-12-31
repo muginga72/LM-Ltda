@@ -1,0 +1,54 @@
+{
+  "schedule": {
+    "title": "Agenda",
+    "noSchedule": "Nenhuma agenda disponível",
+    "close": "Fechar",
+    "scheduled": "Agendado"
+  },
+
+  "payment": {
+    "title": "Pagar serviço",
+    "amount": "Valor",
+    "method": {
+      "card": "Cartão",
+      "bank": "Transferência bancária"
+    },
+    "cancel": "Cancelar",
+    "pay": "Pagar",
+    "paymentError": "Pagamento falhou. Por favor, tente novamente.",
+    "instructionsTitle": "Instruções para transferência bancária",
+    "reference": "Referência",
+    "bankName": "Banco",
+    "accountName": "Titular da conta",
+    "accountNumber": "Número da conta",
+    "routingNumber": "IBAN/Referência",
+    "instructionsNote": "Depois de efetuar a transferência, por favor carregue o comprovativo de pagamento usando o botão Carregar Comprovativo.",
+    "close": "Fechar"
+  },
+  "dashboard": {
+    "availableServices": "Serviços disponíveis",
+    "noServices": "Não tem serviços no momento.",
+    "status": "Estado",
+    "sendProof": "Carregar comprovativo",
+    "payService": "Pagar serviço"
+  },
+  "upload": {
+    "title": "Carregar comprovativo de pagamento",
+    "selectFile": "Selecione o ficheiro comprovativo (imagem ou PDF)",
+    "cancel": "Cancelar",
+    "upload": "Carregar",
+    "noFile": "Por favor selecione um ficheiro para carregar.",
+    "uploadError": "Falha no carregamento. Por favor, tente novamente."
+  },
+  "status": {
+    "paid_full": "Pago (total)",
+    "paid_half": "Pago (parcial)",
+    "pending": "Pendente",
+    "unpaid": "Por pagar",
+    "cancelled": "Cancelado"
+  },
+  "proof": {
+    "title": "Comprovativo de pagamento",
+    "viewDocument": "Ver documento comprovativo"
+  }
+}

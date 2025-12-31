@@ -1,0 +1,53 @@
+{
+  "schedule": {
+    "title": "Schedule",
+    "noSchedule": "No schedule available",
+    "close": "Close",
+    "scheduled": "Scheduled"
+  },
+  "payment": {
+    "title": "Pay for service",
+    "amount": "Amount",
+    "method": {
+      "card": "Card",
+      "bank": "Bank transfer"
+    },
+    "cancel": "Cancel",
+    "pay": "Pay",
+    "paymentError": "Payment failed. Please try again.",
+    "instructionsTitle": "Bank transfer instructions",
+    "reference": "Reference",
+    "bankName": "Bank",
+    "accountName": "Account name",
+    "accountNumber": "Account number",
+    "routingNumber": "Routing/IBAN",
+    "instructionsNote": "After you complete the transfer, please upload the proof of payment using the Upload Proof button.",
+    "close": "Close"
+  },
+  "dashboard": {
+    "availableServices": "Available services",
+    "noServices": "You have no services at the moment.",
+    "status": "Status",
+    "sendProof": "Upload proof",
+    "payService": "Pay Service"
+  },
+  "upload": {
+    "title": "Upload proof of payment",
+    "selectFile": "Select proof file (image or PDF)",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "noFile": "Please select a file to upload.",
+    "uploadError": "Upload failed. Please try again."
+  },
+  "status": {
+    "paid_full": "Paid (full)",
+    "paid_half": "Paid (partial)",
+    "pending": "Pending",
+    "unpaid": "Unpaid",
+    "cancelled": "Cancelled"
+  },
+  "proof": {
+    "title": "Proof of payment",
+    "viewDocument": "View proof document"
+  }
+}

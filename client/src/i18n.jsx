@@ -1,6 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+// import en from "./locales/en.json";
+// import pt from "./locales/pt.json";
+// import fr from "./locales/fr.json";
+
+// const resources = {
+//   en: { translation: en },
+//   pt: { translation: pt },
+//   fr: { translation: fr },
+// };
 
 i18n
   .use(LanguageDetector) // Automatically detects browser language
@@ -113,11 +122,13 @@ i18n
           "dashboard.availableServices": "Available Services",
           "dashboard.noServices":
             "No requests, schedules, or shared services yet.",
-          "dashboard.sendProof": "Send Payment Proof",
+          // "dashboard.sendProof": "Send Payment Proof",
           "dashboard.status": "Status",
           "status.paid_full": "Paid in Full",
           "status.paid_half": "Partially Paid",
           "status.unpaid": "Unpaid",
+          "dashboard.payService": "Pay Service",
+          "dashboard.sendProof": "Send Proof",
 
           // ----- Payment Instructions Modal -----
           "modal.paymentInstructions.title": "Payment Instructions",
@@ -132,6 +143,23 @@ i18n
             "Once you've completed the payment, please upload the support document or send it via email or 'SEND PAYMENT PROOF' button related to requested, scheduled or shared service.",
           fullNameId:
             "Your full name or service ID associated with the payment",
+
+          "payment.instructionsTitle": "Bank transfer instructions",
+          "payment.reference": "Reference",
+          "payment.bankName": "Bank",
+          "payment.accountName": "Account name",
+          "payment.accountNumber": "Account number",
+          "payment.routingNumber": "Routing/IBAN",
+          "payment.amount": "Amount",
+          "payment.close": "Close",
+          "payment.instructionsNote": "After you complete the transfer or deposit, please upload the proof of payment using the UPLOAD PROOF button. If you need help contact the support team",
+
+          "payment.paymentError": "Payment failed",
+          "payment.title": "Pay for service",
+          "payment.method.card": "Card",
+          "payment.method.bank": "Bank transfer",
+          "payment.cancel": "Cancel",
+          "payment.pay": "Pay details",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "User Dashboard",
@@ -548,11 +576,13 @@ i18n
           "dashboard.availableServices": "Serviços Disponíveis",
           "dashboard.noServices":
             "Nenhum pedido, agendamento ou serviço compartilhado ainda.",
-          "dashboard.sendProof": "Envie o Comprovativo de Pagamento",
+          // "dashboard.sendProof": "Envie o Comprovativo de Pagamento",
           "dashboard.status": "Condição",
           "status.paid_full": "Pago",
           "status.paid_half": "Pago parcialmente",
           "status.unpaid": "Não pago",
+          "dashboard.payService": "Pagamento",
+          "dashboard.sendProof": "Enviar comprovativo",
 
           // ----- Payment Instructions Modal -----
           "modal.paymentInstructions.title": "Instruções de Pagamento",
@@ -567,6 +597,22 @@ i18n
             "Após concluir o pagamento, envie em anexo o comprovante por e-mail ou aperta no botão 'ENVIAR COMPROVATIVO DE PAGAMENTO' relacionado ao serviço solicitado, agendado ou compartilhado.",
           fullNameId:
             "Nome completo associado ao pagamento ou seu ID associado ao serviço",
+
+          "payment.instructionsTitle": "Instruções para transferência bancária",
+          "payment.reference": "Referência",
+          "payment.bankName": "Banco",
+          "payment.accountName": "Nome da conta",
+          "payment.accountNumber": "Número da conta",
+          "payment.routingNumber": "Routing/IBAN",
+          "payment.amount": "Valor",
+          "payment.close": "Fechar",
+          "payment.instructionsNote": "Após concluir a transferência ou o depósito, carregue o comprovativo de pagamento através do botão CARREGAR COMPROVATIVO. Se precisar de ajuda, contacte a equipa de suporte",
+          "payment.paymentError": "Pagamento falhou",
+          "payment.title": "Pagar o serviço",
+          "payment.method.card": "Cartão",
+          "payment.method.bank": "Transferência bancária",
+          "payment.cancel": "Cancelar",
+          "payment.pay": "Como Pagar",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Painel do Usuário",
@@ -987,11 +1033,13 @@ i18n
           "dashboard.availableServices": "Services Disponibles",
           "dashboard.noServices":
             "Aucune demande, planification ou service partagé pour l'instant.",
-          "dashboard.sendProof": "Envoyer la Preuve de Paiement",
+          // "dashboard.sendProof": "Envoyer la Preuve de Paiement",
           "dashboard.status": "État",
           "status.paid_full": "Payé",
           "status.paid_half": "Payé partiellement",
           "status.unpaid": "Non payé",
+          "dashboard.payService": "Paiement",
+          "dashboard.sendProof": "Envoyer à prix réduit",
 
           // ----- Payment Instructions Modal -----
           "modal.paymentInstructions.title": "Instructions de Paiement",
@@ -1006,6 +1054,22 @@ i18n
             "Une fois le paiement effectué, veuillez télécharger le document justificatif ou l'envoyer par e-mail ou via le bouton 'ENVOYER LA PREUVE DE PAIEMENT' lié au service demandé, planifié ou partagé.",
           fullNameId:
             "Votre nom complet ou l'ID du service associé au paiement",
+
+          "payment.instructionsTitle": "Instructions pour le virement bancaire",
+          "payment.reference": "Référence",
+          "payment.bankName": "Banque",
+          "payment.accountName": "Nom du compte",
+          "payment.accountNumber": "Numéro de compte",
+          "payment.routingNumber": "Code banque/IBAN",
+          "payment.amount": "Montant",
+          "payment.close": "Fermer",
+          "payment.instructionsNote": "Après avoir effectué le virement ou le dépôt, veuillez télécharger la preuve de paiement en utilisant le bouton TÉLÉCHARGER LA PREUVE. Si vous avez besoin d'aide, veuillez contacter l'équipe d'assistance.",
+          "payment.paymentError": "Échec du paiement",
+          "payment.title": "Payer le service",
+          "payment.method.card": "Carte bancaire",
+          "payment.method.bank": "Virement bancaire",
+          "payment.cancel": "Annuler",
+          "payment.pay": "Détails du paiement",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Tableau de Bord Utilisateur",
@@ -1332,3 +1396,15 @@ i18n
   });
 
 export default i18n;
+
+// i18n.use(initReactI18next).init({
+//   resources,
+//   lng: "en",
+//   fallbackLng: "en",
+//   interpolation: {
+//     escapeValue: false,
+//   },
+// });
+
+// export default i18n;
+
