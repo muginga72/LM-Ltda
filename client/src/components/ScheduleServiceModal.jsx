@@ -45,7 +45,7 @@ export default function ScheduleServiceModal({
         ? new Date(`${date}T${time}:00`)
         : new Date(`${date}T00:00:00`);
 
-      await axios.post(`${API}/api/schedule`, {
+      await axios.post(`${API}/api/schedules`, {
         serviceType: service?.title,
         fullName,
         email,

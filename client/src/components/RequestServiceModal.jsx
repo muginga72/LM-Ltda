@@ -38,7 +38,7 @@ export default function RequestServiceModal({
       setLoading(true);
       setError("");
 
-      await axios.post(`${API}/api/request`, {
+      await axios.post(`${API}/api/requests`, {
         serviceTitle: service?.title,
         serviceType: service?.type || service?.title,
         fullName,
