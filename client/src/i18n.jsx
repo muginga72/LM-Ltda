@@ -205,7 +205,7 @@ i18n
             noServices: "No {{type}} found.",
             created: "Created",
             payInstructions: "Pay / Upload proof",
-            pay: "Pay",
+            pay: "Bank details",
             paid: "Paid",
             view: "View",
             payConfirm: "You will be redirected to a secure payment page.",

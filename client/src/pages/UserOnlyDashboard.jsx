@@ -23,6 +23,7 @@ import UserCalendar from "../components/UserCalendar";
 import RoomCardWithPay from "../components/roomrentals/RoomCardWithPay";
 import UserBookingsList from "../components/roomrentals/UserBookingsList";
 import BookingFormWithModal from "../components/roomrentals/BookingFormWithModal";
+import UploadProofModal from "../components/UploadProofModal";
 
 export default function UserOnlyDashboard({
   apiBaseUrl,
@@ -81,6 +82,8 @@ export default function UserOnlyDashboard({
   // Bank info modal (shown after booking when bank transfer selected)
   const [bankInfo, setBankInfo] = useState(null);
   const [showBankModal, setShowBankModal] = useState(false);
+  const [showUploadProofModal, setShowUploadProofModal] = useState(false);
+  const [selectedServiceForProof, setSelectedServiceForProof] = useState(null);
 
   // refresh key
   const [refreshKey, setRefreshKey] = React.useState(0);
@@ -328,14 +331,17 @@ export default function UserOnlyDashboard({
       {error ? (
         <Alert variant="danger">{error}</Alert>
       ) : services.length === 0 ? (
-        <Alert variant="info">
+        <Alert variant="info" style={{ borderRadius: 24 }}>
           {t("dashboard.noServices", { type: t(typeKey) })}
         </Alert>
       ) : (
         <Row>
           {services.map((item) => (
             <Col md={6} lg={4} key={item._id} className="mb-3">
-              <Card className="h-100">
+              <Card
+                className="h-100 shadow-sm d-flex flex-column"
+                style={{ borderRadius: 24, overflow: "hidden" }}
+              >
                 <Card.Body>
                   <Row className="h-100">
                     {/* Left: Text Content */}
@@ -362,7 +368,9 @@ export default function UserOnlyDashboard({
                           <Button
                             variant="outline-primary"
                             onClick={() => handlePayService(item._id)}
+                            style={{ borderRadius: 24 }}
                           >
+                            {/* This render the Pay / Upload proof button */}
                             {t("dashboard.payInstructions")}
                           </Button>
                         )}
@@ -577,27 +585,48 @@ export default function UserOnlyDashboard({
 
         <Modal show={showPayModal} onHide={handleClosePayModal} centered>
           <Modal.Header closeButton>
-            <Modal.Title>{t("dashboard.pay") || "Pay"}</Modal.Title>
+            <Modal.Title>{t("dashboard.pay") || "Bank details"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p>
-              {t("dashboard.payConfirm") ||
-                "You will be redirected to a secure payment page."}
-            </p>
+            <div>
+              <ul style={{ listStyle: "none" }}>
+                <li>
+                  <strong>Bank:</strong> BFA
+                </li>
+                <li>
+                  <strong>Accout name:</strong> Maria Miguel
+                </li>
+                <li>
+                  <strong>Accout number:</strong> 34229556030001
+                </li>
+                <li>
+                  <strong>IBAN:</strong> AO06 0006 0000 42295560301 25
+                </li>
+              </ul>
+              <p style={{ fontWeight: 600, margin: 8 }}>
+                Pay the service in the next <srong>48 hours</srong> to avoid
+                cancellation. If you need help contact the support team{" "}
+                <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team.</a>
+              </p>
+            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClosePayModal}>
               {t("dashboard.cancel") || "Cancel"}
             </Button>
+
+            {/* Send Proof button that opens UploadProofModal */}
             <Button
               variant="primary"
               onClick={() => {
                 if (selectedServiceId) {
-                  window.location.href = `/payments/checkout?serviceId=${selectedServiceId}`;
+                  setSelectedServiceForProof(selectedServiceId);
+                  setShowUploadProofModal(true);
+                  handleClosePayModal();
                 }
               }}
             >
-              {t("dashboard.proceedToPay") || "Proceed to payment"}
+              {t("dashboard.sendProof") || "Send Proof"}
             </Button>
           </Modal.Footer>
         </Modal>
@@ -713,7 +742,11 @@ export default function UserOnlyDashboard({
           {bankInfo ? (
             <div>
               <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                Thank you for your booking. Pay the booking in the next <srong>48 hours</srong> to avoid cancellation. If you need help contact the support team <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>. Please complete payment using the details below:
+                Thank you for your booking. Pay the booking in the next{" "}
+                <srong>48 hours</srong> to avoid cancellation. If you need help
+                contact the support team{" "}
+                <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>. Please
+                complete payment using the details below:
               </p>
 
               <div>
@@ -721,7 +754,8 @@ export default function UserOnlyDashboard({
                   <strong>Bank:</strong> {bankInfo.bankName}
                 </div>
                 <div>
-                  <strong>Account name:</strong>{" "}
+                  <strong>Account name:</strong>
+                  {""}
                   {bankInfo.accountName ?? bankInfo.owner}
                 </div>
                 <div>
@@ -749,6 +783,12 @@ export default function UserOnlyDashboard({
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <UploadProofModal
+        show={showUploadProofModal}
+        onHide={() => setShowUploadProofModal(false)}
+        serviceId={selectedServiceForProof}
+      />
 
       <footer className="text-center py-4 border-top">
         <small>
