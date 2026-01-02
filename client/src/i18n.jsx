@@ -152,7 +152,8 @@ i18n
           "payment.routingNumber": "Routing/IBAN",
           "payment.amount": "Amount",
           "payment.close": "Close",
-          "payment.instructionsNote": "After you complete the transfer or deposit, please upload the proof of payment using the UPLOAD PROOF button. If you need help contact the support team",
+          "payment.instructionsNote":
+            "After you complete the transfer or deposit, please upload the proof of payment using the UPLOAD PROOF button. If you need help contact the support team",
 
           "payment.paymentError": "Payment failed",
           "payment.title": "Pay for service",
@@ -213,6 +214,42 @@ i18n
             proceedToPay: "Proceed to payment",
             availableRooms: "Available rooms",
             tabOverviewLabel: "Overview",
+            noImage: "No image available",
+            sendProof: "Send Proof",
+            scheduleService: "Schedule Service",
+            requestService: "Request Service",
+            failedRequested: "Failed to load requested services.",
+            failedScheduled: "Failed to load scheduled services.",
+            failedShared: "Failed to load shared services",
+          },
+          schedule: {
+            title: "Schedule Service",
+            fullName: "Full name",
+            email: "Email",
+            date: "Date",
+            time: "Time",
+            optionalTime: "Optional — pick a time if you prefer",
+            cancel: "Cancel",
+            confirm: "Confirm",
+            saving: "Saving...",
+            errors: {
+              dateRequired: "Please select a date.",
+              submitFailed: "Failed to schedule service. Try again.",
+            },
+          },
+          request: {
+            title: "Request Service",
+            fullName: "Full name",
+            email: "Email",
+            details: "Details",
+            detailsPlaceholder: "Describe what you need",
+            cancel: "Cancel",
+            confirm: "Submit request",
+            saving: "Submitting...",
+            errors: {
+              detailsRequired: "Please provide details for your request.",
+              submitFailed: "Failed to submit request. Try again.",
+            },
           },
           modal: {
             paymentInstructions: {
@@ -606,7 +643,8 @@ i18n
           "payment.routingNumber": "Routing/IBAN",
           "payment.amount": "Valor",
           "payment.close": "Fechar",
-          "payment.instructionsNote": "Após concluir a transferência ou o depósito, carregue o comprovativo de pagamento através do botão CARREGAR COMPROVATIVO. Se precisar de ajuda, contacte a equipa de suporte",
+          "payment.instructionsNote":
+            "Após concluir a transferência ou o depósito, carregue o comprovativo de pagamento através do botão CARREGAR COMPROVATIVO. Se precisar de ajuda, contacte a equipa de suporte",
           "payment.paymentError": "Pagamento falhou",
           "payment.title": "Pagar o serviço",
           "payment.method.card": "Cartão",
@@ -670,6 +708,42 @@ i18n
             proceedToPay: "Ir para o pagamento",
             availableRooms: "Quartos disponíveis",
             tabOverviewLabel: "Visão geral",
+            noImage: "A image não esta disponível",
+            sendProof: "Enviar Comprovativo",
+            scheduleService: "Agendar Serviço",
+            requestService: "Solicitar Serviço",
+            failedRequested: "Falha ao carregar serviços solicitados.",
+            failedScheduled: "Falha ao carregar serviços agendados.",
+            failedShared: "Falha ao carregar serviços partilhados.",
+          },
+          schedule: {
+            title: "Agendar Serviço",
+            fullName: "Nome completo",
+            email: "Email",
+            date: "Data",
+            time: "Hora",
+            optionalTime: "Opcional — escolha uma hora se preferir",
+            cancel: "Cancelar",
+            confirm: "Confirmar",
+            saving: "A gravar...",
+            errors: {
+              dateRequired: "Por favor selecione uma data.",
+              submitFailed: "Falha ao agendar o serviço. Tente novamente.",
+            },
+          },
+          request: {
+            title: "Solicitar Serviço",
+            fullName: "Nome completo",
+            email: "Email",
+            details: "Detalhes",
+            detailsPlaceholder: "Descreva o que precisa",
+            cancel: "Cancelar",
+            confirm: "Enviar pedido",
+            saving: "A enviar...",
+            errors: {
+              detailsRequired: "Por favor forneça detalhes para o seu pedido.",
+              submitFailed: "Falha ao enviar o pedido. Tente novamente.",
+            },
           },
           modal: {
             paymentInstructions: {
@@ -1063,7 +1137,8 @@ i18n
           "payment.routingNumber": "Code banque/IBAN",
           "payment.amount": "Montant",
           "payment.close": "Fermer",
-          "payment.instructionsNote": "Après avoir effectué le virement ou le dépôt, veuillez télécharger la preuve de paiement en utilisant le bouton TÉLÉCHARGER LA PREUVE. Si vous avez besoin d'aide, veuillez contacter l'équipe d'assistance.",
+          "payment.instructionsNote":
+            "Après avoir effectué le virement ou le dépôt, veuillez télécharger la preuve de paiement en utilisant le bouton TÉLÉCHARGER LA PREUVE. Si vous avez besoin d'aide, veuillez contacter l'équipe d'assistance.",
           "payment.paymentError": "Échec du paiement",
           "payment.title": "Payer le service",
           "payment.method.card": "Carte bancaire",
@@ -1128,6 +1203,42 @@ i18n
             proceedToPay: "Procéder au paiement",
             availableRooms: "Chambres disponibles",
             tabOverviewLabel: "Aperçu",
+            noImage: "Aucune image disponible",
+            sendProof: "Envoyer justificatif",
+            scheduleService: "Planifier le service",
+            requestService: "Demander le service",
+            failedRequested: "Échec du chargement des services demandés.",
+            failedScheduled: "Échec du chargement des services planifiés.",
+            failedShared: "Échec du chargement des services partagés.",
+          },
+          schedule: {
+            title: "Planifier le service",
+            fullName: "Nom complet",
+            email: "Email",
+            date: "Date",
+            time: "Heure",
+            optionalTime: "Optionnel — choisissez une heure si vous préférez",
+            cancel: "Annuler",
+            confirm: "Confirmer",
+            saving: "Enregistrement...",
+            errors: {
+              dateRequired: "Veuillez sélectionner une date.",
+              submitFailed: "Échec de la planification du service. Réessayez.",
+            },
+          },
+          request: {
+            title: "Demander un service",
+            fullName: "Nom complet",
+            email: "Email",
+            details: "Détails",
+            detailsPlaceholder: "Décrivez ce dont vous avez besoin",
+            cancel: "Annuler",
+            confirm: "Soumettre la demande",
+            saving: "Envoi...",
+            errors: {
+              detailsRequired: "Veuillez fournir des détails pour votre demande.",
+              submitFailed: "Échec de l'envoi de la demande. Réessayez.",
+            },
           },
           modal: {
             paymentInstructions: {
@@ -1407,4 +1518,3 @@ export default i18n;
 // });
 
 // export default i18n;
-
