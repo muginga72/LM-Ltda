@@ -1,7 +1,18 @@
 // src/pages/UserOnlyDashboard.jsx
 import React, { useCallback, useMemo, useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Container, Spinner, Alert, Button, Card, Row, Col, Modal, Tabs, Tab, } from "react-bootstrap";
+import {
+  Container,
+  Spinner,
+  Alert,
+  Button,
+  Card,
+  Row,
+  Col,
+  Modal,
+  Tabs,
+  Tab,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../contexts/AuthContext";
 import UploadDocumentModal from "../components/UploadDocumentModal";
@@ -323,7 +334,7 @@ export default function UserOnlyDashboard({
     setRefreshKey((k) => k + 1);
   };
 
-  // listType: 'scheduled' | 'requested' | 'shared'
+  // Centralized action button logic (listType: 'scheduled' | 'requested' | 'shared')
   const renderActionButton = (service, listType) => {
     // Scheduled -> Pay / Send Proof ONLY
     if (listType === "scheduled") {
@@ -334,12 +345,13 @@ export default function UserOnlyDashboard({
           </Button>
         );
       }
-
+      // store service id for UploadProofModal
+      const id = service._id || service.id || service.serviceId || null;
       return (
         <Button
           variant="outline-primary"
           onClick={() => {
-            setSelectedServiceForProof(service._id || service.id || service._id);
+            setSelectedServiceForProof(id);
             setShowUploadProofModal(true);
           }}
           style={{ borderRadius: 24 }}
@@ -353,12 +365,12 @@ export default function UserOnlyDashboard({
     if (listType === "requested") {
       return (
         <Button
-          variant="outline-warning"
+          variant="warning"
           onClick={() => {
             setSelectedService(service);
             setShowScheduleModal(true);
           }}
-          style={{ borderRadius: 24, overflow: "hidden" }}
+          style={{ borderRadius: 24 }}
         >
           {t("dashboard.scheduleService")}
         </Button>
@@ -369,12 +381,12 @@ export default function UserOnlyDashboard({
     if (listType === "shared") {
       return (
         <Button
-          variant="outline-info"
+          variant="info"
           onClick={() => {
             setSelectedService(service);
             setShowRequestModal(true);
           }}
-          style={{ borderRadius: 24, overflow: "hidden" }}
+          style={{ borderRadius: 24 }}
         >
           {t("dashboard.requestService")}
         </Button>
@@ -396,17 +408,17 @@ export default function UserOnlyDashboard({
       ) : (
         <Row>
           {services.map((item) => (
-            <Col md={6} lg={4} key={item._id} className="mb-3">
+            <Col md={6} lg={4} key={item._id || item.id} className="mb-3">
               <Card className="h-100 shadow-sm d-flex flex-column" style={{ borderRadius: 24, overflow: "hidden" }}>
                 <Card.Body>
                   <Row className="h-100">
                     {/* Left: Text Content */}
                     <Col xs={6} className="d-flex flex-column">
-                      <Card.Title>{item.serviceTitle || item.serviceTitle}</Card.Title>
+                      <Card.Title>{item.serviceTitle || item.serviceTitle || item.title}</Card.Title>
                       <Card.Subtitle className="mb-2 text-muted">
-                        {item.serviceType || item.serviceType}
+                        {item.serviceType || item.serviceType || item.type}
                       </Card.Subtitle>
-                      <Card.Text>{item.details || item.date || item.email}</Card.Text>
+                      <Card.Text>{item.details || item.date || item.email || ""}</Card.Text>
                       <Card.Text>
                         <small className="text-muted">
                           {t("dashboard.created")}: {""}
@@ -630,10 +642,9 @@ export default function UserOnlyDashboard({
               {t("dashboard.cancel") || "Cancel"}
             </Button>
             <Button
-              variant="outline-primary"
+              variant="primary"
               onClick={() => {
                 if (selectedServiceId) {
-                  // ensure we pass an id to UploadProofModal
                   setSelectedServiceForProof(selectedServiceId);
                   setShowUploadProofModal(true);
                   handleClosePayModal();

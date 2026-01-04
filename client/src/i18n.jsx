@@ -511,7 +511,34 @@ i18n
           weddingTitle: "Wedding Testimonials",
           tutoringTitle: "Tutoring Chemistry Testimonials",
         },
+
+        //---------------------------------------------
+        //  RequestServiceModal
+        //---------------------------------------------
+        request: {
+          title: "Request Service",
+          unknownService: "Service",
+          fullName: "Full name",
+          email: "Email",
+          details: "Details",
+          detailsPlaceholder: "Describe what you need...",
+          sharedEmailPlaceholder: "No shared email provided",
+          sharedEmailMissing:
+            "No shared email is associated with this service.",
+          cancel: "Cancel",
+          saving: "Saving...",
+          confirm: "Confirm",
+          errors: {
+            detailsRequired: "Please provide details for your request.",
+            submitFailed: "Failed to submit request. Please try again.",
+          },
+          requestedAt: "Requested date",
+        },
       },
+
+      //================================================================
+      //                 PORTUGUESE
+      //================================================================
       pt: {
         translation: {
           // --------- Home page --------------
@@ -1005,7 +1032,35 @@ i18n
           weddingTitle: "Testemunhos de Casamento",
           tutoringTitle: "Testemunhos das aulas particulares em Química",
         },
+
+        //---------------------------------------------
+        //  RequestServiceModal
+        //---------------------------------------------
+        request: {
+          title: "Solicitar Serviço",
+          unknownService: "Serviço",
+          fullName: "Nome completo",
+          email: "Email",
+          details: "Detalhes",
+          detailsPlaceholder: "Descreva o que você precisa...",
+          sharedEmailPlaceholder: "Nenhum email compartilhado fornecido",
+          sharedEmailMissing:
+            "Nenhum email compartilhado está associado a este serviço.",
+          cancel: "Cancelar",
+          saving: "Salvando...",
+          confirm: "Confirmar",
+          errors: {
+            detailsRequired:
+              "Por favor, forneça detalhes para sua solicitação.",
+            submitFailed: "Falha ao enviar a solicitação. Tente novamente.",
+          },
+          requestedAt: "Data solicitada",
+        },
       },
+
+      //================================================================
+      //                 FRANCH
+      //================================================================
       fr: {
         translation: {
           // ----- Home page -------
@@ -1236,7 +1291,8 @@ i18n
             confirm: "Soumettre la demande",
             saving: "Envoi...",
             errors: {
-              detailsRequired: "Veuillez fournir des détails pour votre demande.",
+              detailsRequired:
+                "Veuillez fournir des détails pour votre demande.",
               submitFailed: "Échec de l'envoi de la demande. Réessayez.",
             },
           },
@@ -1501,6 +1557,28 @@ i18n
           },
           weddingTitle: "Témoignages de mariage",
           tutoringTitle: "Témoignages de tutorat en chimie",
+        },
+
+        //---------------------------------------------
+        //  RequestServiceModal
+        //---------------------------------------------
+        request: {
+          title: "Demander un service",
+          unknownService: "Service",
+          fullName: "Nom complet",
+          email: "Email",
+          details: "Détails",
+          detailsPlaceholder: "Décrivez ce dont vous avez besoin...",
+          sharedEmailPlaceholder: "Aucun email partagé fourni",
+          sharedEmailMissing: "Aucun email partagé n'est associé à ce service.",
+          cancel: "Annuler",
+          saving: "Enregistrement...",
+          confirm: "Confirmer",
+          errors: {
+            detailsRequired: "Veuillez fournir des détails pour votre demande.",
+            submitFailed: "Échec de l'envoi de la demande. Veuillez réessayer.",
+          },
+          requestedAt: "Date demandée",
         },
       },
     },
