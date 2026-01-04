@@ -812,7 +812,7 @@ export default function UserOnlyDashboard({
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} {t("ImLtd")} {t("whoWeAre.footer.copyright")}
+          &copy; {new Date().getFullYear()} {t("lmLtd")} {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </>
