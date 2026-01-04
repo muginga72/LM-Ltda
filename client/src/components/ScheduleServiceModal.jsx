@@ -4,14 +4,6 @@ import axios from "axios";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-/**
- * ScheduleServiceModal
- *
- * - Fetches signed-in user's full name and email into the form.
- * - Uses the service title (keeps a local copy so it renders if service arrives async).
- * - Displays the selected date in European format (DD/MM/YYYY) and localized time.
- * - Sends scheduledAt as an ISO string to the backend.
- */
 export default function ScheduleServiceModal({
   show,
   onHide,
@@ -28,8 +20,8 @@ export default function ScheduleServiceModal({
 
   const [fullName, setFullName] = useState(getUserName(user));
   const [email, setEmail] = useState(getUserEmail(user));
-  const [date, setDate] = useState(""); // yyyy-mm-dd from <input type="date">
-  const [time, setTime] = useState(""); // HH:MM from <input type="time">
+  const [date, setDate] = useState(""); 
+  const [time, setTime] = useState(""); 
   const [serviceTitle, setServiceTitle] = useState(
     service?.title || service?.name || service?.serviceTitle || ""
   );
@@ -48,21 +40,17 @@ export default function ScheduleServiceModal({
         return "fr-FR";
       case "en":
       default:
-        // Use en-GB for European-style dates for English
         return "en-GB";
     }
   };
 
   const locale = localeForEuropeanDates(i18n.language);
 
-  // Format a yyyy-mm-dd string to DD/MM/YYYY (localized)
   const formatDateEuropean = (yyyyMmDd) => {
     if (!yyyyMmDd) return "";
-    // Create a Date using the yyyy-mm-dd string (interpreted as UTC midnight)
     const parts = yyyyMmDd.split("-");
     if (parts.length !== 3) return yyyyMmDd;
     const [y, m, d] = parts.map((p) => parseInt(p, 10));
-    // Use Date.UTC to avoid timezone shifts when constructing from yyyy-mm-dd
     const dt = new Date(Date.UTC(y, m - 1, d));
     return dt.toLocaleDateString(locale, {
       day: "2-digit",
@@ -71,7 +59,6 @@ export default function ScheduleServiceModal({
     });
   };
 
-  // Format time (HH:MM) to localized representation (keeps 24h by default)
   const formatTimeLocalized = (hhMm) => {
     if (!hhMm) return "";
     const [hh, mm] = hhMm.split(":").map((p) => parseInt(p, 10));
@@ -80,7 +67,6 @@ export default function ScheduleServiceModal({
     return dt.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Sync user and service props (they may arrive async)
   useEffect(() => {
     setFullName(getUserName(user));
     setEmail(getUserEmail(user));
@@ -88,9 +74,6 @@ export default function ScheduleServiceModal({
 
   useEffect(() => {
     setServiceTitle(service?.title || service?.name || service?.serviceTitle || "");
-    // If the service has a sharedEmail and you want to use it instead of the signed-in user's email,
-    // uncomment the next line and comment out the setEmail above in the user effect.
-    // setEmail(service?.sharedEmail || getUserEmail(user));
   }, [service]);
 
   // Reset when modal opens
@@ -123,15 +106,10 @@ export default function ScheduleServiceModal({
       setLoading(true);
       setError("");
 
-      // Build scheduledAt as local date/time then convert to ISO
-      // The date input returns yyyy-mm-dd (no timezone). We'll combine with time (if provided)
-      // and create a Date in the user's local timezone, then send ISO string.
       let scheduledAt;
       if (time) {
-        // date: yyyy-mm-dd, time: HH:MM
         scheduledAt = new Date(`${date}T${time}:00`);
       } else {
-        // If no time provided, use midnight local time
         scheduledAt = new Date(`${date}T00:00:00`);
       }
 
@@ -139,8 +117,8 @@ export default function ScheduleServiceModal({
         serviceType: serviceTitle || service?.title || "",
         fullName,
         email: email || "",
-        date, // keep original yyyy-mm-dd for backend convenience if needed
-        time, // keep original HH:MM
+        date, 
+        time, 
         scheduledAt: scheduledAt.toISOString(),
         imagePath: service?.imagePath || "",
         user: user?._id,
@@ -159,7 +137,6 @@ export default function ScheduleServiceModal({
     }
   };
 
-  // If service is required to open the modal, keep the early return
   if (!service) return null;
 
   return (
