@@ -1,24 +1,7 @@
 // src/pages/UserOnlyDashboard.jsx
-import React, {
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
-  useContext,
-} from "react";
+import React, { useCallback, useMemo, useState, useEffect, useContext, } from "react";
 import axios from "axios";
-import {
-  Container,
-  Spinner,
-  Alert,
-  Button,
-  Card,
-  Row,
-  Col,
-  Modal,
-  Tabs,
-  Tab,
-} from "react-bootstrap";
+import { Container, Spinner, Alert, Button, Card, Row, Col, Modal, Tabs, Tab, } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../contexts/AuthContext";
 import UploadDocumentModal from "../components/UploadDocumentModal";
