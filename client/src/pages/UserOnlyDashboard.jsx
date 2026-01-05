@@ -16,15 +16,7 @@ import UploadProofModal from "../components/UploadProofModal";
 import ScheduleServiceModal from "../components/ScheduleServiceModal";
 import RequestServiceModal from "../components/RequestServiceModal";
 
-export default function UserOnlyDashboard({
-  apiBaseUrl,
-  token,
-  initialServices,
-  onProofSubmitted,
-  onServiceSelect,
-  userId,
-  headers = {},
-}) {
+export default function UserOnlyDashboard({ apiBaseUrl, token, initialServices, onProofSubmitted, onServiceSelect, userId, headers = {}, }) {
   const { user } = useContext(AuthContext);
   const { t } = useTranslation();
   const isUser = Boolean(user && user.role !== "admin");
