@@ -1,5 +1,11 @@
 // src/pages/UserOnlyDashboard.jsx
-import React, { useCallback, useMemo, useState, useEffect, useContext } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import axios from "axios";
 import {
   Container,
@@ -251,9 +257,10 @@ export default function UserOnlyDashboard({
 
     (async () => {
       try {
-        const path = user && user._id
-          ? `/api/bookings?userId=${encodeURIComponent(user._id)}`
-          : "/api/bookings";
+        const path =
+          user && user._id
+            ? `/api/bookings?userId=${encodeURIComponent(user._id)}`
+            : "/api/bookings";
         const res = await axios.get(buildUrl(path), {
           headers: defaultHeaders,
         });
@@ -290,10 +297,6 @@ export default function UserOnlyDashboard({
     setSelectedServiceId(serviceId);
     setShowPayModal(true);
   };
-  const handleClosePayModal = () => {
-    setShowPayModal(false);
-    setSelectedServiceId(null);
-  };
   const handleOpenDetails = (room) => {
     setSelectedRoom(room);
     setShowDetails(true);
@@ -323,7 +326,10 @@ export default function UserOnlyDashboard({
             roomId: createdBooking.roomId || (bookingRoom && bookingRoom._id),
             roomTitle:
               createdBooking.roomTitle ||
-              (bookingRoom && (bookingRoom.roomTitle || bookingRoom.title || bookingRoom.name)),
+              (bookingRoom &&
+                (bookingRoom.roomTitle ||
+                  bookingRoom.title ||
+                  bookingRoom.name)),
             startDate: createdBooking.startDate,
             endDate: createdBooking.endDate,
           };
@@ -334,9 +340,7 @@ export default function UserOnlyDashboard({
     setRefreshKey((k) => k + 1);
   };
 
-  // Centralized action button logic (listType: 'scheduled' | 'requested' | 'shared')
   const renderActionButton = (service, listType) => {
-    // Scheduled -> Pay / Send Proof ONLY
     if (listType === "scheduled") {
       if (service.paid) {
         return (
@@ -345,14 +349,91 @@ export default function UserOnlyDashboard({
           </Button>
         );
       }
-      // store service id for UploadProofModal
+
+      // derive id
       const id = service._id || service.id || service.serviceId || null;
+
       return (
         <Button
           variant="outline-primary"
-          onClick={() => {
+          onClick={async () => {
             setSelectedServiceForProof(id);
-            setShowUploadProofModal(true);
+
+            let amount =
+              service &&
+              (service.price ||
+                service.amount ||
+                service.total ||
+                service.cost);
+
+            if (!amount && id) {
+              try {
+                const url = buildUrl(`/api/services/${encodeURIComponent(id)}`);
+                const res = await axios.get(url, { headers: defaultHeaders });
+                const svc = res && res.data ? res.data : null;
+                amount =
+                  svc && (svc.price || svc.amount || svc.total || svc.cost)
+                    ? svc.price || svc.amount || svc.total || svc.cost
+                    : amount;
+              } catch (err) {
+                console.warn(
+                  "Could not fetch service details for amount:",
+                  err
+                );
+              }
+            }
+
+            const info = {
+              bankName: service?.bankName || "BFA",
+              accountName: service?.accountName || "Maria Miguel",
+              accountNumber: service?.accountNumber || "34229556030001",
+              routingNumber:
+                service?.routingNumber || "AO06 0006 0000 42295560301 25",
+              reference:
+                service?.reference ||
+                `SERVICE-${id || Date.now()}-${Math.floor(
+                  Math.random() * 9000 + 1000
+                )}`,
+              serviceId: id,
+              serviceTitle:
+                service?.serviceTitle || service?.title || service?.name || "",
+            };
+
+            setBankInfo(info);
+            setShowBankModal(true);
+
+            const openUploadProof = () => {
+              setShowUploadProofModal(true);
+            };
+
+            const onHidden = (ev) => {
+              try {
+                openUploadProof();
+              } finally {
+                document.removeEventListener("hidden.bs.modal", onHidden);
+              }
+            };
+            try {
+              document.addEventListener("hidden.bs.modal", onHidden, {
+                once: true,
+              });
+            } catch (e) {
+              document.addEventListener("hidden.bs.modal", onHidden);
+            }
+
+            let checks = 0;
+            const maxChecks = (20 * 1000) / 300; // ~20s
+            const poll = setInterval(() => {
+              checks += 1;
+              const anyVisibleModal = !!document.querySelector(".modal.show");
+              if (!anyVisibleModal) {
+                clearInterval(poll);
+                openUploadProof();
+              } else if (checks >= maxChecks) {
+                clearInterval(poll);
+                openUploadProof();
+              }
+            }, 300);
           }}
           style={{ borderRadius: 24 }}
         >
@@ -409,30 +490,47 @@ export default function UserOnlyDashboard({
         <Row>
           {services.map((item) => (
             <Col md={6} lg={4} key={item._id || item.id} className="mb-3">
-              <Card className="h-100 shadow-sm d-flex flex-column" style={{ borderRadius: 24, overflow: "hidden" }}>
+              <Card
+                className="h-100 shadow-sm d-flex flex-column"
+                style={{ borderRadius: 24, overflow: "hidden" }}
+              >
                 <Card.Body>
                   <Row className="h-100">
                     {/* Left: Text Content */}
                     <Col xs={6} className="d-flex flex-column">
-                      <Card.Title>{item.serviceTitle || item.serviceTitle || item.title}</Card.Title>
+                      <Card.Title>
+                        {item.serviceTitle || item.serviceTitle || item.title}
+                      </Card.Title>
                       <Card.Subtitle className="mb-2 text-muted">
                         {item.serviceType || item.serviceType || item.type}
                       </Card.Subtitle>
-                      <Card.Text>{item.details || item.date || item.email || ""}</Card.Text>
+                      <Card.Text>
+                        {item.details || item.date || item.email || ""}
+                      </Card.Text>
                       <Card.Text>
                         <small className="text-muted">
                           {t("dashboard.created")}: {""}
-                          {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : ""}
+                          {item.createdAt
+                            ? new Date(item.createdAt).toLocaleDateString()
+                            : ""}
                         </small>
                       </Card.Text>
                       <div className="mt-auto">
-                        {/* Use the centralized action button logic */}
+
+                        {/*================================================= 
+                            Use the centralized action button logic 
+                        =================================================*/}
+
                         {renderActionButton(item, listType)}
+
                       </div>
                     </Col>
 
                     {/* Right: Service Image */}
-                    <Col xs={6} className="d-flex align-items-center justify-content-center">
+                    <Col
+                      xs={6}
+                      className="d-flex align-items-center justify-content-center"
+                    >
                       {item.imagePath ? (
                         <img
                           src={item.imagePath}
@@ -447,7 +545,9 @@ export default function UserOnlyDashboard({
                           }}
                         />
                       ) : (
-                        <div className="text-muted text-center">{t("dashboard.noImage")}</div>
+                        <div className="text-muted text-center">
+                          {t("dashboard.noImage")}
+                        </div>
                       )}
                     </Col>
                   </Row>
@@ -508,7 +608,8 @@ export default function UserOnlyDashboard({
     return (
       <Container style={{ padding: "2rem" }}>
         <Alert variant="warning" className="text-center">
-          {t("dashboard.accessDenied") || "Access denied. This area is for users only."}
+          {t("dashboard.accessDenied") ||
+            "Access denied. This area is for users only."}
         </Alert>
       </Container>
     );
@@ -523,14 +624,24 @@ export default function UserOnlyDashboard({
         </h5>
         <div className="mb-3 text-center">
           <small className="text-muted">
-            {t("dashboard.email")}: {user.email} . {t("dashboard.role")}: {user.role}
+            {t("dashboard.email")}: {user.email} . {t("dashboard.role")}:{" "}
+            {user.role}
           </small>
         </div>
 
-        <Tabs defaultActiveKey="overview" id="user-dashboard-tabs" className="mb-3">
-          <Tab eventKey="overview" title={t("dashboard.tabOverview") || "Overview"}>
+        <Tabs
+          defaultActiveKey="overview"
+          id="user-dashboard-tabs"
+          className="mb-3"
+        >
+          <Tab
+            eventKey="overview"
+            title={t("dashboard.tabOverview") || "Overview"}
+          >
             <div className="mt-3">
-              <h5 className="mt-4 mb-3">{t("dashboard.availableRooms") || "Available rooms"}</h5>
+              <h5 className="mt-4 mb-3">
+                {t("dashboard.availableRooms") || "Available rooms"}
+              </h5>
               {renderRooms()}
 
               <UserDashboard
@@ -544,7 +655,10 @@ export default function UserOnlyDashboard({
             </div>
           </Tab>
 
-          <Tab eventKey="services" title={t("dashboard.tabServices") || "Services"}>
+          <Tab
+            eventKey="services"
+            title={t("dashboard.tabServices") || "Services"}
+          >
             <div className="mt-3">
               {loadingServices ? (
                 <div className="text-center py-4">
@@ -553,7 +667,11 @@ export default function UserOnlyDashboard({
               ) : (
                 <>
                   <div>
-                    <UserCalendar apiBaseUrl={apiBaseUrl} headers={headers} user={user} />
+                    <UserCalendar
+                      apiBaseUrl={apiBaseUrl}
+                      headers={headers}
+                      user={user}
+                    />
                   </div>
 
                   <hr />
@@ -588,7 +706,10 @@ export default function UserOnlyDashboard({
             </div>
           </Tab>
 
-          <Tab eventKey="bookings" title={t("dashboard.tabBookings") || "My Bookings"}>
+          <Tab
+            eventKey="bookings"
+            title={t("dashboard.tabBookings") || "My Bookings"}
+          >
             <UserBookingsList
               bookings={bookings}
               loadingBookings={loadingBookings}
@@ -611,56 +732,20 @@ export default function UserOnlyDashboard({
           serviceId={selectedServiceId}
         />
 
-        <Modal show={showPayModal} onHide={handleClosePayModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>{t("dashboard.pay") || "Bank details"}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div>
-              <ul style={{ listStyle: "none" }}>
-                <li>
-                  <strong>Bank :</strong> BFA
-                </li>
-                <li>
-                  <strong>Account name :</strong> Maria Miguel
-                </li>
-                <li>
-                  <strong>Account number :</strong> 34229556030001
-                </li>
-                <li>
-                  <strong>IBAN :</strong> AO06 0006 0000 42295560301 25
-                </li>
-              </ul>
-              <p style={{ fontWeight: 600, margin: 8 }}>
-                Pay the service in the next <strong>48 hours</strong> to avoid cancellation. If you need help contact the support team{" "}
-                <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>
-              </p>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClosePayModal}>
-              {t("dashboard.cancel") || "Cancel"}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (selectedServiceId) {
-                  setSelectedServiceForProof(selectedServiceId);
-                  setShowUploadProofModal(true);
-                  handleClosePayModal();
-                }
-              }}
-            >
-              {t("dashboard.sendProof") || "Send Proof"}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-
-        <Modal show={showBookingModal} onHide={handleCancelBooking} centered size="md">
+        <Modal
+          show={showBookingModal}
+          onHide={handleCancelBooking}
+          centered
+          size="md"
+        >
           <Modal.Header closeButton>
             <Modal.Title>
               {bookingRoom
-                ? `Book: ${bookingRoom.roomTitle || bookingRoom.title || bookingRoom.name}`
+                ? `Book: ${
+                    bookingRoom.roomTitle ||
+                    bookingRoom.title ||
+                    bookingRoom.name
+                  }`
                 : "Book room"}
             </Modal.Title>
           </Modal.Header>
@@ -686,10 +771,18 @@ export default function UserOnlyDashboard({
           </Modal.Body>
         </Modal>
 
-        <Modal show={showDetails} onHide={handleCloseDetails} centered size="lg">
+        <Modal
+          show={showDetails}
+          onHide={handleCloseDetails}
+          centered
+          size="lg"
+        >
           <Modal.Header closeButton>
             <Modal.Title>
-              {selectedRoom?.roomTitle || selectedRoom?.title || selectedRoom?.name || "Room details"}
+              {selectedRoom?.roomTitle ||
+                selectedRoom?.title ||
+                selectedRoom?.name ||
+                "Room details"}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -700,12 +793,22 @@ export default function UserOnlyDashboard({
                     src={selectedRoom.imagePath}
                     alt={selectedRoom.title || "Room"}
                     className="img-fluid mb-3"
-                    style={{ maxHeight: 300, objectFit: "cover", width: "100%" }}
+                    style={{
+                      maxHeight: 300,
+                      objectFit: "cover",
+                      width: "100%",
+                    }}
                   />
                 ) : null}
-                <p>{selectedRoom.roomDescription || selectedRoom.description || selectedRoom.summary || "No description available."}</p>
                 <p>
-                  <strong>Max guests :</strong> {selectedRoom.roomCapacity || selectedRoom.capacity || "N/A"}
+                  {selectedRoom.roomDescription ||
+                    selectedRoom.description ||
+                    selectedRoom.summary ||
+                    "No description available."}
+                </p>
+                <p>
+                  <strong>Max guests :</strong>{" "}
+                  {selectedRoom.roomCapacity || selectedRoom.capacity || "N/A"}
                 </p>
                 <div className="d-flex gap-2">
                   <Button
@@ -740,15 +843,19 @@ export default function UserOnlyDashboard({
           {bankInfo ? (
             <div>
               <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                Thank you for your booking. Pay the booking in the next <strong>48 hours</strong> to avoid cancellation. If you need help contact the support team{" "}
-                <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>. Please complete payment using the details below:
+                Thank you for your booking. Pay the booking in the next{" "}
+                <strong>48 hours</strong> to avoid cancellation. If you need
+                help contact the support team{" "}
+                <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>. Please
+                complete payment using the details below:
               </p>
               <div>
                 <div>
                   <strong>Bank :</strong> {bankInfo.bankName}
                 </div>
                 <div>
-                  <strong>Account name :</strong> {bankInfo.accountName ?? bankInfo.owner}
+                  <strong>Account name :</strong>{" "}
+                  {bankInfo.accountName ?? bankInfo.owner}
                 </div>
                 <div>
                   <strong>Account number :</strong> {bankInfo.accountNumber}
@@ -760,8 +867,12 @@ export default function UserOnlyDashboard({
                   <strong>Reference :</strong> {bankInfo.reference}
                 </div>
                 <div>
-                  <strong>Amount :</strong> {bankInfo.currency ?? "USD"} {bankInfo.amount}
-                </div>
+                  <strong>Amount :</strong> {bankInfo.currency ?? "USD"}{" "}
+                  {bankInfo.amount}
+                </div> <br/>
+                <p style={{ fontWeight: 600, marginBottom: 8 }}>
+                  <small><strong>Note:</strong> If you can't submit the proof, send us an email:<a href="mailto:lmj.muginga@gmail.com"> LM-Ltd Team</a>.</small>
+                </p>
               </div>
             </div>
           ) : (
@@ -808,11 +919,13 @@ export default function UserOnlyDashboard({
       <footer className="text-center py-4 border-top">
         <small>
           <p>
-            <strong>{t("whoWeAre.footer.phones")} :</strong> (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <strong>{t("whoWeAre.footer.phones")} :</strong> (+244) 222 022 351;
+            (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} {t("lmLtd")} {t("whoWeAre.footer.copyright")}
+          &copy; {new Date().getFullYear()} {t("lmLtd")}{" "}
+          {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </>
