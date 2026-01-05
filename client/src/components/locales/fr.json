@@ -1,0 +1,53 @@
+{
+  "schedule": {
+    "title": "Calendrier",
+    "noSchedule": "Aucun calendrier disponible",
+    "close": "Fermer",
+    "scheduled": "Planifié"
+  },
+  "payment": {
+    "title": "Payer le service",
+    "amount": "Montant",
+    "method": {
+      "card": "Carte",
+      "bank": "Virement bancaire"
+    },
+    "cancel": "Annuler",
+    "pay": "Payer",
+    "paymentError": "Le paiement a échoué. Veuillez réessayer.",
+    "instructionsTitle": "Instructions pour le virement bancaire",
+    "reference": "Référence",
+    "bankName": "Banque",
+    "accountName": "Titulaire du compte",
+    "accountNumber": "Numéro de compte",
+    "routingNumber": "IBAN/RIB",
+    "instructionsNote": "Après avoir effectué le virement, veuillez télécharger la preuve de paiement en utilisant le bouton Télécharger la preuve.",
+    "close": "Fermer"
+  },
+  "dashboard": {
+    "availableServices": "Services disponibles",
+    "noServices": "Vous n'avez aucun service pour le moment.",
+    "status": "Statut",
+    "sendProof": "Téléverser la preuve",
+    "payService": "Payer le service"
+  },
+  "upload": {
+    "title": "Téléverser la preuve de paiement",
+    "selectFile": "Sélectionnez le fichier de preuve (image ou PDF)",
+    "cancel": "Annuler",
+    "upload": "Téléverser",
+    "noFile": "Veuillez sélectionner un fichier à téléverser.",
+    "uploadError": "Échec du téléversement. Veuillez réessayer."
+  },
+  "status": {
+    "paid_full": "Payé (complet)",
+    "paid_half": "Payé (partiel)",
+    "pending": "En attente",
+    "unpaid": "Non payé",
+    "cancelled": "Annulé"
+  },
+  "proof": {
+    "title": "Preuve de paiement",
+    "viewDocument": "Voir le document de preuve"
+  }
+}

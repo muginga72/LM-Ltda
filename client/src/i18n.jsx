@@ -1,6 +1,15 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+// import en from "./locales/en.json";
+// import pt from "./locales/pt.json";
+// import fr from "./locales/fr.json";
+
+// const resources = {
+//   en: { translation: en },
+//   pt: { translation: pt },
+//   fr: { translation: fr },
+// };
 
 i18n
   .use(LanguageDetector) // Automatically detects browser language
@@ -113,11 +122,13 @@ i18n
           "dashboard.availableServices": "Available Services",
           "dashboard.noServices":
             "No requests, schedules, or shared services yet.",
-          "dashboard.sendProof": "Send Payment Proof",
+          // "dashboard.sendProof": "Send Payment Proof",
           "dashboard.status": "Status",
           "status.paid_full": "Paid in Full",
           "status.paid_half": "Partially Paid",
           "status.unpaid": "Unpaid",
+          "dashboard.payService": "Pay Service",
+          "dashboard.sendProof": "Send Proof",
 
           // ----- Payment Instructions Modal -----
           "modal.paymentInstructions.title": "Payment Instructions",
@@ -132,6 +143,24 @@ i18n
             "Once you've completed the payment, please upload the support document or send it via email or 'SEND PAYMENT PROOF' button related to requested, scheduled or shared service.",
           fullNameId:
             "Your full name or service ID associated with the payment",
+
+          "payment.instructionsTitle": "Bank transfer instructions",
+          "payment.reference": "Reference",
+          "payment.bankName": "Bank",
+          "payment.accountName": "Account name",
+          "payment.accountNumber": "Account number",
+          "payment.routingNumber": "Routing/IBAN",
+          "payment.amount": "Amount",
+          "payment.close": "Close",
+          "payment.instructionsNote":
+            "After you complete the transfer or deposit, please upload the proof of payment using the UPLOAD PROOF button. If you need help contact the support team",
+
+          "payment.paymentError": "Payment failed",
+          "payment.title": "Pay for service",
+          "payment.method.card": "Card",
+          "payment.method.bank": "Bank transfer",
+          "payment.cancel": "Cancel",
+          "payment.pay": "Pay details",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "User Dashboard",
@@ -177,7 +206,7 @@ i18n
             noServices: "No {{type}} found.",
             created: "Created",
             payInstructions: "Pay / Upload proof",
-            pay: "Pay",
+            pay: "Bank details",
             paid: "Paid",
             view: "View",
             payConfirm: "You will be redirected to a secure payment page.",
@@ -185,6 +214,42 @@ i18n
             proceedToPay: "Proceed to payment",
             availableRooms: "Available rooms",
             tabOverviewLabel: "Overview",
+            noImage: "No image available",
+            sendProof: "Send Proof",
+            scheduleService: "Schedule Service",
+            requestService: "Request Service",
+            failedRequested: "Failed to load requested services.",
+            failedScheduled: "Failed to load scheduled services.",
+            failedShared: "Failed to load shared services",
+          },
+          schedule: {
+            title: "Schedule Service",
+            fullName: "Full name",
+            email: "Email",
+            date: "Date",
+            time: "Time",
+            optionalTime: "Optional — pick a time if you prefer",
+            cancel: "Cancel",
+            confirm: "Confirm",
+            saving: "Saving...",
+            errors: {
+              dateRequired: "Please select a date.",
+              submitFailed: "Failed to schedule service. Try again.",
+            },
+          },
+          request: {
+            title: "Request Service",
+            fullName: "Full name",
+            email: "Email",
+            details: "Details",
+            detailsPlaceholder: "Describe what you need",
+            cancel: "Cancel",
+            confirm: "Submit request",
+            saving: "Submitting...",
+            errors: {
+              detailsRequired: "Please provide details for your request.",
+              submitFailed: "Failed to submit request. Try again.",
+            },
           },
           modal: {
             paymentInstructions: {
@@ -446,7 +511,34 @@ i18n
           weddingTitle: "Wedding Testimonials",
           tutoringTitle: "Tutoring Chemistry Testimonials",
         },
+
+        //---------------------------------------------
+        //  RequestServiceModal
+        //---------------------------------------------
+        request: {
+          title: "Request Service",
+          unknownService: "Service",
+          fullName: "Full name",
+          email: "Email",
+          details: "Details",
+          detailsPlaceholder: "Describe what you need...",
+          sharedEmailPlaceholder: "No shared email provided",
+          sharedEmailMissing:
+            "No shared email is associated with this service.",
+          cancel: "Cancel",
+          saving: "Saving...",
+          confirm: "Confirm",
+          errors: {
+            detailsRequired: "Please provide details for your request.",
+            submitFailed: "Failed to submit request. Please try again.",
+          },
+          requestedAt: "Requested date",
+        },
       },
+
+      //================================================================
+      //                 PORTUGUESE
+      //================================================================
       pt: {
         translation: {
           // --------- Home page --------------
@@ -548,11 +640,13 @@ i18n
           "dashboard.availableServices": "Serviços Disponíveis",
           "dashboard.noServices":
             "Nenhum pedido, agendamento ou serviço compartilhado ainda.",
-          "dashboard.sendProof": "Envie o Comprovativo de Pagamento",
+          // "dashboard.sendProof": "Envie o Comprovativo de Pagamento",
           "dashboard.status": "Condição",
           "status.paid_full": "Pago",
           "status.paid_half": "Pago parcialmente",
           "status.unpaid": "Não pago",
+          "dashboard.payService": "Pagamento",
+          "dashboard.sendProof": "Enviar comprovativo",
 
           // ----- Payment Instructions Modal -----
           "modal.paymentInstructions.title": "Instruções de Pagamento",
@@ -567,6 +661,23 @@ i18n
             "Após concluir o pagamento, envie em anexo o comprovante por e-mail ou aperta no botão 'ENVIAR COMPROVATIVO DE PAGAMENTO' relacionado ao serviço solicitado, agendado ou compartilhado.",
           fullNameId:
             "Nome completo associado ao pagamento ou seu ID associado ao serviço",
+
+          "payment.instructionsTitle": "Instruções para transferência bancária",
+          "payment.reference": "Referência",
+          "payment.bankName": "Banco",
+          "payment.accountName": "Nome da conta",
+          "payment.accountNumber": "Número da conta",
+          "payment.routingNumber": "Routing/IBAN",
+          "payment.amount": "Valor",
+          "payment.close": "Fechar",
+          "payment.instructionsNote":
+            "Após concluir a transferência ou o depósito, carregue o comprovativo de pagamento através do botão CARREGAR COMPROVATIVO. Se precisar de ajuda, contacte a equipa de suporte",
+          "payment.paymentError": "Pagamento falhou",
+          "payment.title": "Pagar o serviço",
+          "payment.method.card": "Cartão",
+          "payment.method.bank": "Transferência bancária",
+          "payment.cancel": "Cancelar",
+          "payment.pay": "Como Pagar",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Painel do Usuário",
@@ -624,6 +735,42 @@ i18n
             proceedToPay: "Ir para o pagamento",
             availableRooms: "Quartos disponíveis",
             tabOverviewLabel: "Visão geral",
+            noImage: "A image não esta disponível",
+            sendProof: "Enviar Comprovativo",
+            scheduleService: "Agendar Serviço",
+            requestService: "Solicitar Serviço",
+            failedRequested: "Falha ao carregar serviços solicitados.",
+            failedScheduled: "Falha ao carregar serviços agendados.",
+            failedShared: "Falha ao carregar serviços partilhados.",
+          },
+          schedule: {
+            title: "Agendar Serviço",
+            fullName: "Nome completo",
+            email: "Email",
+            date: "Data",
+            time: "Hora",
+            optionalTime: "Opcional — escolha uma hora se preferir",
+            cancel: "Cancelar",
+            confirm: "Confirmar",
+            saving: "A gravar...",
+            errors: {
+              dateRequired: "Por favor selecione uma data.",
+              submitFailed: "Falha ao agendar o serviço. Tente novamente.",
+            },
+          },
+          request: {
+            title: "Solicitar Serviço",
+            fullName: "Nome completo",
+            email: "Email",
+            details: "Detalhes",
+            detailsPlaceholder: "Descreva o que precisa",
+            cancel: "Cancelar",
+            confirm: "Enviar pedido",
+            saving: "A enviar...",
+            errors: {
+              detailsRequired: "Por favor forneça detalhes para o seu pedido.",
+              submitFailed: "Falha ao enviar o pedido. Tente novamente.",
+            },
           },
           modal: {
             paymentInstructions: {
@@ -885,7 +1032,35 @@ i18n
           weddingTitle: "Testemunhos de Casamento",
           tutoringTitle: "Testemunhos das aulas particulares em Química",
         },
+
+        //---------------------------------------------
+        //  RequestServiceModal
+        //---------------------------------------------
+        request: {
+          title: "Solicitar Serviço",
+          unknownService: "Serviço",
+          fullName: "Nome completo",
+          email: "Email",
+          details: "Detalhes",
+          detailsPlaceholder: "Descreva o que você precisa...",
+          sharedEmailPlaceholder: "Nenhum email compartilhado fornecido",
+          sharedEmailMissing:
+            "Nenhum email compartilhado está associado a este serviço.",
+          cancel: "Cancelar",
+          saving: "Salvando...",
+          confirm: "Confirmar",
+          errors: {
+            detailsRequired:
+              "Por favor, forneça detalhes para sua solicitação.",
+            submitFailed: "Falha ao enviar a solicitação. Tente novamente.",
+          },
+          requestedAt: "Data solicitada",
+        },
       },
+
+      //================================================================
+      //                 FRANCH
+      //================================================================
       fr: {
         translation: {
           // ----- Home page -------
@@ -987,11 +1162,13 @@ i18n
           "dashboard.availableServices": "Services Disponibles",
           "dashboard.noServices":
             "Aucune demande, planification ou service partagé pour l'instant.",
-          "dashboard.sendProof": "Envoyer la Preuve de Paiement",
+          // "dashboard.sendProof": "Envoyer la Preuve de Paiement",
           "dashboard.status": "État",
           "status.paid_full": "Payé",
           "status.paid_half": "Payé partiellement",
           "status.unpaid": "Non payé",
+          "dashboard.payService": "Paiement",
+          "dashboard.sendProof": "Envoyer à prix réduit",
 
           // ----- Payment Instructions Modal -----
           "modal.paymentInstructions.title": "Instructions de Paiement",
@@ -1006,6 +1183,23 @@ i18n
             "Une fois le paiement effectué, veuillez télécharger le document justificatif ou l'envoyer par e-mail ou via le bouton 'ENVOYER LA PREUVE DE PAIEMENT' lié au service demandé, planifié ou partagé.",
           fullNameId:
             "Votre nom complet ou l'ID du service associé au paiement",
+
+          "payment.instructionsTitle": "Instructions pour le virement bancaire",
+          "payment.reference": "Référence",
+          "payment.bankName": "Banque",
+          "payment.accountName": "Nom du compte",
+          "payment.accountNumber": "Numéro de compte",
+          "payment.routingNumber": "Code banque/IBAN",
+          "payment.amount": "Montant",
+          "payment.close": "Fermer",
+          "payment.instructionsNote":
+            "Après avoir effectué le virement ou le dépôt, veuillez télécharger la preuve de paiement en utilisant le bouton TÉLÉCHARGER LA PREUVE. Si vous avez besoin d'aide, veuillez contacter l'équipe d'assistance.",
+          "payment.paymentError": "Échec du paiement",
+          "payment.title": "Payer le service",
+          "payment.method.card": "Carte bancaire",
+          "payment.method.bank": "Virement bancaire",
+          "payment.cancel": "Annuler",
+          "payment.pay": "Détails du paiement",
 
           // ---------- UserOnlyDashboard -----------
           "dashboard.title": "Tableau de Bord Utilisateur",
@@ -1064,6 +1258,43 @@ i18n
             proceedToPay: "Procéder au paiement",
             availableRooms: "Chambres disponibles",
             tabOverviewLabel: "Aperçu",
+            noImage: "Aucune image disponible",
+            sendProof: "Envoyer justificatif",
+            scheduleService: "Planifier le service",
+            requestService: "Demander le service",
+            failedRequested: "Échec du chargement des services demandés.",
+            failedScheduled: "Échec du chargement des services planifiés.",
+            failedShared: "Échec du chargement des services partagés.",
+          },
+          schedule: {
+            title: "Planifier le service",
+            fullName: "Nom complet",
+            email: "Email",
+            date: "Date",
+            time: "Heure",
+            optionalTime: "Optionnel — choisissez une heure si vous préférez",
+            cancel: "Annuler",
+            confirm: "Confirmer",
+            saving: "Enregistrement...",
+            errors: {
+              dateRequired: "Veuillez sélectionner une date.",
+              submitFailed: "Échec de la planification du service. Réessayez.",
+            },
+          },
+          request: {
+            title: "Demander un service",
+            fullName: "Nom complet",
+            email: "Email",
+            details: "Détails",
+            detailsPlaceholder: "Décrivez ce dont vous avez besoin",
+            cancel: "Annuler",
+            confirm: "Soumettre la demande",
+            saving: "Envoi...",
+            errors: {
+              detailsRequired:
+                "Veuillez fournir des détails pour votre demande.",
+              submitFailed: "Échec de l'envoi de la demande. Réessayez.",
+            },
           },
           modal: {
             paymentInstructions: {
@@ -1327,8 +1558,41 @@ i18n
           weddingTitle: "Témoignages de mariage",
           tutoringTitle: "Témoignages de tutorat en chimie",
         },
+
+        //---------------------------------------------
+        //  RequestServiceModal
+        //---------------------------------------------
+        request: {
+          title: "Demander un service",
+          unknownService: "Service",
+          fullName: "Nom complet",
+          email: "Email",
+          details: "Détails",
+          detailsPlaceholder: "Décrivez ce dont vous avez besoin...",
+          sharedEmailPlaceholder: "Aucun email partagé fourni",
+          sharedEmailMissing: "Aucun email partagé n'est associé à ce service.",
+          cancel: "Annuler",
+          saving: "Enregistrement...",
+          confirm: "Confirmer",
+          errors: {
+            detailsRequired: "Veuillez fournir des détails pour votre demande.",
+            submitFailed: "Échec de l'envoi de la demande. Veuillez réessayer.",
+          },
+          requestedAt: "Date demandée",
+        },
       },
     },
   });
 
 export default i18n;
+
+// i18n.use(initReactI18next).init({
+//   resources,
+//   lng: "en",
+//   fallbackLng: "en",
+//   interpolation: {
+//     escapeValue: false,
+//   },
+// });
+
+// export default i18n;

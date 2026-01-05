@@ -3,13 +3,13 @@ const ServiceShare = require('../models/ServiceShare');
 // Create a new service share
 exports.createServiceShare = async (req, res) => {
   try {
-    const { serviceType, fullName, serviceTitle, email } = req.body;
+    const { serviceType, fullName, serviceTitle, email, notes } = req.body;
 
     if (!fullName || !serviceTitle || !email) {
       return res.status(400).json({ error: 'fullName, serviceTitle, and email are required.' });
     }
 
-    const newShare = new ServiceShare({ serviceType, fullName, serviceTitle, email });
+    const newShare = new ServiceShare({ serviceType, fullName, serviceTitle, email, notes });
     const savedShare = await newShare.save();
     res.status(201).json(savedShare);
   } catch (err) {
