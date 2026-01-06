@@ -37,7 +37,7 @@
     "eject": "react-scripts eject",
     "client": "react-scripts start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon ../server/index.js",
+    "server": "nodemon ../server/server.js",
     "validate-i18n": "lingual-i18n-check -s en -l ./src/locales"
   },
   "eslintConfig": {

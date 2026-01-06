@@ -1,11 +1,11 @@
 {
-  "name": "server",
+  "name": "backend",
   "version": "1.0.1",
   "main": "index.js",
   "proxy": "http://localhost:5000",
   "scripts": {
     "start": "node server.js",
-    "server": "nodemon server.js",
+    "build": "npm && npm install --prefix frontend && npm run build --prefix frontend",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node server.js"
   },
