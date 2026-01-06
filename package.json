@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "multer-gridfs-storage": "^5.0.2",
+    "express": "^4.18.2",
+    "gridfs-stream": "^1.1.1",
+    "mongoose": "^7.3.4",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.8.1",
+    "cors": "^2.8.5"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "name": "lmtda",
+  "version": "1.0.0",
+  "description": "LM-Ltd Services is a scalable, modular web application designed to streamline digital service requests, scheduling, and verification. Built with React, Node.js, and MongoDB, it empowers users to request services, manage schedules, and submit payment proof via secure upload or email.",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+}
