@@ -14,5 +14,11 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
-  }
+  },
+  "name": "lmtda",
+  "version": "1.0.0",
+  "description": "LM-Ltd Services is a scalable, modular web application designed to streamline digital service requests, scheduling, and verification. Built with React, Node.js, and MongoDB, it empowers users to request services, manage schedules, and submit payment proof via secure upload or email.",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
 }

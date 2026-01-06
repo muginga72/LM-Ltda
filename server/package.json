@@ -2,14 +2,12 @@
   "name": "backend",
   "version": "1.0.1",
   "main": "index.js",
-  "engines": {
-    "node": ">=18"
-  },
+  "proxy": "http://localhost:5000",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install --prefix ../client && npm run build --prefix ../client",
+    "build": "npm && npm install --prefix frontend && npm run build --prefix frontend",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js"
+    "dev": "node server.js"
   },
   "keywords": [],
   "author": "",

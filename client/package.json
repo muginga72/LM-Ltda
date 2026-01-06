@@ -2,6 +2,7 @@
   "name": "client",
   "version": "0.1.1",
   "private": true,
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
     "@fortawesome/free-regular-svg-icons": "^7.0.1",
@@ -32,10 +33,10 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "client": "react-scripts start",
-    "dev": "concurrently \"npm:server\" \"npm:client\"",
+    "dev": "concurrently \"npm run server\" \"npm run dev\"",
     "server": "nodemon ../server/server.js",
     "validate-i18n": "lingual-i18n-check -s en -l ./src/locales"
   },
@@ -62,8 +63,6 @@
     "concurrently": "^9.2.1",
     "i18next": "^25.5.2",
     "react-i18next": "^13.0.0",
-    "typescript": "^4.9.5",
-    "nodemon": "^2.0.22",
-    "lingual-i18n-check": "^1.0.0"
+    "typescript": "^4.9.5"
   }
 }
