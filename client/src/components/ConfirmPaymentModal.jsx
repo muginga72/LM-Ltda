@@ -55,7 +55,7 @@ function ConfirmPaymentModal({ service, user, fetchAllServices }) {
       const paidAmount = amountPaid === "full" ? totalAmount : totalAmount / 2;
 
       await axios.post(
-        "http://localhost:5000/api/payments/proof-payment-received",
+        "https://lmltda-api.onrender.com/payments/proof-payment-received",
         {
           fullName: service.fullName || service.name || "Valued Customer",
           serviceId: service._id,

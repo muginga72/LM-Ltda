@@ -1,7 +1,7 @@
 // client/src/services/fetchServices.js
 
 export const fetchServices = async () => {
-  const response = await fetch("http://localhost:5000/api");
+  const response = await fetch("https://lmltda-api.onrender.com");
   if (!response.ok) {
     throw new Error("Failed to fetch services");
   }
