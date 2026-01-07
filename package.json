@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "build": "npm run build"
+    "build": "yarn build"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
