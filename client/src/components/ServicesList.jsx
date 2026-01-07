@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ServiceCardWithModals from "./ServiceCardWithModals";
-const BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const BASE = process.env.REACT_APP_API_URL || "https://lmltda-api.onrender.com";
 
 const ServicesList =() => {
   const [services, setServices] = useState([]);

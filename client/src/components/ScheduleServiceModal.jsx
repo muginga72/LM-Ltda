@@ -13,7 +13,7 @@ export default function ScheduleServiceModal({
   refresh,
 }) {
   const { t, i18n } = useTranslation();
-  const API = apiBaseUrl || process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const API = apiBaseUrl || process.env.REACT_APP_API_URL || "https://lmltda-api.onrender.com";
 
   const getUserName = (u) => u?.name || u?.fullName || u?.displayName || "";
   const getUserEmail = (u) => u?.email || u?.mail || u?.username || "";
