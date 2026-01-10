@@ -1,5 +1,5 @@
 // src/api/bookingsApi.js
-const BASE = process.env.REACT_APP_API_BASE || 'https://lmltda-api.onrender.com';
+const BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
 
 function authHeader(role = 'user') {
   // Demo: replace with real token retrieval

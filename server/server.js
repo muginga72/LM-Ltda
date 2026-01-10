@@ -28,8 +28,8 @@ const calendarAvailabilityRouter = require('./routes/calendarAvailability');
 const roomsRoutes = require('./routes/roomrental/roomRoutes');
 const uploadsRouter = require('./routes/uploads/uploads');
 const roomRequestRoutes = require('./routes/roomrental/roomRequestRoutes');
-const bookingRoutes = require("./routes/roomrental/bookingRoutes");
-const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRoutes') // admin list all bookings
+const bookingRoutes = require('./routes/roomrental/bookingRoutes');
+const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRoutes'); // admin list all bookings
 
 const { Server } = require('socket.io');
 const multer = require('multer');
@@ -38,32 +38,69 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-// Basic protection + logging
+// ---------- Security & logging ----------
 app.use(helmet());
 app.use(morgan('dev'));
 
-// CORS for frontend dev
+// ---------- CORS FIX ----------
+const allowedOrigins = [
+  'http://localhost:3000',         // CRA dev
+  'https://lm-ltda.onrender.com',  // Render frontend
+  'https://lmuginga.com',          // Custom domain
+];
+
+// Allow extra origin via env if needed
+if (process.env.CLIENT_ORIGIN) {
+  allowedOrigins.push(process.env.CLIENT_ORIGIN);
+}
+
+function isLocalhostOrigin(origin) {
+  if (!origin) return false;
+  try {
+    const u = new URL(origin);
+    return (u.hostname === 'localhost' || u.hostname === '127.0.0.1');
+  } catch (e) {
+    return false;
+  }
+}
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'https://lm-ltda.onrender.com',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Allow any localhost origin during development
+      if (isLocalhostOrigin(origin)) return callback(null, true);
+
+      // Allow explicitly configured origins
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      // Deny other origins: do not throw; return a clear CORS rejection
+      console.warn('CORS blocked origin:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   })
 );
 
-// Body parsers for JSON
+// ---------- Body parsers ----------
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize Socket.IO
+// ---------- Socket.IO with same CORS ----------
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_ORIGIN || 'https://lm-ltda.onrender.com',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
   },
 });
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 });
@@ -76,10 +113,10 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 // Multer store uploads in uploads directory
-const upload = multer({
+const multerUpload = multer({
   dest: UPLOADS_DIR,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB limit 
+    fileSize: 5 * 1024 * 1024, // 5 MB limit
   },
   fileFilter: (req, file, cb) => {
     // allow images and pdfs
@@ -88,9 +125,12 @@ const upload = multer({
   },
 });
 
-// Allow cross-origin image use in dev
+// Allow cross-origin image use
 app.use('/uploads', (req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', process.env.CLIENT_ORIGIN || 'http://localhost:3000');
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   next();
 });
@@ -128,26 +168,26 @@ app.use('/api/testimonials', testimonialsRoute);
 
 // Room rental routes
 app.use('/api/rooms', roomsRoutes);
-app.use("/api/bookings", bookingRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/room-listing-request', roomListingRequestRoutes);
-app.use('/admin', adminListBookingsRoutes)
+app.use('/admin', adminListBookingsRoutes);
 
 // ---------- Booking route (accepts JSON or multipart/form-data) ----------
-app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
+app.post('/api/bookings', multerUpload.single('idDocument'), (req, res) => {
   try {
     const isMultipart = !!req.file;
     const body = req.body || {};
 
-    // Normalize fields (client should send these names)
     const roomId = body.roomId;
     const userId = body.userId;
     const startDate = body.startDate;
     const endDate = body.endDate;
     const guestsCount = body.guestsCount ? Number(body.guestsCount) : undefined;
 
-    // Basic validation
     if (!roomId || !userId || !startDate || !endDate) {
-      return res.status(400).json({ message: 'roomId, userId, startDate and endDate are required.' });
+      return res
+        .status(400)
+        .json({ message: 'roomId, userId, startDate and endDate are required.' });
     }
     const s = new Date(startDate);
     const e = new Date(endDate);
@@ -155,22 +195,24 @@ app.post('/api/bookings', upload.single('idDocument'), (req, res) => {
       return res.status(400).json({ message: 'Invalid startDate or endDate format.' });
     }
     if (s > e) {
-      return res.status(400).json({ message: 'startDate must be before or equal to endDate.' });
+      return res
+        .status(400)
+        .json({ message: 'startDate must be before or equal to endDate.' });
     }
 
-    // If file uploaded, req.file contains file info
     if (isMultipart) {
       console.log('Received file:', req.file.originalname, 'stored at', req.file.path);
     }
 
-    // Save booking to DB 
     const booking = {
       roomId,
       userId,
       startDate,
       endDate,
       guestsCount,
-      file: isMultipart ? { originalname: req.file.originalname, path: req.file.path } : undefined,
+      file: isMultipart
+        ? { originalname: req.file.originalname, path: req.file.path }
+        : undefined,
     };
 
     return res.status(201).json({ message: 'Booking created', booking });
@@ -206,7 +248,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Other errors
   console.error('Unhandled error:', err);
   res.status(err?.status || 500).json({ error: err?.message || 'Internal Server Error' });
 });
