@@ -1,5 +1,5 @@
 // src/api/roomsApi.js
-const API_BASE = process.env.REACT_APP_API_BASE || "https://lmltda-api.onrender.com";
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
 
 function buildHeaders(token, isFormData = false) {
   const headers = {};

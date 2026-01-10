@@ -10,16 +10,24 @@ const candidatePaths = [
 
 function buildAbsoluteUrl(base, pathWithQs) {
   const normalizedPath = pathWithQs.startsWith('/') ? pathWithQs : `/${pathWithQs}`;
-  if (base && base.trim() !== '') {
-    const baseClean = base.replace(/\/+$/, '');
+  const baseTrimmed = (base || '').trim();
+
+  if (baseTrimmed) {
+    // remove trailing slashes from base
+    const baseClean = baseTrimmed.replace(/\/+$/, '');
     return `${baseClean}${normalizedPath}`;
   }
-  const origin = (typeof window !== 'undefined' && window.location && window.location.origin) || '';
+
+  const origin =
+    typeof window !== 'undefined' && window.location && window.location.origin
+      ? window.location.origin
+      : 'http://localhost:5000';
+
   return `${origin}${normalizedPath}`;
 }
 
 export async function fetchBookingsApi({
-  apiBaseUrl = '',
+  apiBaseUrl = process.env.REACT_APP_API_BASE || '',
   token = null,
   useCookies = false,
   tab = 'all',
@@ -28,9 +36,10 @@ export async function fetchBookingsApi({
 } = {}) {
   const qs = `?tab=${encodeURIComponent(tab)}&page=${encodeURIComponent(page)}`;
   const headers = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     'Cache-Control': 'no-cache',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+
   const axiosConfig = {
     headers,
     timeout,
@@ -42,23 +51,32 @@ export async function fetchBookingsApi({
   for (const p of candidatePaths) {
     const fullPath = `${p}${qs}`;
     const url = buildAbsoluteUrl(apiBaseUrl, fullPath);
+
     try {
       const res = await axios.get(url, axiosConfig);
-      // Expect server to return { page, limit, total, pages, bookings }
+      // Expect server to return JSON with bookings or array
       return res.data || {};
     } catch (err) {
       lastError = err;
       const status = err?.response?.status;
+
+      // If 404, try next candidate
       if (status === 404) {
         continue;
       }
+
+      // If unauthorized/forbidden, stop trying other endpoints
       if (status === 401 || status === 403) {
         break;
       }
+
+      // For network errors or other statuses, continue trying other candidates
       continue;
     }
   }
-  const status = lastError?.response?.status;
+
+  // If we reach here, all candidates failed
+  const status = lastError?.response?.status || 0;
   const responseData = lastError?.response?.data || null;
   const message =
     responseData?.message ||
@@ -67,7 +85,9 @@ export async function fetchBookingsApi({
     'Failed to fetch bookings from any candidate endpoint';
 
   const err = new Error(message);
-  err.status = status || 0;
+  err.status = status;
   err.responseData = responseData;
   throw err;
 }
+
+export default fetchBookingsApi;

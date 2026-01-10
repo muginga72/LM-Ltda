@@ -15,7 +15,7 @@ export default function RequestServiceModal({
   const { t, i18n } = useTranslation();
 
   // Ensure API is a full origin string. Prefer explicit prop, then env, then default.
-  const defaultApi = "https://lmltda-api.onrender.com";
+  const defaultApi = "http://localhost:5000";
   const API =
     (apiBaseUrl && apiBaseUrl.startsWith("http"))
       ? apiBaseUrl

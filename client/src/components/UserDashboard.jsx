@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 
 function UserDashboard({ apiBaseUrl, user, userPayment }) {
   const { t, i18n } = useTranslation();
-  const API = apiBaseUrl || process.env.REACT_APP_API_URL || "https://lmltda-api.onrender.com";
+  const API = apiBaseUrl || process.env.REACT_APP_API_URL || "http://localhost:5000";
   const [services, setServices] = useState([]);
   const [selected, setSelected] = useState(null);
 
