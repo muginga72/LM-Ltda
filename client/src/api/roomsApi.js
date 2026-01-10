@@ -34,7 +34,7 @@ async function handleResponse(res) {
 }
 
 export async function fetchRooms(token = null, opts = { useCredentials: false }) {
-  const res = await fetch(`${API_BASE}/rooms`, {
+  const res = await fetch(`${API_BASE}/api/rooms`, {
     method: "GET",
     headers: buildHeaders(token, false),
     credentials: opts.useCredentials ? "include" : "same-origin",
@@ -47,7 +47,7 @@ export function createRoom(payload, token = null, isFormData = false, opts = { u
     // Use XMLHttpRequest to support upload progress
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      const url = `${API_BASE}/rooms`;
+      const url = `${API_BASE}/api/rooms`;
       xhr.open("POST", url, true);
 
       // Set headers (Authorization only; Content-Type is set automatically for FormData)
@@ -92,7 +92,7 @@ export function createRoom(payload, token = null, isFormData = false, opts = { u
     });
   } else {
     // JSON POST via fetch
-    return fetch(`${API_BASE}/rooms`, {
+    return fetch(`${API_BASE}/api/rooms`, {
       method: "POST",
       headers: buildHeaders(token, false),
       body: JSON.stringify(payload),
@@ -104,7 +104,7 @@ export function createRoom(payload, token = null, isFormData = false, opts = { u
 export async function updateRoom(id, payload, token = null, isFormData = false, opts = { useCredentials: false }) {
   if (isFormData) {
     // Use fetch for FormData (no progress)
-    const res = await fetch(`${API_BASE}/rooms/${id}`, {
+    const res = await fetch(`${API_BASE}/api/rooms/${id}`, {
       method: "PUT",
       headers: buildHeaders(token, true),
       body: payload,
@@ -112,7 +112,7 @@ export async function updateRoom(id, payload, token = null, isFormData = false, 
     });
     return handleResponse(res);
   } else {
-    const res = await fetch(`${API_BASE}/rooms/${id}`, {
+    const res = await fetch(`${API_BASE}/api/rooms/${id}`, {
       method: "PUT",
       headers: buildHeaders(token, false),
       body: JSON.stringify(payload),
@@ -123,7 +123,7 @@ export async function updateRoom(id, payload, token = null, isFormData = false, 
 }
 
 export async function deleteRoom(id, token = null, opts = { useCredentials: false }) {
-  const res = await fetch(`${API_BASE}/rooms/${id}`, {
+  const res = await fetch(`${API_BASE}/api/rooms/${id}`, {
     method: "DELETE",
     headers: buildHeaders(token, false),
     credentials: opts.useCredentials ? "include" : "same-origin",
