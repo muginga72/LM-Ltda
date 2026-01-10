@@ -1,10 +1,17 @@
 // servicesApi.js
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000/api';
+const API_BASE =
+  (process.env.REACT_APP_API_BASE && process.env.REACT_APP_API_BASE.replace(/\/$/, '')) ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:5000/api'
+    : `${window.location.protocol}//${window.location.host}/api`);
 
-export async function fetchServices() {
-  const res = await fetch(`${API_BASE}/services`);
+export async function fetchServices(signal) {
+  const url = `${API_BASE}/services`;
+  const res = await fetch(url, { method: 'GET', signal, credentials: 'include' });
+
   if (!res.ok) {
-    throw new Error('Failed to fetch services');
+    const body = await res.text().catch(() => '');
+    throw new Error(`Failed to fetch services: ${res.status} ${res.statusText} - ${body}`);
   }
   return res.json();
 }
