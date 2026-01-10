@@ -3,7 +3,7 @@ const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cors = require('cors');
+// const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
@@ -42,20 +42,46 @@ const server = http.createServer(app);
 app.use(helmet());
 app.use(morgan('dev'));
 
+// Express CORS snippet
+const cors = require('cors');
+
 const allowedOrigins = [
-  'http://localhost:3000',
   'https://www.lmuginga.com',
-  process.env.CLIENT_ORIGIN,
+  'https://lmuginga.com',
+  'http://localhost:5000/api'
 ];
 
-app.use(require('cors')({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // allow server-to-server or curl
-    if (allowedOrigins.includes(origin) || /localhost/.test(origin)) return cb(null, true);
-    cb(new Error('Not allowed by CORS'));
+function isLocalhostOrigin(origin) {
+  if (!origin) return false;
+  try {
+    const u = new URL(origin);
+    return u.hostname === 'localhost' || u.hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true); // allow server-to-server or curl
+    if (isLocalhostOrigin(origin)) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn('CORS blocked origin:', origin);
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  optionsSuccessStatus: 204,
 }));
+
+// convert CORS origin errors into 403 JSON
+app.use((err, req, res, next) => {
+  if (err && err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS error: origin not allowed' });
+  }
+  next(err);
+});
 
 // ---------- Body parsers ----------
 app.use(express.json());
