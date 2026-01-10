@@ -4,8 +4,7 @@ import axios from 'axios';
 const candidatePaths = [
   '/admin/bookings',
   '/api/admin/bookings',
-  '/bookings',
-  '/api/bookings',
+  'api/bookings',
 ];
 
 function buildAbsoluteUrl(base, pathWithQs) {
@@ -21,7 +20,7 @@ function buildAbsoluteUrl(base, pathWithQs) {
   const origin =
     typeof window !== 'undefined' && window.location && window.location.origin
       ? window.location.origin
-      : 'http://localhost:5000';
+      : 'http://localhost:5000/api';
 
   return `${origin}${normalizedPath}`;
 }
