@@ -42,50 +42,20 @@ const server = http.createServer(app);
 app.use(helmet());
 app.use(morgan('dev'));
 
-// ---------- CORS FIX ----------
 const allowedOrigins = [
-  'http://localhost:3000',         // CRA dev
-  'https://lm-ltda.onrender.com',  // Render frontend
-  'https://lmuginga.com',          // Custom domain
+  'http://localhost:3000',
+  'https://www.lmuginga.com',
+  process.env.CLIENT_ORIGIN,
 ];
 
-// Allow extra origin via env if needed
-if (process.env.CLIENT_ORIGIN) {
-  allowedOrigins.push(process.env.CLIENT_ORIGIN);
-}
-
-function isLocalhostOrigin(origin) {
-  if (!origin) return false;
-  try {
-    const u = new URL(origin);
-    return (u.hostname === 'localhost' || u.hostname === '127.0.0.1');
-  } catch (e) {
-    return false;
-  }
-}
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (curl, server-to-server)
-      if (!origin) return callback(null, true);
-
-      // Allow any localhost origin during development
-      if (isLocalhostOrigin(origin)) return callback(null, true);
-
-      // Allow explicitly configured origins
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-
-      // Deny other origins: do not throw; return a clear CORS rejection
-      console.warn('CORS blocked origin:', origin);
-      return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    optionsSuccessStatus: 204,
-  })
-);
+app.use(require('cors')({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // allow server-to-server or curl
+    if (allowedOrigins.includes(origin) || /localhost/.test(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 
 // ---------- Body parsers ----------
 app.use(express.json());
