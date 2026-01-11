@@ -48,7 +48,6 @@ const cors = require('cors');
 const allowedOrigins = [
   'https://www.lmuginga.com',
   'https://lmuginga.com',
-  'http://localhost:5000/api'
 ];
 
 function isLocalhostOrigin(origin) {
@@ -71,7 +70,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
+  allowedHeaders: ['Content-Type','Authorization', 'cache-control', 'X-Requested-With'],
   optionsSuccessStatus: 204,
 }));
 
