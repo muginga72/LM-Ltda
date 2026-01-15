@@ -1,6 +1,7 @@
 // src/components/roomrentals/RoomDetails.jsx
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { resolveRoomImage } from "../../utils/imageUtils";
 
 const PLACEHOLDER =
@@ -12,20 +13,165 @@ const PLACEHOLDER =
     </svg>`
   );
 
-export default function RoomDetails({
+const conversionRates = {
+  EUR: 0.8615, // 1 USD = 0.8615 EUR
+  AOA: 912.085, // 1 USD = 912.085 AOA
+  USD: 1,
+};
+
+function localeForLang(lang) {
+  if (!lang) return "en-US";
+  const l = String(lang).toLowerCase();
+    if (l.startsWith("pt")) return "pt-PT";
+    if (l.startsWith("fr")) return "fr-FR";
+  return "en-US";
+}
+
+export function formatEuropeanDateTime(value, lang) {
+  if (!value) return "";
+  const locale = localeForLang(lang);
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+export function formatDate(dateLike, lang) {
+  if (!dateLike) return "";
+  const date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return "";
+  const intlLocale = localeForLang(lang);
+  const dateFormatter = new Intl.DateTimeFormat(intlLocale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  return dateFormatter.format(date);
+}
+
+export function formatTime(dateLike, lang) {
+  if (!dateLike) return "";
+  const date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return "";
+  const intlLocale = localeForLang(lang);
+  const timeFormatter = new Intl.DateTimeFormat(intlLocale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return timeFormatter.format(date);
+}
+
+function targetCurrencyForLang(lang) {
+  const l = String(lang || "en").toLowerCase();
+  if (l.startsWith("fr")) return "EUR";
+  if (l.startsWith("pt")) return "AOA";
+  // default target for other languages: USD
+  return "USD";
+}
+
+export function formatCurrency(value, currency, lang) {
+  const target = targetCurrencyForLang(lang);
+  const intlLocale = localeForLang(lang);
+
+  if (value == null) return "";
+
+  // Normalize currency codes
+  const from = currency ? String(currency).toUpperCase() : null;
+  const to = String(target).toUpperCase();
+
+  // If no source currency provided, just format the number
+  if (!from) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  // If same currency, format directly
+  if (from === to) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: to,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${to}`;
+    }
+  }
+
+  const rateFrom = conversionRates[from];
+  const rateTo = conversionRates[to];
+
+  // If we don't have rates for either currency, fall back to formatting original value with its code
+  if (typeof rateFrom !== "number" || typeof rateTo !== "number") {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: from,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${from}`;
+    }
+  }
+
+  const converted = (value / rateFrom) * rateTo;
+
+  try {
+    return new Intl.NumberFormat(intlLocale, {
+      style: "currency",
+      currency: to,
+      maximumFractionDigits: 2,
+    }).format(converted);
+  } catch {
+    return `${converted.toFixed(2)} ${to}`;
+  }
+}
+
+function localizedField(obj, baseKey, lang) {
+  if (!obj) return null;
+  const l = (lang || "en").split("-")[0];
+
+  const translationsMap = obj[`${baseKey}Translations`];
+  if (translationsMap && typeof translationsMap === "object") {
+    if (translationsMap[lang]) return translationsMap[lang];
+    if (translationsMap[l]) return translationsMap[l];
+  }
+
+  if (obj[`${baseKey}_${lang}`]) return obj[`${baseKey}_${lang}`];
+  if (obj[`${baseKey}_${l}`]) return obj[`${baseKey}_${l}`];
+  if (obj[baseKey]) return obj[baseKey];
+  return null;
+}
+
+const RoomDetails = function RoomDetailsComponent({
   show,
   onClose,
   room: roomProp,
   fetchUrl = null,
   token,
 }) {
-  const [room, setRoom] = useState(roomProp || null);
+  const { t, i18n } = useTranslation();
+  const lang = i18n?.language ?? "en";
+
+  const [room, setRoom] = useState(roomProp ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Keep local room in sync when parent provides a new room prop
   useEffect(() => {
-    setRoom(roomProp || null);
+    setRoom(roomProp ?? null);
     setError("");
   }, [roomProp]);
 
@@ -40,8 +186,10 @@ export default function RoomDetails({
     setLoading(true);
     setError("");
 
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
     fetch(fetchUrl, {
-      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers,
       signal: controller.signal,
     })
       .then((res) => {
@@ -54,7 +202,7 @@ export default function RoomDetails({
       .catch((err) => {
         if (!mounted) return;
         if (err.name === "AbortError") return;
-        setError(err.message || "Failed to load");
+        setError(err.message || t("failedToLoad"));
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -64,7 +212,7 @@ export default function RoomDetails({
       mounted = false;
       controller.abort();
     };
-  }, [show, fetchUrl, roomProp, token]);
+  }, [show, fetchUrl, roomProp, token, t]);
 
   // Close on Escape
   useEffect(() => {
@@ -84,28 +232,15 @@ export default function RoomDetails({
     return (
       <>
         <div className="modal-backdrop fade show" />
-        <div
-          className="modal d-block"
-          tabIndex="-1"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="modal-dialog modal-lg modal-dialog-centered"
-            role="document"
-          >
+        <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
+          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Loading...</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={onClose}
-                />
+                <h5 className="modal-title">{t("loading")}</h5>
+                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
               </div>
               <div className="modal-body">
-                <div className="text-center py-4">Loading room details…</div>
+                <div className="text-center py-4">{t("loadingRoomDetails")}</div>
               </div>
             </div>
           </div>
@@ -118,25 +253,12 @@ export default function RoomDetails({
     return (
       <>
         <div className="modal-backdrop fade show" />
-        <div
-          className="modal d-block"
-          tabIndex="-1"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="modal-dialog modal-lg modal-dialog-centered"
-            role="document"
-          >
+        <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
+          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Error</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={onClose}
-                />
+                <h5 className="modal-title">{t("error")}</h5>
+                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
               </div>
               <div className="modal-body">
                 <div className="alert alert-danger">{error}</div>
@@ -152,28 +274,15 @@ export default function RoomDetails({
     return (
       <>
         <div className="modal-backdrop fade show" />
-        <div
-          className="modal d-block"
-          tabIndex="-1"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="modal-dialog modal-lg modal-dialog-centered"
-            role="document"
-          >
+        <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
+          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">No data</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={onClose}
-                />
+                <h5 className="modal-title">{t("noData")}</h5>
+                <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
               </div>
               <div className="modal-body">
-                <div className="text-muted">No room data available.</div>
+                <div className="text-muted">{t("noRoomData")}</div>
               </div>
             </div>
           </div>
@@ -185,10 +294,19 @@ export default function RoomDetails({
   const images = Array.isArray(room.images)
     ? room.images.map(resolveRoomImage).filter(Boolean)
     : room.images
-    ? [resolveRoomImage(room.images)]
+    ? [resolveRoomImage(room.images)].filter(Boolean)
     : [];
 
-  const title = room.roomTitle || room.title || "Untitled room";
+  const localizedTitle =
+    localizedField(room, "title", lang) ??
+    localizedField(room, "roomTitle", lang) ??
+    room.name ??
+    t("untitledRoom");
+
+  const localizedDescription =
+    localizedField(room, "description", lang) ??
+    localizedField(room, "roomDescription", lang) ??
+    t("noDescription");
 
   // Extract location similar to RoomCardWithPay
   const address =
@@ -196,53 +314,60 @@ export default function RoomDetails({
     room?.roomLocation?.address ??
     room?.address ??
     "";
+
   const city =
     room?.roomLocation?.address?.city ??
     room?.roomLocation?.city ??
     room?.city ??
     "";
+
   const region =
     room?.roomLocation?.address?.region ??
     room?.roomLocation?.region ??
     room?.region ??
     "";
+
   const country =
     room?.roomLocation?.address?.country ??
     room?.roomLocation?.country ??
     room?.country ??
     "";
+
   const locParts = [address, city, region, country].filter(Boolean);
   const locationString = locParts.length ? locParts.join(", ") : "";
 
   function backdropClick(e) {
-    if (e.target.classList.contains("modal")) {
+    const target = e.target;
+    if (target && target.classList && target.classList.contains("modal")) {
       if (typeof onClose === "function") onClose();
     }
   }
+
+  // Format availability dates if present (European format via local helpers)
+  const availableFrom = room.availableFrom ? formatEuropeanDateTime(room.availableFrom, lang) : null;
+  const availableTo = room.availableTo ? formatEuropeanDateTime(room.availableTo, lang) : null;
+
+  // Price formatting using local helper (converts to currency appropriate for language)
+  const priceAmount = room?.pricePerNight?.amount ?? room?.price ?? null;
+  const priceCurrency = room?.pricePerNight?.currency ?? room?.currency ?? null;
+  const formattedPrice =
+    priceAmount != null ? formatCurrency(priceAmount, priceCurrency, lang) : t("nA");
 
   return (
     <>
       <div className="modal-backdrop fade show" />
       <div
         className="modal d-block"
-        tabIndex="-1"
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         onMouseDown={backdropClick}
       >
-        <div
-          className="modal-dialog modal-lg modal-dialog-centered"
-          role="document"
-        >
+        <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">{title}</h5>
-              <button
-                type="button"
-                className="btn-close"
-                aria-label="Close"
-                onClick={onClose}
-              />
+              <h5 className="modal-title">{localizedTitle}</h5>
+              <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
             </div>
 
             <div className="modal-body">
@@ -255,7 +380,7 @@ export default function RoomDetails({
                           <img
                             key={i}
                             src={src || PLACEHOLDER}
-                            alt={`${title} ${i + 1}`}
+                            alt={`${localizedTitle} ${i + 1}`}
                             className="img-fluid mb-2"
                             style={{
                               width: "100%",
@@ -272,47 +397,55 @@ export default function RoomDetails({
                         ))}
                       </div>
                     ) : (
-                      <div className="bg-light p-5 text-center">No images</div>
+                      <div className="bg-light p-5 text-center">{t("noImages")}</div>
                     )}
                   </div>
 
                   <div className="col-md-6">
-                    <h6>Description</h6>
-                    <p>
-                      {room.roomDescription ||
-                        room.description ||
-                        "No description provided."}
-                    </p>
+                    <h6>{t("description")}</h6>
+                    <p>{localizedDescription}</p>
 
                     {locationString && (
                       <>
-                        <h6>Location</h6>
+                        <h6>{t("location")}</h6>
                         <div className="text-muted mb-3">{locationString}</div>
                       </>
                     )}
 
-                    <h6>Details</h6>
+                    {availableFrom || availableTo ? (
+                      <>
+                        <h6>{t("availability")}</h6>
+                        <div className="text-muted mb-3">
+                          {availableFrom ? `${t("from")}: ${availableFrom}` : ""}
+                          {availableFrom && availableTo ? " — " : ""}
+                          {availableTo ? `${t("to")}: ${availableTo}` : ""}
+                        </div>
+                      </>
+                    ) : null}
+
+                    <h6>{t("details")}</h6>
                     <ul>
                       <li>
-                        <strong>Price:</strong>{" "}
-                        {room.pricePerNight?.amount ?? "N/A"}{" "}
-                        {room.pricePerNight?.currency ?? ""}
+                        <strong>{t("price")}: </strong>
+                        {formattedPrice}
                       </li>
                       <li>
-                        <strong>Capacity:</strong>{" "}
-                        {room.roomCapacity ?? room.capacity ?? "—"} guests
+                        <strong>{t("capacity")}: </strong>
+                        {room.roomCapacity ?? room.capacity ?? "-"} {t("guests")}
                       </li>
                       <li>
-                        <strong>Bedrooms:</strong> {room.bedrooms ?? "—"}
+                        <strong>{t("bedrooms")}: </strong>
+                        {room.bedrooms ?? "-"}
                       </li>
                       <li>
-                        <strong>Bathrooms:</strong> {room.bathrooms ?? "—"}
+                        <strong>{t("bathrooms")}: </strong>
+                        {room.bathrooms ?? "-"}
                       </li>
                     </ul>
 
                     {room.amenities && room.amenities.length > 0 && (
                       <>
-                        <h6>Amenities</h6>
+                        <h6>{t("amenities")}</h6>
                         <ul>
                           {room.amenities.map((a, idx) => (
                             <li key={idx}>{a}</li>
@@ -323,7 +456,7 @@ export default function RoomDetails({
 
                     {room.rules && room.rules.length > 0 && (
                       <>
-                        <h6>Rules</h6>
+                        <h6>{t("rules")}</h6>
                         <ul>
                           {room.rules.map((r, idx) => (
                             <li key={idx}>{r}</li>
@@ -337,12 +470,8 @@ export default function RoomDetails({
             </div>
 
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={onClose}
-              >
-                Close
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                {t("close")}
               </button>
             </div>
           </div>
@@ -350,7 +479,7 @@ export default function RoomDetails({
       </div>
     </>
   );
-}
+};
 
 RoomDetails.propTypes = {
   show: PropTypes.bool.isRequired,
@@ -365,3 +494,5 @@ RoomDetails.defaultProps = {
   fetchUrl: null,
   token: null,
 };
+
+export default RoomDetails;

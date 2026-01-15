@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useContext, useCallback } from "react";
 import { Button, Alert, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../contexts/AuthContext";
 import { fetchRooms, createRoom, updateRoom, deleteRoom } from "../../api/roomsApi";
 import RoomForm from "./RoomForm";
@@ -20,6 +21,29 @@ function parseRoleFromToken(token) {
   }
 }
 
+function localeForLang(lang) {
+  if (!lang) return "en-GB";
+  const l = lang.toLowerCase();
+  if (l.startsWith("fr")) return "fr-FR";
+  if (l.startsWith("pt")) return "pt-PT";
+  return "en-GB";
+}
+
+export function formatEuropeanDateTime(value, lang) {
+  if (!value) return "";
+  const locale = localeForLang(lang);
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export default function RoomManager() {
   const { user } = useContext(AuthContext);
   const token = user?.token || localStorage.getItem("authToken") || null;
@@ -27,6 +51,7 @@ export default function RoomManager() {
   const isAdmin = role === "admin";
 
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,14 +63,14 @@ export default function RoomManager() {
   const handleAuthError = useCallback(
     (err) => {
       if (err && err.status === 401) {
-        setError("Session expired. Please log in again.");
+        setError(t("sessionExpired"));
         localStorage.removeItem("authToken");
         setTimeout(() => navigate("/login"), 700);
       } else {
-        setError(err?.message || "An error occurred.");
+        setError(err?.message || t("errorOccurred"));
       }
     },
-    [navigate]
+    [navigate, t]
   );
 
   // Load rooms on mount (and when token changes)
@@ -152,7 +177,7 @@ export default function RoomManager() {
 
   // Delete a room
   async function handleDelete(id) {
-    if (!window.confirm("Delete this room?")) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
     setError("");
     try {
       // optimistic update
@@ -181,7 +206,7 @@ export default function RoomManager() {
   // Helper to render grid of RoomCard components
   function renderCards() {
     if (!rooms || rooms.length === 0) {
-      return <div className="text-muted">No rooms found.</div>;
+      return <div className="text-muted">{t("noRoomsFound")}</div>;
     }
     return (
       <div className="row">
@@ -193,6 +218,8 @@ export default function RoomManager() {
               onDelete={handleDelete}
               onView={handleView}
               isAdmin={isAdmin}
+              // pass formatting helper so child components can display dates in European format
+              formatDate={(value) => formatEuropeanDateTime(value, i18n.language)}
             />
           </div>
         ))}
@@ -203,12 +230,19 @@ export default function RoomManager() {
   // Helper to render compact list (optional)
   function renderList() {
     if (!rooms || rooms.length === 0) {
-      return <div className="text-muted">No rooms found.</div>;
+      return <div className="text-muted">{t("noRoomsFound")}</div>;
     }
     return (
       <div className="list-group">
         {rooms.map((r) => (
-          <RoomListItem key={r._id} room={r} onEdit={startEdit} onDelete={handleDelete} isAdmin={isAdmin} />
+          <RoomListItem
+            key={r._id}
+            room={r}
+            onEdit={startEdit}
+            onDelete={handleDelete}
+            isAdmin={isAdmin}
+            formatDate={(value) => formatEuropeanDateTime(value, i18n.language)}
+          />
         ))}
       </div>
     );
@@ -217,15 +251,15 @@ export default function RoomManager() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Rooms</h4>
+        <h4>{t("rooms")}</h4>
         <div>
           <Button
             variant="outline-primary"
             onClick={openCreateModal}
             disabled={!isAdmin}
-            title={!isAdmin ? "Admin only" : "Add room"}
+            title={!isAdmin ? t("adminOnly") : t("addRoom")}
           >
-            ➕ Room
+            ➕ {t("room")}
           </Button>
         </div>
       </div>
@@ -248,7 +282,7 @@ export default function RoomManager() {
 
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>{editingRoom ? "Edit Room" : "Add New Room"}</Modal.Title>
+          <Modal.Title>{editingRoom ? t("editRoom") : t("addNewRoom")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <RoomForm
@@ -261,11 +295,15 @@ export default function RoomManager() {
             updateRoomWithUpload={(id, formData, onProgress, appendImages = true) =>
               handleUpdateWithFormData(id, formData, onProgress, appendImages)
             }
+            // pass formatting helper to RoomForm if it needs to show dates
+            formatDate={(value) => formatEuropeanDateTime(value, i18n.language)}
           />
 
           {uploadProgress > 0 && uploadProgress < 100 && (
             <div className="mt-3">
-              <div>Upload progress: {uploadProgress}%</div>
+              <div>
+                {t("uploadProgress")}: {uploadProgress}%
+              </div>
             </div>
           )}
         </Modal.Body>

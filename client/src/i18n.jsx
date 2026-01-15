@@ -1,15 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-// import en from "./locales/en.json";
-// import pt from "./locales/pt.json";
-// import fr from "./locales/fr.json";
-
-// const resources = {
-//   en: { translation: en },
-//   pt: { translation: pt },
-//   fr: { translation: fr },
-// };
 
 i18n
   .use(LanguageDetector) // Automatically detects browser language
@@ -77,6 +68,367 @@ i18n
             phone:
               "Tel.: (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046",
             rights: "All rights reserved.",
+          },
+
+          // --------- Rooms Management --------------
+          rooms: "Rooms",
+          room: "Room",
+          addRoom: "Add Room",
+          addNewRoom: "Add New Room",
+          editRoom: "Edit Room",
+          adminOnly: "Admin Only",
+          sessionExpired: "Session expired. Please log in again.",
+          errorOccurred: "An error occurred.",
+          noRoomsFound: "No rooms found.",
+          deleteConfirm: "Delete this room?",
+          uploadProgress: "Upload Progress",
+
+          // --------- Room Details Modal -----------
+          loading: "Loading ...",
+          loadingRoomDetails: "Loading room details ...",
+          error: "Error",
+          failedToLoad: "Failed to load",
+          noData: "No data",
+          noRoomData: "No room data available.",
+          untitledRoom: "Untitled room",
+          noImages: "No images",
+          description: "Description",
+          noDescription: "No description provided.",
+          location: "Location",
+          availability: "Availability",
+          from: "From",
+          to: "To",
+          details: "Details",
+          price: "Price",
+          capacity: "Capacity",
+          guests: "guests",
+          bedrooms: "Bedrooms",
+          bathrooms: "Bathrooms",
+          amenities: "Amenities",
+          rules: "Rules",
+          close: "Close",
+          nA: "N/A",
+          open: "Open",
+          edit: "Edit",
+          delete: "Delete",
+
+          // -------- Room Form Modal -----------
+          mustBeAdmin: "You must be an admin to create rooms.",
+          provideTitleAndPrice: "Please provide at least a title and price.",
+          mustBeSignedIn: "You must be signed in to create a room.",
+          roomCreated: "Room created successfully.",
+          failedToCreateRoom: "Failed to create room",
+          title: "Title",
+          roomTitlePlaceholder: "Room title",
+          descriptionPlaceholder: "Short description",
+          address: "Address",
+          addressPlaceholder: "Street address",
+          city: "City",
+          country: "Country",
+          pricePerNight: "Price per night",
+          pricePreview: "Price preview",
+          minNights: "Min nights",
+          maxNights: "Max nights",
+          addAmenityPlaceholder: "Add amenity (e.g. Wifi)",
+          addRulePlaceholder: "Add rule (e.g. No smoking)",
+          add: "Add",
+          images: "Images",
+          imagesHelp: "It's possible to select up to 12 images, 5MB each.",
+          cancel: "Cancel",
+          saving: "Saving",
+          createRoom: "Create Room",
+          updateRoom: "Update Room",
+          failedToUpdateRoom: "Failed to update room",
+          roomUpdated: "Room updated successfully.",
+          confirmDeleteRoom: "Are you sure you want to delete this room?",
+          deletingRoom: "Deleting room...",
+          roomDeleted: "Room deleted successfully.",
+          failedToDeleteRoom: "Failed to delete room",
+
+          // ---------- RoomCardWithPay -----------
+          priceNA: "Price: N/A",
+          bedroomsShort: "br",
+          bathroomsShort: "ba",
+          book: "Book",
+          pay: "Pay",
+
+          // ----------- Room Card ------------------
+          previous: "Previous",
+          next: "Next",
+          night: "night",
+          view: "View",
+          editAria: "Edit {{title}}",
+
+          // ---------------- RoomListingRequest --------------
+          "Room Listing Request": "Room Listing Request",
+          "Room Title": "Room Title",
+          Description: "Description",
+          Capacity: "Capacity",
+          Bedrooms: "Bedrooms",
+          Bathrooms: "Bathrooms",
+          "Instant Book": "Instant Book",
+          "Min Nights": "Min Nights",
+          "Max Nights": "Max Nights",
+          Terms: "Terms",
+          "Select term": "Select term",
+          Selected: "Selected",
+          Pricing: "Pricing",
+          "Price Amount": "Price Amount",
+          Currency: "Currency",
+          "Select Currency": "Select Currency",
+          Location: "Location",
+          Address: "Address",
+          City: "City",
+          Region: "Region",
+          Country: "Country",
+          "Coordinates (lat, lng)": "Coordinates (lat, lng)",
+          "Amenities (comma separated)": "Amenities (comma separated)",
+          "Rules (comma separated)": "Rules (comma separated)",
+          "You can upload up to 12 images.": "You can upload up to 12 images.",
+          Contact: "Contact",
+          "Your Name": "Your Name",
+          Email: "Email",
+          Phone: "Phone",
+          "I acknowledge the contract for listing and agree to the terms.":
+            "I acknowledge the contract for listing and agree to the terms.",
+          "listing contract": "listing contract",
+          "Submitting ...": "Submitting ...",
+          "Submit Listing": "Submit Listing",
+          Reset: "Reset",
+          "Thank you for booking!": "Thank you for booking!",
+          "Payment Instructions": "Payment Instructions",
+          Notice: "Notice",
+          Bank: "Bank",
+          "Account name": "Account name",
+          "Account number": "Account number",
+          IBAN: "IBAN",
+          Reference: "Reference",
+          "Please include your listing ID or email":
+            "Please include your listing ID or email",
+          "After you complete the payment, please reply to the confirmation email or contact support at":
+            "After you complete the payment, please reply to the confirmation email or contact support at",
+          Close: "Close",
+          "Required:": "Required:",
+          Saved: "Saved",
+          "Price per night is required.": "Price per night is required.",
+          "Room title is required.": "Room title is required.",
+          "Description is required.": "Description is required.",
+          "Your name is required.": "Your name is required.",
+          "Email is required.": "Email is required.",
+          "Phone is required.": "Phone is required.",
+          "You must acknowledge the listing terms.":
+            "You must acknowledge the listing terms.",
+          "Invalid email address.": "Invalid email address.",
+          "Invalid phone number.": "Invalid phone number.",
+          "Select term placeholder": "Select term",
+          "Select Currency placeholder": "Select Currency",
+
+          // ----------- Contracts Page ----------------
+          // Page title and meta
+          "page.title": "Listing Agreement — LM-Ltd Services and Owner",
+          "effectiveDate.label": "Effective date:",
+          "owner.label": "Owner:",
+          "phone.label": "Phone:",
+
+          // Sections and their full text
+          "term.title": "Term",
+          "term.text":
+            "Owner selects 1 (13.5%) / 3 (10.5%) / 6 (8.5%) months (circle one). The selected term governs the initial duration of this Listing Agreement.",
+
+          "fees.title": "Fees and payment",
+          "fees.text":
+            "Owner agrees to pay the commission percentage or one-time fee described in the chosen plan. For hybrid plans, an upfront listing fee of $20 × months is charged at listing start; commission applies to rent collected.",
+
+          "billing.title": "Billing timing",
+          "billing.text":
+            "Per-booking commissions are charged at the time of each rent collection. One-time fees are charged at listing start. Processing fees are passed through as applicable.",
+
+          "payouts.title": "Payouts to owner",
+          "payouts.text":
+            "Platform remits owner payouts 7 days after confirmed check-in/receipt. The exact payout timing will be displayed in the owner's payout settings.",
+
+          "refunds.title": "Refunds and prorating",
+          "refunds.text":
+            "If owner terminates early, fees are prorated on a daily basis for the unused portion; platform retains fees for services rendered. Platform may withhold refunds for unresolved disputes or outstanding chargebacks.",
+
+          "cancellations.title": "Cancellations and disputes",
+          "cancellations.text":
+            "Cancellation rules follow the published cancellation policy. Disputes must be submitted within 3 days of checkout.",
+
+          "taxes.title": "Taxes and compliance",
+          "taxes.text":
+            "Owner is responsible for local lodging taxes unless platform is contracted to collect and remit them. Platform will display taxes at checkout where required by law.",
+
+          "damage.title": "Damage and security deposits",
+          "damage.text":
+            "Platform may require a card pre-authorization or hold for incidental damages; capture will occur only on validated claims.",
+
+          "data.title": "Data and privacy",
+          "data.text":
+            "Platform will process owner and guest data in accordance with its privacy policy.",
+
+          "termination.title": "Termination and renewal",
+          "termination.text":
+            "This Agreement auto-renews unless either party gives 30 days' notice prior to the term end.",
+
+          "governing.title": "Governing law and dispute resolution",
+          "governing.text":
+            "This Agreement is governed by the laws of Luanda, Angola. Any disputes will be resolved under those laws.",
+
+          "signatures.title": "Signatures",
+          "signatures.text":
+            "By clicking Agree and Acknowledge, the Owner digitally agrees to and acknowledges the terms of this Listing Agreement.",
+
+          // Buttons / UI
+          "button.agree": "Agree and Acknowledge",
+          "button.saving": "Saving...",
+          "spinner.saving.aria": "Saving",
+
+          // Notices / errors
+          "notice.acknowledgeSaveFailed":
+            "We were unable to save your acknowledgement to the server. Your agreement is stored locally.",
+
+          // ----------- Room Page -------------------
+          // Dashboard / tabs
+          "dashboard.tabOverview": "Overview",
+          "dashboard.tabBookings": "My Bookings",
+          "dashboard.availableRooms": "Available rooms",
+          "dashboard.pay": "Pay",
+          "dashboard.payConfirm":
+            "You will be redirected to a secure payment page.",
+          "dashboard.cancel": "Cancel",
+          "dashboard.proceedToPay": "Proceed to payment",
+          "dashboard.accessDenied":
+            "Access denied. This area is for users only.",
+
+          // Room page messages
+          "roomPage.noRooms": "No rooms available.",
+          "roomPage.noDescription": "No description available.",
+          "roomPage.detailsTitle": "Room details",
+          "roomPage.bookRoom": "Book room",
+          "roomPage.bookThisRoom": "Book this room",
+          "roomPage.close": "Close",
+          "roomPage.maxGuests": "Max guests:",
+
+          // Errors and messages
+          "roomPage.errors.loadRooms": "Failed to load rooms.",
+          "roomPage.errors.loadBookings": "Failed to load bookings.",
+          "roomPage.messages.bookingsEndpointUnavailable":
+            "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation.",
+
+          // Bank modal
+          "roomPage.paymentInstructionsTitle": "Payment instructions",
+          "roomPage.bankModal.thankYou":
+            "Thank you for your booking. Pay the booking in the next 48 hours to avoid cancellation.",
+          "roomPage.bankModal.contactSupport":
+            "If you need help contact the support team",
+          "roomPage.bankModal.bank": "Bank:",
+          "roomPage.bankModal.accountName": "Account name:",
+          "roomPage.bankModal.accountNumber": "Account number:",
+          "roomPage.bankModal.iban": "IBAN:",
+          "roomPage.bankModal.reference": "Reference:",
+          "roomPage.bankModal.amount": "Amount:",
+          "roomPage.bankModal.loading": "Loading payment details...",
+          "roomPage.bankModal.close": "Close",
+
+          // ------------- RoomBookingModal --------------
+          "roomBooking.title": "Book {{roomName}}",
+          "roomBooking.startDate": "Start Date",
+          "roomBooking.endDate": "End Date",
+          "roomBooking.dateOfBirth": "Date of Birth",
+          "roomBooking.guests": "Guests",
+          "roomBooking.idDocumentLabel":
+            "ID Document (passport or government ID)",
+          "roomBooking.cancel": "Cancel",
+          "roomBooking.book": "Book",
+          "roomBooking.booking": "Booking...",
+          "roomBooking.success": "Booking successful",
+          "roomBooking.error.uploadId": "Please upload an ID document",
+          "roomBooking.error.dates": "Please select start and end dates",
+          "roomBooking.error.dob": "Please enter date of birth",
+          "roomBooking.error.generic": "Booking failed",
+          "roomBooking.file.accept": "image/*,application/pdf",
+
+          // ------------- BookingForm -----------------
+          // Form labels
+          "booking.startDate": "Start date",
+          "booking.endDate": "End date",
+          "booking.guests": "Guests",
+          "booking.primaryGuestName": "Primary guest name",
+          "booking.primaryGuestEmail": "Primary guest email",
+          "booking.secondaryGuestName": "Secondary guest name (optional)",
+          "booking.secondaryGuestEmail": "Secondary guest email (optional)",
+          "booking.primaryGuestPhone": "Primary guest phone",
+          "booking.dateOfBirth": "Date of birth",
+          "booking.paymentMethod": "Payment method",
+          "booking.paymentMethod.card": "Card",
+          "booking.paymentMethod.bank": "Bank transfer",
+          "booking.notes": "Notes (optional)",
+          "booking.idDocumentLabel": "ID Document / Passport (required)",
+          "booking.idDocumentHelp": "Max 10MB. PDF or image formats accepted.",
+          "booking.cancel": "Cancel",
+          "booking.submit": "Book room",
+          "booking.submitting": "Booking...",
+          "booking.progressLabel": "Upload progress",
+
+          // Success / info
+          "booking.success": "Booking created successfully.",
+          "booking.bookingsEndpointUnavailable":
+            "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation.",
+
+          // Validation / errors
+          "booking.error.noRoom": "No room selected.",
+          "booking.error.noUser": "No user available. Please sign in.",
+          "booking.error.datesRequired":
+            "Start date and end date are required.",
+          "booking.error.invalidDate": "Invalid date format.",
+          "booking.error.endBeforeStart": "End date must be after start date.",
+          "booking.error.guestsPositive": "Guests must be a positive integer.",
+          "booking.error.primaryNameRequired":
+            "Primary guest name is required.",
+          "booking.error.dobRequired": "Date of birth is required.",
+          "booking.error.invalidDob": "Invalid date of birth.",
+          "booking.error.ageMinimum":
+            "Guest must be at least 18 years old to book.",
+          "booking.error.idRequired":
+            "Government ID / passport upload (idDocument) is required.",
+          "booking.error.idTooLarge":
+            "ID file is too large. Maximum 10MB allowed.",
+          "booking.error.invalidEmail": "Primary guest email is invalid.",
+          "booking.error.invalidEmailSecondary":
+            "Secondary guest email is invalid.",
+          "booking.error.createFailed":
+            "Failed to create booking. Please try again.",
+
+          // ----------- Bookings -----------------
+          bookings: {
+            title: "My Bookings",
+            empty: "No bookings yet.",
+            confirmCancel: "Cancel this booking?",
+            error: {
+              load: "Failed to load bookings",
+              cancel: "Cancel failed",
+              details: "Failed to load booking details",
+            },
+          },
+
+          // ------------ BookingFormWithModal ---------------
+          bookingModal: {
+            payTitle: "Pay: {{roomName}}",
+            paymentInstructions: "Payment instructions",
+            bankTransferTitle: "Bank transfer instructions",
+            bank: "Bank",
+            accountName: "Account name",
+            accountNumber: "Account number",
+            routing: "Routing / Sort code",
+            iban: "IBAN",
+            reference: "Reference",
+            amount: "Amount",
+            copy: "Copy",
+            copied: "Copied {{field}}",
+            copyHint: "Use the Copy buttons to copy details to clipboard.",
+            close: "Close",
+            room: "room",
           },
 
           // ---------- Services Available -----------
@@ -168,8 +520,6 @@ i18n
           "dashboard.email": "Email",
           "dashboard.role": "Role",
           "dashboard.overview": "Your Service Overview",
-          "dashboard.accessDenied":
-            "Access denied. This dashboard is for regular users only.",
           "dashboard.loading": "Loading...",
           "dashboard.failedRequested": "Failed to load requested services.",
           "dashboard.failedScheduled": "Failed to load scheduled services.",
@@ -377,10 +727,10 @@ i18n
           // ---------------- Modal Profile  ---------------
           "Your Profile": "Your Profile",
           Fullname: "Full name",
-          Email: "Email",
-          Phone: "Phone",
+          // Email: "Email",
+          // Phone: "Phone",
           "Save Changes": "Save Changes",
-          Close: "Close",
+          // Close: "Close",
           "Profile updated successfully!": "Profile updated successfully!",
           "Failed to update profile": "Failed to update profile",
           "No token found": "No token found",
@@ -599,6 +949,374 @@ i18n
             rights: "Todos os direitos reservados.",
           },
 
+          // --------- Rooms Management -----------
+          rooms: "Quartos",
+          room: "Quarto",
+          addRoom: "Adicionar quarto",
+          addNewRoom: "Adicionar novo quarto",
+          editRoom: "Editar quarto",
+          adminOnly: "Apenas administrador",
+          sessionExpired: "Sessão expirada. Por favor, faça login novamente.",
+          errorOccurred: "Ocorreu um erro.",
+          noRoomsFound: "Nenhum quarto encontrado.",
+          deleteConfirm: "Excluir este quarto?",
+          uploadProgress: "Progresso do envio",
+
+          // --------- Room Details Modal -----------
+
+          loading: "Carregando ...",
+          loadingRoomDetails: "Carregando detalhes do quarto ...",
+          error: "Erro",
+          failedToLoad: "Falha ao carregar",
+          noData: "Sem dados",
+          noRoomData: "Nenhum dado do quarto disponível.",
+          untitledRoom: "Quarto sem título",
+          noImages: "Sem imagens",
+          description: "Descrição",
+          noDescription: "Nenhuma descrição fornecida.",
+          location: "Localização",
+          availability: "Disponibilidade",
+          from: "De",
+          to: "Até",
+          details: "Detalhes",
+          price: "Preço",
+          capacity: "Capacidade",
+          guests: "hóspedes",
+          bedrooms: "Quartos",
+          bathrooms: "Banheiros",
+          amenities: "Comodidades",
+          rules: "Regras",
+          close: "Fechar",
+          nA: "N/D",
+          open: "Abrir",
+          edit: "Editar",
+          delete: "Excluir",
+
+          // -------- Room Form Modal -----------
+          mustBeAdmin: "Você deve ser administrador para criar quartos.",
+          provideTitleAndPrice:
+            "Por favor, forneça pelo menos um título e preço.",
+          mustBeSignedIn: "Você deve estar conectado para criar um quarto.",
+          failedToCreateRoom: "Falha ao criar o quarto",
+          title: "Título",
+          roomTitlePlaceholder: "Título do quarto",
+          descriptionPlaceholder: "Descrição curta",
+          address: "Endereço",
+          addressPlaceholder: "Endereço",
+          city: "Cidade",
+          country: "País",
+          pricePerNight: "Preço por noite",
+          pricePreview: "Pré-visualização do preço",
+          minNights: "Mínimo de noites",
+          maxNights: "Máximo de noites",
+          addAmenityPlaceholder: "Adicionar comodidade (ex.: Wifi)",
+          addRulePlaceholder: "Adicionar regra (ex.: Proibido fumar)",
+          add: "Adicionar",
+          images: "Imagens",
+          imagesHelp: "É possível selecionar até 12 imagens, 5MB cada.",
+          cancel: "Cancelar",
+          saving: "Salvando",
+          createRoom: "Criar Quarto",
+          updateRoom: "Atualizar Quarto",
+          deleteRoom: "Excluir Quarto",
+          confirmDelete: "Tem certeza de que deseja excluir este quarto?",
+          deleting: "Excluindo...",
+          failedToDeleteRoom: "Falha ao excluir o quarto.",
+          failedToUpdateRoom: "Falha ao atualizar o quarto.",
+
+          // ---------- RoomCardWithPay -----------
+          priceNA: "Preço: N/D",
+          bedroomsShort: "qd",
+          bathroomsShort: "wc",
+          book: "Reservar",
+          pay: "Pagar",
+
+          // ----------- Room Card ------------------
+          previous: "Anterior",
+          next: "Seguinte",
+          night: "noite",
+          view: "Ver",
+          editAria: "Editar {{title}}",
+
+          // ---------------- RoomListingRequest --------------
+          "Room Listing Request": "Pedido para Anúnciar Quarto",
+          "Room Title": "Título do quarto",
+          Description: "Descrição",
+          Capacity: "Capacidade",
+          Bedrooms: "Quartos",
+          Bathrooms: "Casas de banho",
+          "Instant Book": "Reserva instantânea",
+          "Min Nights": "Noites mín.",
+          "Max Nights": "Noites máx.",
+          Terms: "Condições",
+          "Select term": "Selecionar prazo",
+          Selected: "Selecionado",
+          Pricing: "Preços",
+          "Price Amount": "Valor",
+          Currency: "Moeda",
+          "Select Currency": "Selecionar moeda",
+          Location: "Localização",
+          Address: "Endereço",
+          City: "Cidade",
+          Region: "Região",
+          Country: "País",
+          "Coordinates (lat, lng)": "Coordenadas (lat, lng)",
+          "Amenities (comma separated)": "Comodidades (separadas por vírgula)",
+          "Rules (comma separated)": "Regras (separadas por vírgula)",
+          "You can upload up to 12 images.": "Pode carregar até 12 imagens.",
+          Contact: "Contacto",
+          "Your Name": "O seu nome",
+          Email: "Email",
+          Phone: "Telefone",
+          "I acknowledge the contract for listing and agree to the terms.":
+            "Reconheço o contrato de anúncio e concordo com os termos.",
+          "listing contract": "contrato de anúncio",
+          "Submitting ...": "A submeter ...",
+          "Submit Listing": "Submeter pedido",
+          Reset: "Repor",
+          "Thank you for booking!": "Obrigado pela submissão!",
+          "Payment Instructions": "Instruções de pagamento",
+          Notice: "Aviso",
+          Bank: "Banco",
+          "Account name": "Nome da conta",
+          "Account number": "Número da conta",
+          IBAN: "IBAN",
+          Reference: "Referência",
+          "Please include your listing ID or email":
+            "Por favor inclua o ID do anúncio ou o seu e-mail",
+          "After you complete the payment, please reply to the confirmation email or contact support at":
+            "Após efetuar o pagamento, responda ao e-mail de confirmação ou contacte o suporte em",
+          Close: "Fechar",
+          "Required:": "Obrigatório:",
+          Saved: "Guardado",
+          "Price per night is required.": "O preço por noite é obrigatório.",
+          "Room title is required.": "O título do quarto é obrigatório.",
+          "Description is required.": "A descrição é obrigatória.",
+          "Your name is required.": "O seu nome é obrigatório.",
+          "Email is required.": "O e-mail é obrigatório.",
+          "Phone is required.": "O telefone é obrigatório.",
+          "You must acknowledge the listing terms.":
+            "Deve aceitar os termos do anúncio.",
+          "Invalid email address.": "Endereço de e-mail inválido.",
+          "Invalid phone number.": "Número de telefone inválido.",
+          "Select term placeholder": "Selecionar prazo",
+          "Select Currency placeholder": "Selecionar moeda",
+
+          // ----------
+          // Page title and meta
+          "page.title": "Contrato de Anúncio — LM-Ltd Services e Proprietário",
+          "effectiveDate.label": "Data de vigência:",
+          "owner.label": "Proprietário:",
+          "phone.label": "Telefone:",
+
+          // Sections and their full text
+          "term.title": "Prazo",
+          "term.text":
+            "O proprietário seleciona 1 (13,5%) / 3 (10,5%) / 6 (8,5%) meses (circule um). O prazo selecionado rege a duração inicial deste Contrato de Anúncio.",
+
+          "fees.title": "Taxas e pagamento",
+          "fees.text":
+            "O proprietário concorda em pagar a percentagem de comissão ou a taxa única descrita no plano escolhido. Para planos híbridos, uma taxa inicial de listagem de $20 × meses é cobrada no início; a comissão aplica-se ao aluguer cobrado.",
+
+          "billing.title": "Momento de faturação",
+          "billing.text":
+            "As comissões por reserva são cobradas no momento de cada cobrança de aluguer. As taxas únicas são cobradas no início da listagem. As taxas de processamento são repassadas conforme aplicável.",
+
+          "payouts.title": "Pagamentos ao proprietário",
+          "payouts.text":
+            "A plataforma efetua os pagamentos ao proprietário 7 dias após o check-in/recebimento confirmado. O tempo exato de pagamento será exibido nas definições de pagamento do proprietário.",
+
+          "refunds.title": "Reembolsos e rateio",
+          "refunds.text":
+            "Se o proprietário rescindir antecipadamente, as taxas são prorrogadas diariamente para a parte não utilizada; a plataforma retém taxas pelos serviços prestados. A plataforma pode reter reembolsos por litígios não resolvidos ou estornos pendentes.",
+
+          "cancellations.title": "Cancelamentos e litígios",
+          "cancellations.text":
+            "As regras de cancelamento seguem a política de cancelamento publicada. Litígios devem ser apresentados dentro de 3 dias após o check-out.",
+
+          "taxes.title": "Impostos e conformidade",
+          "taxes.text":
+            "O proprietário é responsável pelos impostos locais de alojamento, salvo se a plataforma estiver contratada para os recolher e entregar. A plataforma exibirá impostos no checkout quando exigido por lei.",
+
+          "damage.title": "Danos e depósitos de segurança",
+          "damage.text":
+            "A plataforma pode exigir uma pré-autorização de cartão ou retenção para danos incidentais; a captura ocorrerá apenas em reclamações validadas.",
+
+          "data.title": "Dados e privacidade",
+          "data.text":
+            "A plataforma processará os dados do proprietário e do hóspede de acordo com a sua política de privacidade.",
+
+          "termination.title": "Rescisão e renovação",
+          "termination.text":
+            "Este Acordo renova-se automaticamente, salvo se qualquer das partes der aviso prévio de 30 dias antes do término do prazo.",
+
+          "governing.title": "Lei aplicável e resolução de litígios",
+          "governing.text":
+            "Este Acordo é regido pelas leis de Luanda, Angola. Quaisquer litígios serão resolvidos ao abrigo dessas leis.",
+
+          "signatures.title": "Assinaturas",
+          "signatures.text":
+            "Ao clicar em Concordar e Reconhecer, o Proprietário concorda digitalmente e reconhece os termos deste Contrato de Anúncio.",
+
+          // Buttons / UI
+          "button.agree": "Concordo e Assino",
+          "button.saving": "A gravar...",
+          "spinner.saving.aria": "A gravar",
+
+          // Notices / errors
+          "notice.acknowledgeSaveFailed":
+            "Não foi possível guardar o seu reconhecimento no servidor. O seu acordo está armazenado localmente.",
+
+          // ------------- Room Page ------------------
+          // Dashboard / tabs
+          "dashboard.tabOverview": "Visão geral",
+          "dashboard.tabBookings": "Minhas Reservas",
+          "dashboard.availableRooms": "Quartos disponíveis",
+          "dashboard.pay": "Pagar",
+          "dashboard.payConfirm":
+            "Será redirecionado para uma página de pagamento segura.",
+          "dashboard.cancel": "Cancelar",
+          "dashboard.proceedToPay": "Prosseguir para pagamento",
+          "dashboard.accessDenied":
+            "Acesso negado. Esta área é apenas para utilizadores.",
+
+          // Room page messages
+          "roomPage.noRooms": "Nenhum quarto disponível.",
+          "roomPage.noDescription": "Nenhuma descrição disponível.",
+          "roomPage.detailsTitle": "Detalhes do quarto",
+          "roomPage.bookRoom": "Reservar quarto",
+          "roomPage.bookThisRoom": "Reservar este quarto",
+          "roomPage.close": "Fechar",
+          "roomPage.maxGuests": "Máx. hóspedes:",
+
+          // Errors and messages
+          "roomPage.errors.loadRooms": "Falha ao carregar quartos.",
+          "roomPage.errors.loadBookings": "Falha ao carregar reservas.",
+          "roomPage.messages.bookingsEndpointUnavailable":
+            "Ponto de extremidade de reservas não disponível no servidor. Ainda pode criar reservas; elas aparecerão aqui após a criação.",
+
+          // Bank modal
+          "roomPage.paymentInstructionsTitle": "Instruções de pagamento",
+          "roomPage.bankModal.thankYou":
+            "Obrigado pela sua reserva. Pague a reserva nas próximas 48 horas para evitar o cancelamento.",
+          "roomPage.bankModal.contactSupport":
+            "Se precisar de ajuda contacte a equipa de suporte",
+          "roomPage.bankModal.bank": "Banco:",
+          "roomPage.bankModal.accountName": "Nome da conta:",
+          "roomPage.bankModal.accountNumber": "Número da conta:",
+          "roomPage.bankModal.iban": "IBAN:",
+          "roomPage.bankModal.reference": "Referência:",
+          "roomPage.bankModal.amount": "Montante:",
+          "roomPage.bankModal.loading": "A carregar detalhes de pagamento...",
+          "roomPage.bankModal.close": "Fechar",
+
+          // ----------- RoomBookingModal ----------------
+          "roomBooking.title": "Reservar {{roomName}}",
+          "roomBooking.startDate": "Data de início",
+          "roomBooking.endDate": "Data de fim",
+          "roomBooking.dateOfBirth": "Data de nascimento",
+          "roomBooking.guests": "Hóspedes",
+          "roomBooking.idDocumentLabel":
+            "Documento de identificação (passaporte ou documento do governo)",
+          "roomBooking.cancel": "Cancelar",
+          "roomBooking.book": "Reservar",
+          "roomBooking.booking": "A reservar...",
+          "roomBooking.success": "Reserva bem-sucedida",
+          "roomBooking.error.uploadId":
+            "Por favor carregue um documento de identificação",
+          "roomBooking.error.dates":
+            "Por favor selecione as datas de início e fim",
+          "roomBooking.error.dob": "Por favor introduza a data de nascimento",
+          "roomBooking.error.generic": "A reserva falhou",
+          "roomBooking.file.accept": "image/*,application/pdf",
+
+          // ------------ BookingForm ----------------
+          "booking.startDate": "Data de início",
+          "booking.endDate": "Data de fim",
+          "booking.guests": "Hóspedes",
+          "booking.primaryGuestName": "Nome do hóspede principal",
+          "booking.primaryGuestEmail": "Email do hóspede principal",
+          "booking.secondaryGuestName": "Nome do segundo hóspede (opcional)",
+          "booking.secondaryGuestEmail": "Email do segundo hóspede (opcional)",
+          "booking.primaryGuestPhone": "Telefone do hóspede principal",
+          "booking.dateOfBirth": "Data de nascimento",
+          "booking.paymentMethod": "Método de pagamento",
+          "booking.paymentMethod.card": "Cartão",
+          "booking.paymentMethod.bank": "Transferência bancária",
+          "booking.notes": "Notas (opcional)",
+          "booking.idDocumentLabel":
+            "Documento de identificação / Passaporte (obrigatório)",
+          "booking.idDocumentHelp":
+            "Máx. 10MB. Formatos PDF ou imagem aceites.",
+          "booking.cancel": "Cancelar",
+          "booking.submit": "Reservar quarto",
+          "booking.submitting": "A reservar...",
+          "booking.progressLabel": "Progresso do envio",
+
+          // Success / info
+          "booking.success": "Reserva criada com sucesso.",
+          "booking.bookingsEndpointUnavailable":
+            "Ponto de extremidade de reservas não disponível no servidor. Ainda pode criar reservas; elas aparecerão após a criação.",
+
+          // Validation / errors
+          "booking.error.noRoom": "Nenhum quarto selecionado.",
+          "booking.error.noUser":
+            "Nenhum utilizador disponível. Por favor inicie sessão.",
+          "booking.error.datesRequired":
+            "As datas de início e fim são obrigatórias.",
+          "booking.error.invalidDate": "Formato de data inválido.",
+          "booking.error.endBeforeStart":
+            "A data de fim deve ser posterior à data de início.",
+          "booking.error.guestsPositive":
+            "Os hóspedes devem ser um inteiro positivo.",
+          "booking.error.primaryNameRequired":
+            "O nome do hóspede principal é obrigatório.",
+          "booking.error.dobRequired": "A data de nascimento é obrigatória.",
+          "booking.error.invalidDob": "Data de nascimento inválida.",
+          "booking.error.ageMinimum":
+            "O hóspede deve ter pelo menos 18 anos para reservar.",
+          "booking.error.idRequired":
+            "É obrigatório carregar um documento de identificação / passaporte.",
+          "booking.error.idTooLarge":
+            "O ficheiro de identificação é demasiado grande. Máximo 10MB permitido.",
+          "booking.error.invalidEmail":
+            "O email do hóspede principal é inválido.",
+          "booking.error.invalidEmailSecondary":
+            "O email do segundo hóspede é inválido.",
+          "booking.error.createFailed":
+            "Falha ao criar a reserva. Por favor tente novamente.",
+
+          // ----------- Bookings -----------------
+          bookings: {
+            title: "Minhas Reservas",
+            empty: "Ainda não existem reservas.",
+            confirmCancel: "Cancelar esta reserva?",
+            error: {
+              load: "Falha ao carregar reservas",
+              cancel: "Falha ao cancelar",
+              details: "Falha ao carregar detalhes da reserva",
+            },
+          },
+
+          // ------------ BookingFormWithModal ---------------
+          bookingModal: {
+            payTitle: "Pagar: {{roomName}}",
+            paymentInstructions: "Instruções de pagamento",
+            bankTransferTitle: "Instruções para transferência bancária",
+            bank: "Banco",
+            accountName: "Nome da conta",
+            accountNumber: "Número da conta",
+            routing: "Código de rota / Sort code",
+            iban: "IBAN",
+            reference: "Referência",
+            amount: "Montante",
+            copy: "Copiar",
+            copied: "{{field}} copiado",
+            copyHint: "Use os botões Copiar para copiar os detalhes.",
+            close: "Fechar",
+            room: "quarto",
+          },
+
           // ---------- Services Available -----------
           "button.request": "Solicitar",
           "button.schedule": "Agendar",
@@ -685,8 +1403,6 @@ i18n
           "dashboard.email": "Email",
           "dashboard.role": "Função",
           "dashboard.overview": "Visão Geral dos Seus Serviços",
-          "dashboard.accessDenied":
-            "Acesso negado. Este painel é apenas para usuários regulares.",
           "dashboard.loading": "Carregando...",
           "dashboard.failedRequested":
             "Falha ao carregar serviços solicitados.",
@@ -898,10 +1614,10 @@ i18n
           // ---------------- Modal Profile  ---------------
           "Your Profile": "Seu Perfil",
           Fullname: "Nome completo",
-          Email: "E-mail",
-          Phone: "Telefone",
+          // Email: "E-mail",
+          // Phone: "Telefone",
           "Save Changes": "Salvar Alterações",
-          Close: "Fechar",
+          // Close: "Fechar",
           "Profile updated successfully!": "Perfil atualizado com sucesso!",
           "Failed to update profile": "Falha ao atualizar perfil",
           "No token found": "Token não encontrado",
@@ -1122,6 +1838,384 @@ i18n
             rights: "Tous droits réservés.",
           },
 
+          // --------- Rooms Management -------------
+          rooms: "Chambres",
+          room: "Chambre",
+          addRoom: "Ajouter une chambre",
+          addNewRoom: "Ajouter une nouvelle chambre",
+          editRoom: "Modifier la chambre",
+          adminOnly: "Administrateur uniquement",
+          sessionExpired: "Session expirée. Veuillez vous reconnecter.",
+          errorOccurred: "Une erreur s'est produite.",
+          noRoomsFound: "Aucune chambre trouvée.",
+          deleteConfirm: "Supprimer cette chambre?",
+          uploadProgress: "Progression du téléchargement",
+
+          // --------- Room Details Modal -----------
+
+          loading: "Chargement ...",
+          loadingRoomDetails: "Chargement des détails de la chambre ...",
+          error: "Erreur",
+          failedToLoad: "Échec du chargement",
+          noData: "Aucune donnée",
+          noRoomData: "Aucune donnée de chambre disponible.",
+          untitledRoom: "Chambre sans titre",
+          noImages: "Pas d'images",
+          description: "Description",
+          noDescription: "Aucune description fournie.",
+          location: "Emplacement",
+          availability: "Disponibilité",
+          from: "De",
+          to: "À",
+          details: "Détails",
+          price: "Prix",
+          capacity: "Capacité",
+          guests: "invités",
+          bedrooms: "Chambres",
+          bathrooms: "Salles de bain",
+          amenities: "Équipements",
+          rules: "Règles",
+          close: "Fermer",
+          nA: "N/D",
+          open: "Ouvrir",
+          edit: "Modifier",
+          delete: "Supprimer",
+
+          // -------- Room Form Modal -----------
+          mustBeAdmin:
+            "Vous devez être administrateur pour créer des chambres.",
+          provideTitleAndPrice:
+            "Veuillez fournir au moins un titre et un prix.",
+          mustBeSignedIn: "Vous devez être connecté pour créer une chambre.",
+          roomCreated: "Chambre créée avec succès.",
+          failedToCreateRoom: "Échec de la création de la chambre",
+          title: "Titre",
+          roomTitlePlaceholder: "Titre de la chambre",
+          descriptionPlaceholder: "Brève description",
+          address: "Adresse",
+          addressPlaceholder: "Adresse",
+          city: "Ville",
+          country: "Pays",
+          pricePerNight: "Prix par nuit",
+          pricePreview: "Aperçu du prix",
+          minNights: "Nuits min",
+          maxNights: "Nuits max",
+          addAmenityPlaceholder: "Ajouter un équipement (ex.: Wifi)",
+          addRulePlaceholder: "Ajouter une règle (ex.: Interdit de fumer)",
+          add: "Ajouter",
+          images: "Images",
+          imagesHelp:
+            "Il est possible de sélectionner jusqu'à 12 images, 5 Mo chacune.",
+          cancel: "Annuler",
+          saving: "Enregistrement",
+          createRoom: "Créer la chambre",
+          updateRoom: "Mettre à jour la chambre",
+          deleteRoom: "Supprimer la chambre",
+          confirmDelete: "Confirmer la suppression",
+          deleting: "Suppression...",
+          failedToUpdateRoom: "Échec de la mise à jour de la chambre",
+          roomUpdated: "Chambre mise à jour avec succès.",
+          roomDeleted: "Chambre supprimée avec succès.",
+
+          // --------- RoomCardWithPay -----------
+          priceNA: "Prix : N/D",
+          bedroomsShort: "ch",
+          bathroomsShort: "wc",
+          book: "Réserver",
+          pay: "Payer",
+
+          // ----------- Room Card ------------------
+          previous: "Précédent",
+          next: "Suivant",
+          // priceNA: "Prix non disponible",
+          night: "nuit",
+          view: "Voir",
+          editAria: "Modifier {{title}}",
+
+          // ---------------- RoomListingRequest --------------
+          "Room Listing Request": "Demande de mise en location",
+          "Room Title": "Titre du logement",
+          Description: "Description",
+          Capacity: "Capacité",
+          Bedrooms: "Chambres",
+          Bathrooms: "Salles de bain",
+          "Instant Book": "Réservation instantanée",
+          "Min Nights": "Nuits min.",
+          "Max Nights": "Nuits max.",
+          Terms: "Conditions",
+          "Select term": "Sélectionner la durée",
+          Selected: "Sélectionné",
+          Pricing: "Tarification",
+          "Price Amount": "Montant",
+          Currency: "Devise",
+          "Select Currency": "Sélectionner la devise",
+          Location: "Emplacement",
+          Address: "Adresse",
+          City: "Ville",
+          Region: "Région",
+          Country: "Pays",
+          "Coordinates (lat, lng)": "Coordonnées (lat, lng)",
+          "Amenities (comma separated)":
+            "Équipements (séparés par des virgules)",
+          "Rules (comma separated)": "Règles (séparées par des virgules)",
+          "You can upload up to 12 images.":
+            "Vous pouvez télécharger jusqu'à 12 images.",
+          Contact: "Contact",
+          "Your Name": "Votre nom",
+          Email: "Email",
+          Phone: "Téléphone",
+          "I acknowledge the contract for listing and agree to the terms.":
+            "Je reconnais le contrat de mise en location et j'accepte les conditions.",
+          "listing contract": "contrat de mise en location",
+          "Submitting ...": "Envoi ...",
+          "Submit Listing": "Soumettre l'annonce",
+          Reset: "Réinitialiser",
+          "Thank you for booking!": "Merci pour votre inscription !",
+          "Payment Instructions": "Instructions de paiement",
+          Notice: "Avis",
+          Bank: "Banque",
+          "Account name": "Nom du compte",
+          "Account number": "Numéro de compte",
+          IBAN: "IBAN",
+          Reference: "Référence",
+          "Please include your listing ID or email":
+            "Veuillez inclure votre identifiant d'annonce ou votre e-mail",
+          "After you complete the payment, please reply to the confirmation email or contact support at":
+            "Après avoir effectué le paiement, veuillez répondre à l'e-mail de confirmation ou contacter le support à",
+          Close: "Fermer",
+          "Required:": "Requis :",
+          Saved: "Enregistré",
+          "Price per night is required.": "Le prix par nuit est requis.",
+          "Room title is required.": "Le titre du logement est requis.",
+          "Description is required.": "La description est requise.",
+          "Your name is required.": "Votre nom est requis.",
+          "Email is required.": "L'email est requis.",
+          "Phone is required.": "Le téléphone est requis.",
+          "You must acknowledge the listing terms.":
+            "Vous devez accepter les conditions de l'annonce.",
+          "Invalid email address.": "Adresse e-mail invalide.",
+          "Invalid phone number.": "Numéro de téléphone invalide.",
+          "Select term placeholder": "Sélectionner la durée",
+          "Select Currency placeholder": "Sélectionner la devise",
+
+          // ---------- ContractPageListing ------------
+          // Page title and meta
+          "page.title":
+            "Contrat de mise en location — LM-Ltd Services et Propriétaire",
+          "effectiveDate.label": "Date d'entrée en vigueur :",
+          "owner.label": "Propriétaire :",
+          "phone.label": "Téléphone :",
+
+          // Sections and their full text
+          "term.title": "Durée",
+          "term.text":
+            "Le propriétaire choisit 1 (13,5 %) / 3 (10,5 %) / 6 (8,5 %) mois (entourez votre choix). La durée choisie régit la durée initiale du présent contrat de mise en location.",
+
+          "fees.title": "Frais et paiement",
+          "fees.text":
+            "Le propriétaire accepte de payer le pourcentage de commission ou les frais uniques décrits dans le plan choisi. Pour les plans hybrides, des frais de mise en ligne initiaux de 20 $ × mois sont facturés au début de l'annonce ; la commission s'applique aux loyers perçus.",
+
+          "billing.title": "Moment de facturation",
+          "billing.text":
+            "Les commissions par réservation sont facturées au moment de chaque encaissement de loyer. Les frais uniques sont facturés au début de l'annonce. Les frais de traitement sont répercutés le cas échéant.",
+
+          "payouts.title": "Paiements au propriétaire",
+          "payouts.text":
+            "La plateforme verse les paiements au propriétaire 7 jours après l'enregistrement/confirmation du check-in. Le calendrier exact des paiements sera affiché dans les paramètres de paiement du propriétaire.",
+
+          "refunds.title": "Remboursements et prorata",
+          "refunds.text":
+            "Si le propriétaire met fin au contrat de manière anticipée, les frais sont proratisés au jour pour la portion non utilisée ; la plateforme conserve les frais pour les services rendus. La plateforme peut retenir les remboursements en cas de litiges non résolus ou de rétrofacturations en cours.",
+
+          "cancellations.title": "Annulations et litiges",
+          "cancellations.text":
+            "Les règles d'annulation suivent la politique d'annulation publiée. Les litiges doivent être soumis dans les 3 jours suivant le départ.",
+
+          "taxes.title": "Taxes et conformité",
+          "taxes.text":
+            "Le propriétaire est responsable des taxes locales d'hébergement sauf si la plateforme est contractuellement chargée de les collecter et de les reverser. La plateforme affichera les taxes au paiement lorsque la loi l'exige.",
+
+          "damage.title": "Dommages et dépôts de garantie",
+          "damage.text":
+            "La plateforme peut exiger une pré-autorisation de carte ou une retenue pour dommages éventuels ; la capture n'aura lieu qu'en cas de réclamations validées.",
+
+          "data.title": "Données et confidentialité",
+          "data.text":
+            "La plateforme traitera les données du propriétaire et des invités conformément à sa politique de confidentialité.",
+
+          "termination.title": "Résiliation et renouvellement",
+          "termination.text":
+            "Le présent accord est renouvelé automatiquement sauf si l'une des parties donne un préavis de 30 jours avant la fin de la période.",
+
+          "governing.title": "Droit applicable et résolution des litiges",
+          "governing.text":
+            "Le présent accord est régi par les lois de Luanda, Angola. Tout litige sera résolu conformément à ces lois.",
+
+          "signatures.title": "Signatures",
+          "signatures.text":
+            "En cliquant sur Accepter et reconnaître, le propriétaire accepte numériquement et reconnaît les termes du présent contrat de mise en location.",
+
+          // Buttons / UI
+          "button.agree": "Accepter et reconnaître",
+          "button.saving": "Enregistrement...",
+          "spinner.saving.aria": "Enregistrement",
+
+          // Notices / errors
+          "notice.acknowledgeSaveFailed":
+            "Nous n'avons pas pu enregistrer votre accord sur le serveur. Votre accord est stocké localement.",
+
+          // ------------ Room Page -------------------
+          // Dashboard / tabs
+          "dashboard.tabOverview": "Aperçu",
+          "dashboard.tabBookings": "Mes réservations",
+          "dashboard.availableRooms": "Chambres disponibles",
+          "dashboard.pay": "Payer",
+          "dashboard.payConfirm":
+            "Vous serez redirigé vers une page de paiement sécurisée.",
+          "dashboard.cancel": "Annuler",
+          "dashboard.proceedToPay": "Procéder au paiement",
+          "dashboard.accessDenied":
+            "Accès refusé. Cette zone est réservée aux utilisateurs.",
+
+          // Room page messages
+          "roomPage.noRooms": "Aucune chambre disponible.",
+          "roomPage.noDescription": "Aucune description disponible.",
+          "roomPage.detailsTitle": "Détails de la chambre",
+          "roomPage.bookRoom": "Réserver la chambre",
+          "roomPage.bookThisRoom": "Réserver cette chambre",
+          "roomPage.close": "Fermer",
+          "roomPage.maxGuests": "Nombre max d'invités:",
+
+          // Errors and messages
+          "roomPage.errors.loadRooms": "Échec du chargement des chambres.",
+          "roomPage.errors.loadBookings":
+            "Échec du chargement des réservations.",
+          "roomPage.messages.bookingsEndpointUnavailable":
+            "Le point de terminaison des réservations n'est pas disponible sur le serveur. Vous pouvez toujours créer des réservations ; elles apparaîtront ici après création.",
+
+          // Bank modal
+          "roomPage.paymentInstructionsTitle": "Instructions de paiement",
+          "roomPage.bankModal.thankYou":
+            "Merci pour votre réservation. Payez la réservation dans les 48 heures pour éviter l'annulation.",
+          "roomPage.bankModal.contactSupport":
+            "Si vous avez besoin d'aide, contactez l'équipe de support",
+          "roomPage.bankModal.bank": "Banque :",
+          "roomPage.bankModal.accountName": "Nom du compte :",
+          "roomPage.bankModal.accountNumber": "Numéro de compte :",
+          "roomPage.bankModal.iban": "IBAN :",
+          "roomPage.bankModal.reference": "Référence :",
+          "roomPage.bankModal.amount": "Montant :",
+          "roomPage.bankModal.loading": "Chargement des détails de paiement...",
+          "roomPage.bankModal.close": "Fermer",
+
+          // ------------ RoomBookingModal -------------------
+          "roomBooking.title": "Réserver {{roomName}}",
+          "roomBooking.startDate": "Date de début",
+          "roomBooking.endDate": "Date de fin",
+          "roomBooking.dateOfBirth": "Date de naissance",
+          "roomBooking.guests": "Invités",
+          "roomBooking.idDocumentLabel":
+            "Document d'identité (passeport ou pièce d'identité)",
+          "roomBooking.cancel": "Annuler",
+          "roomBooking.book": "Réserver",
+          "roomBooking.booking": "En cours de réservation...",
+          "roomBooking.success": "Réservation réussie",
+          "roomBooking.error.uploadId":
+            "Veuillez télécharger un document d'identité",
+          "roomBooking.error.dates":
+            "Veuillez sélectionner les dates de début et de fin",
+          "roomBooking.error.dob": "Veuillez saisir la date de naissance",
+          "roomBooking.error.generic": "La réservation a échoué",
+          "roomBooking.file.accept": "image/*,application/pdf",
+
+          // ------------ BookingForm -------------------
+          "booking.startDate": "Date de début",
+          "booking.endDate": "Date de fin",
+          "booking.guests": "Invités",
+          "booking.primaryGuestName": "Nom du voyageur principal",
+          "booking.primaryGuestEmail": "Email du voyageur principal",
+          "booking.secondaryGuestName": "Nom du second voyageur (optionnel)",
+          "booking.secondaryGuestEmail": "Email du second voyageur (optionnel)",
+          "booking.primaryGuestPhone": "Téléphone du voyageur principal",
+          "booking.dateOfBirth": "Date de naissance",
+          "booking.paymentMethod": "Méthode de paiement",
+          "booking.paymentMethod.card": "Carte",
+          "booking.paymentMethod.bank": "Virement bancaire",
+          "booking.notes": "Notes (optionnel)",
+          "booking.idDocumentLabel":
+            "Document d'identité / Passeport (obligatoire)",
+          "booking.idDocumentHelp": "Max 10 Mo. Formats PDF ou image acceptés.",
+          "booking.cancel": "Annuler",
+          "booking.submit": "Réserver la chambre",
+          "booking.submitting": "Réservation en cours...",
+          "booking.progressLabel": "Progression du téléchargement",
+
+          // Success / info
+          "booking.success": "Réservation créée avec succès.",
+          "booking.bookingsEndpointUnavailable":
+            "Le point de terminaison des réservations n'est pas disponible sur le serveur. Vous pouvez toujours créer des réservations ; elles apparaîtront ici après création.",
+
+          // Validation / errors
+          "booking.error.noRoom": "Nenhum quarto selecionado.",
+          "booking.error.noUser":
+            "Nenhum utilizador disponível. Por favor inicie sessão.",
+          "booking.error.datesRequired":
+            "As datas de início e fim são obrigatórias.",
+          "booking.error.invalidDate": "Formato de data inválido.",
+          "booking.error.endBeforeStart":
+            "A data de fim deve ser posterior à data de início.",
+          "booking.error.guestsPositive":
+            "Os hóspedes devem ser um inteiro positivo.",
+          "booking.error.primaryNameRequired":
+            "O nome do hóspede principal é obrigatório.",
+          "booking.error.dobRequired": "A data de nascimento é obrigatória.",
+          "booking.error.invalidDob": "Data de nascimento inválida.",
+          "booking.error.ageMinimum":
+            "O hóspede deve ter pelo menos 18 anos para reservar.",
+          "booking.error.idRequired":
+            "É obrigatório carregar um documento de identificação / passaporte.",
+          "booking.error.idTooLarge":
+            "O ficheiro de identificação é demasiado grande. Máximo 10MB permitido.",
+          "booking.error.invalidEmail":
+            "O email do hóspede principal é inválido.",
+          "booking.error.invalidEmailSecondary":
+            "O email do segundo hóspede é inválido.",
+          "booking.error.createFailed":
+            "Falha ao criar a reserva. Por favor tente novamente.",
+
+          // ------------- Bookings ------------------
+
+          bookings: {
+            title: "Mes Réservations",
+            empty: "Aucune réservation pour le moment.",
+            confirmCancel: "Annuler cette réservation ?",
+            error: {
+              load: "Échec du chargement des réservations",
+              cancel: "Échec de l'annulation",
+              details: "Échec du chargement des détails de la réservation",
+            },
+          },
+
+          // ------------ BookingFormWithModal -------------------
+          bookingModal: {
+            payTitle: "Payer : {{roomName}}",
+            paymentInstructions: "Instructions de paiement",
+            bankTransferTitle: "Instructions pour virement bancaire",
+            bank: "Banque",
+            accountName: "Nom du compte",
+            accountNumber: "Numéro de compte",
+            routing: "Code de routage / Sort code",
+            iban: "IBAN",
+            reference: "Référence",
+            amount: "Montant",
+            copy: "Copier",
+            copied: "{{field}} copié",
+            copyHint:
+              "Utilisez les boutons Copier pour copier les informations.",
+            close: "Fermer",
+            room: "chambre",
+          },
+
           // ---------- Services Available -----------
           "button.request": "Demander",
           "button.schedule": "Planifier",
@@ -1207,8 +2301,6 @@ i18n
           "dashboard.email": "Email",
           "dashboard.role": "Rôle",
           "dashboard.overview": "Aperçu de Vos Services",
-          "dashboard.accessDenied":
-            "Accès refusé. Ce tableau de bord est réservé aux utilisateurs réguliers.",
           "dashboard.loading": "Chargement...",
           "dashboard.failedRequested":
             "Échec du chargement des services demandés.",
@@ -1424,10 +2516,10 @@ i18n
           // ---------------- Modal Profile  ---------------
           "Your Profile": "Votre Profil",
           Fullname: "Nom complet",
-          Email: "E-mail",
-          Phone: "Téléphone",
+          // Email: "E-mail",
+          // Phone: "Téléphone",
           "Save Changes": "Enregistrer",
-          Close: "Fermer",
+          // Close: "Fermer",
           "Profile updated successfully!": "Profil mis à jour avec succès !",
           "Failed to update profile": "Échec de la mise à jour du profil",
           "No token found": "Jeton introuvable",
@@ -1585,14 +2677,3 @@ i18n
   });
 
 export default i18n;
-
-// i18n.use(initReactI18next).init({
-//   resources,
-//   lng: "en",
-//   fallbackLng: "en",
-//   interpolation: {
-//     escapeValue: false,
-//   },
-// });
-
-// export default i18n;

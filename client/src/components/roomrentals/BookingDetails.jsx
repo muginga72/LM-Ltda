@@ -1,10 +1,12 @@
 // src/components/BookingDetails.jsx
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Modal, Button } from 'react-bootstrap';
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal, Button } from "react-bootstrap";
+import { useI18n } from "../../i18n";
+import { EuropeanDateRange, EuropeanDateTime } from "../common/EuropeanDate";
 
 const PLACEHOLDER =
-  'data:image/svg+xml;charset=UTF-8,' +
+  "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(
     `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='400' viewBox='0 0 800 400'>
       <rect width='100%' height='100%' fill='#f3f3f3'/>
@@ -27,11 +29,12 @@ function resolveFirstImage(images) {
 function resolveImageUrl(img) {
   try {
     if (!img) return null;
-    if (typeof img === 'string') {
+    if (typeof img === "string") {
       return img;
     }
-    if (img.url && typeof img.url === 'string') return img.url;
-    if (img.filename && typeof img.filename === 'string') return `/uploads/rooms/${img.filename}`;
+    if (img.url && typeof img.url === "string") return img.url;
+    if (img.filename && typeof img.filename === "string")
+      return `/uploads/rooms/${img.filename}`;
     return null;
   } catch {
     return null;
@@ -39,25 +42,28 @@ function resolveImageUrl(img) {
 }
 
 export default function BookingDetails({ booking, onClose }) {
+  const { t } = useI18n();
+
   if (!booking) return null;
 
-  const start = booking.startDate ? new Date(booking.startDate).toLocaleDateString() : '—';
-  const end = booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—';
   const imageUrl = resolveFirstImage(booking.room?.images) || PLACEHOLDER;
+  const unknown = t("BookingDetails.unknown") || "—";
 
   return (
     <Modal show={!!booking} onHide={onClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Booking {booking._id}</Modal.Title>
+        <Modal.Title>
+          {t("BookingDetails.title", { id: booking._id ?? booking.id ?? unknown })}
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         {/* Top image to attract the user */}
-        <div className="mb-3" style={{ textAlign: 'center' }}>
+        <div className="mb-3" style={{ textAlign: "center" }}>
           <img
             src={imageUrl}
-            alt={booking.room?.roomTitle || 'Room image'}
-            style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 24 }}
+            alt={booking.room?.roomTitle || t("BookingDetails.roomImageAltFallback")}
+            style={{ width: "100%", maxHeight: 320, objectFit: "cover", borderRadius: 24 }}
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = PLACEHOLDER;
@@ -65,34 +71,58 @@ export default function BookingDetails({ booking, onClose }) {
           />
         </div>
 
-        <p><strong>Room:</strong> {booking.room?.roomTitle || booking.room?.title || '—'}</p>
-        <p><strong>Dates:</strong> {start} — {end} ({booking.nights ?? '—'} nights)</p>
-        <p><strong>Guest:</strong> {booking.guest?.name || booking.guest?._id || '—'}</p>
-        <p><strong>Status:</strong> {booking.status || '—'}</p>
         <p>
-          <strong>Total:</strong>{' '}
-          {booking.totalPrice?.amount ?? booking.totalAmount ?? '—'}{' '}
-          {booking.totalPrice?.currency ?? booking.currency ?? ''}
+          <strong>{t("BookingDetails.roomLabel") || "Room"}:</strong>{" "}
+          {booking.room?.roomTitle || booking.room?.title || unknown}
+        </p>
+
+        <p>
+          <strong>{t("BookingDetails.datesLabel") || "Dates"}:</strong>{" "}
+          <EuropeanDateRange start={booking.startDate} end={booking.endDate} /> (
+          {booking.nights ?? unknown} {booking.nights ? "nights" : ""})
+        </p>
+
+        <p>
+          <strong>{t("BookingDetails.guestLabel") || "Guest"}:</strong>{" "}
+          {booking.guest?.name || booking.guest?._id || unknown}
+        </p>
+
+        <p>
+          <strong>{t("BookingDetails.statusLabel") || "Status"}:</strong>{" "}
+          {booking.status || unknown}
+        </p>
+
+        <p>
+          <strong>{t("BookingDetails.totalLabel") || "Total"}:</strong>{" "}
+          {booking.totalPrice?.amount ?? booking.totalAmount ?? unknown}{" "}
+          {booking.totalPrice?.currency ?? booking.currency ?? ""}
         </p>
 
         {booking.idDocument && (
           <p>
-            <strong>ID uploaded:</strong>{' '}
-            {booking.idDocument.originalName || booking.idDocument.filename || 'uploaded file'}
+            <strong>{t("BookingDetails.idUploadedLabel") || "ID uploaded"}:</strong>{" "}
+            {booking.idDocument.originalName || booking.idDocument.filename || t("BookingDetails.unknown")}
           </p>
         )}
 
         {booking.expiresAt && (
-          <p><strong>Expires at:</strong> {new Date(booking.expiresAt).toLocaleString()}</p>
+          <p>
+            <strong>{t("BookingDetails.expiresAtLabel") || "Expires at"}:</strong>{" "}
+            <EuropeanDateTime value={booking.expiresAt} />
+          </p>
         )}
 
         {booking.notes && (
-          <p><strong>Notes:</strong> {booking.notes}</p>
+          <p>
+            <strong>{t("BookingDetails.notesLabel") || "Notes"}:</strong> {booking.notes}
+          </p>
         )}
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="secondary" onClick={onClose}>
+          {t("BookingDetails.close") || "Close"}
+        </Button>
       </Modal.Footer>
     </Modal>
   );

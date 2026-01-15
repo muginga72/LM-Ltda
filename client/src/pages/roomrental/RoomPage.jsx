@@ -19,18 +19,17 @@ import EmailSupportModal from "../../components/EmailSupportModal";
 import RoomCardWithPay from "../../components/roomrentals/RoomCardWithPay";
 import UserBookingsList from "../../components/roomrentals/UserBookingsList";
 import BookingFormWithModal from "../../components/roomrentals/BookingFormWithModal";
+import "../../i18n";
 
 export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers = {} }) {
   const { user } = useContext(AuthContext);
   const { t } = useTranslation();
-
   const isUser = Boolean(user && user.role !== "admin");
 
   // Rooms & bookings
   const [rooms, setRooms] = useState([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [errorRooms, setErrorRooms] = useState(null);
-
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [errorBookings, setErrorBookings] = useState(null);
@@ -70,7 +69,7 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
       ...headers,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authToken, JSON.stringify(headers)]); // stringify headers to detect changes without recreating object each render
+  }, [authToken, JSON.stringify(headers)]);
 
   // buildUrl memoized only on apiBaseUrl
   const buildUrl = useCallback(
@@ -92,7 +91,6 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
         mounted = false;
       };
     }
-
     setLoadingRooms(true);
     setErrorRooms(null);
 
@@ -107,7 +105,7 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
       } catch (err) {
         console.error("Rooms fetch error:", err);
         if (!mounted) return;
-        setErrorRooms("Failed to load rooms.");
+        setErrorRooms(t("roomPage.errors.loadRooms") || "Failed to load rooms.");
       } finally {
         if (mounted) setLoadingRooms(false);
       }
@@ -116,8 +114,8 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
     return () => {
       mounted = false;
     };
-    // Intentionally depend on isUser and refreshKey and authToken only to avoid loops
-  }, [isUser, refreshKey, buildUrl, authToken, defaultHeaders]);
+    // Intentionally depend on isUser, refreshKey, buildUrl, authToken, defaultHeaders, t
+  }, [isUser, refreshKey, buildUrl, authToken, defaultHeaders, t]);
 
   // Fetch bookings
   useEffect(() => {
@@ -150,12 +148,13 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
         if (status === 404) {
           setBookings([]);
           setErrorBookings(
-            "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation."
+            t("roomPage.messages.bookingsEndpointUnavailable") ||
+              "Bookings endpoint not available on the server. You can still create bookings; they will appear here after creation."
           );
         } else {
           console.warn("Bookings fetch error:", err);
           setBookings([]);
-          setErrorBookings("Failed to load bookings.");
+          setErrorBookings(t("roomPage.errors.loadBookings") || "Failed to load bookings.");
         }
       } finally {
         if (mounted) setLoadingBookings(false);
@@ -165,8 +164,8 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
     return () => {
       mounted = false;
     };
-    // Depend on user._id and refreshKey and authToken only
-  }, [isUser, refreshKey, buildUrl, authToken, defaultHeaders, user?._id]);
+    // Depend on isUser, refreshKey, buildUrl, authToken, defaultHeaders, user?._id, t
+  }, [isUser, refreshKey, buildUrl, authToken, defaultHeaders, user?._id, t]);
 
   // UI handlers
   const handlePayService = (serviceId) => {
@@ -177,12 +176,10 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
     setShowPayModal(false);
     setSelectedServiceId(null);
   };
-
   const handleOpenDetails = (room) => {
     setSelectedRoom(room);
     setShowDetails(true);
   };
-
   const handleCloseDetails = () => {
     setSelectedRoom(null);
     setShowDetails(false);
@@ -216,6 +213,7 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
           };
       setBookings((prev) => [b, ...prev]);
     }
+
     setBookingRoom(null);
     setShowBookingModal(false);
     setRefreshKey((k) => k + 1);
@@ -226,7 +224,6 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
     setBankInfo(info);
     setShowBankModal(true);
   };
-
   const closeBankModal = () => {
     setShowBankModal(false);
     setBankInfo(null);
@@ -244,9 +241,8 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
     if (errorRooms) {
       return <Alert variant="danger">{errorRooms}</Alert>;
     }
-
     if (!rooms || rooms.length === 0) {
-      return <div className="text-muted">No rooms available.</div>;
+      return <div className="text-muted">{t("roomPage.noRooms") || "No rooms available."}</div>;
     }
 
     return (
@@ -324,7 +320,7 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
               variant="primary"
               onClick={() => {
                 if (selectedServiceId) {
-                  window.location.href = `/payments/checkout?serviceId=${selectedServiceId}`;
+                  window.location.href = `/payments/checkout?serviceId=${encodeURIComponent(selectedServiceId)}`;
                 }
               }}
             >
@@ -339,7 +335,7 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
             <Modal.Title>
               {bookingRoom
                 ? `Book: ${bookingRoom.roomTitle ?? bookingRoom.title ?? bookingRoom.name}`
-                : "Book room"}
+                : t("roomPage.bookRoom") || "Book room"}
             </Modal.Title>
           </Modal.Header>
 
@@ -369,7 +365,7 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
         <Modal show={showDetails} onHide={handleCloseDetails} centered size="lg">
           <Modal.Header closeButton>
             <Modal.Title>
-              {selectedRoom?.roomTitle ?? selectedRoom?.title ?? selectedRoom?.name ?? "Room details"}
+              {selectedRoom?.roomTitle ?? selectedRoom?.title ?? selectedRoom?.name ?? t("roomPage.detailsTitle") ?? "Room details"}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -387,10 +383,11 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
                   {selectedRoom.roomDescription ??
                     selectedRoom.description ??
                     selectedRoom.summary ??
+                    t("roomPage.noDescription") ??
                     "No description available."}
                 </p>
                 <p>
-                  <strong>Max guests: </strong>
+                  <strong>{t("roomPage.maxGuests") ?? "Max guests:"} </strong>
                   {selectedRoom.roomCapacity ?? selectedRoom.capacity ?? "N/A"}
                 </p>
                 <div className="d-flex gap-2">
@@ -401,10 +398,10 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
                       handleRequestBooking(selectedRoom);
                     }}
                   >
-                    Book this room
+                    {t("roomPage.bookThisRoom") ?? "Book this room"}
                   </Button>
                   <Button variant="secondary" onClick={handleCloseDetails}>
-                    Close
+                    {t("roomPage.close") ?? "Close"}
                   </Button>
                 </div>
               </>
@@ -420,43 +417,47 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
       {/* Bank instructions modal shown after booking when payment method is bank transfer */}
       <Modal show={showBankModal} onHide={closeBankModal} centered size="md">
         <Modal.Header closeButton>
-          <Modal.Title>Payment instructions</Modal.Title>
+          <Modal.Title>{t("roomPage.paymentInstructionsTitle") || "Payment instructions"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {bankInfo ? (
             <div>
               <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                Thank you for your booking. Pay the booking in the next <srong>48 hours</srong> to avoid cancellation. If you need help contact the support team <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a>. Please complete payment using the details below:
+                {t("roomPage.bankModal.thankYou") ||
+                  "Thank you for your booking. Pay the booking in the next 48 hours to avoid cancellation."}{" "}
+                {t("roomPage.bankModal.contactSupport") || "If you need help contact the support team"}{" "}
+                <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a>.
               </p>
 
               <div>
                 <div>
-                  <strong>Bank:</strong> {bankInfo.bankName}
+                  <strong>{t("roomPage.bankModal.bank") || "Bank:"}</strong> {bankInfo.bankName}
                 </div>
                 <div>
-                  <strong>Account name:</strong> {bankInfo.accountName ?? bankInfo.owner}
+                  <strong>{t("roomPage.bankModal.accountName") || "Account name:"}</strong>{" "}
+                  {bankInfo.accountName ?? bankInfo.owner}
                 </div>
                 <div>
-                  <strong>Account number:</strong> {bankInfo.accountNumber}
+                  <strong>{t("roomPage.bankModal.accountNumber") || "Account number:"}</strong> {bankInfo.accountNumber}
                 </div>
                 <div>
-                  <strong>IBAN:</strong> {bankInfo.routingNumber}
+                  <strong>{t("roomPage.bankModal.iban") || "IBAN:"}</strong> {bankInfo.routingNumber}
                 </div>
                 <div>
-                  <strong>Reference:</strong> {bankInfo.reference}
+                  <strong>{t("roomPage.bankModal.reference") || "Reference:"}</strong> {bankInfo.reference}
                 </div>
                 <div>
-                  <strong>Amount:</strong> {bankInfo.currency ?? "USD"} {bankInfo.amount}
+                  <strong>{t("roomPage.bankModal.amount") || "Amount:"}</strong> {bankInfo.currency ?? "USD"} {bankInfo.amount}
                 </div>
               </div>
             </div>
           ) : (
-            <div>Loading payment details…</div>
+            <div>{t("roomPage.bankModal.loading") || "Loading payment details..."}</div>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeBankModal}>
-            Close
+            {t("roomPage.bankModal.close") || "Close"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -464,13 +465,12 @@ export default function RoomPage({ apiBaseUrl, token, onProofSubmitted, headers 
       <footer className="text-center py-4 border-top">
         <small>
           <p>
-            <strong>{t("whoWeAre.footer.phones") || "Phones"}:</strong> (+244) 222 022 351; (+244) 942 154 545;
-            (+244) 921 588 083; (+244) 939 207 046
+            <strong>{t("whoWeAre.footer.phones") || "Phones"}:</strong> (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
             <br />
             {t("whoWeAre.footer.address") || ""}
           </p>
           <p>
-            &copy; {new Date().getFullYear()} ImLtd. {t("whoWeAre.footer.copyright") || ""}
+            &copy; {new Date().getFullYear()} LM-Ltd. {t("whoWeAre.footer.copyright") || ""}
           </p>
         </small>
       </footer>

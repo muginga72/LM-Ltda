@@ -1,7 +1,9 @@
+// src/components/roomrentals/BookingFormWithModal.jsx
 import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Button, Col, Container, Modal, Row, Spinner } from "react-bootstrap";
 import BookingForm from "./BookingForm";
+import { useTranslation } from "react-i18next";
 
 export default function BookingFormWithModal({
   room,
@@ -11,8 +13,10 @@ export default function BookingFormWithModal({
   headers,
   onBooked,
   onCancel,
-  onShowPayInstructions, 
+  onShowPayInstructions,
 }) {
+  const { t } = useTranslation();
+
   const [showPayInstructions, setShowPayInstructions] = useState(false);
   const [bankInfo, setBankInfo] = useState(null);
   const panelRef = useRef(null);
@@ -20,7 +24,6 @@ export default function BookingFormWithModal({
 
   useEffect(() => {
     if (showPayInstructions && panelRef.current) {
-      // focus the panel for accessibility
       panelRef.current.focus({ preventScroll: false });
     }
   }, [showPayInstructions]);
@@ -29,7 +32,6 @@ export default function BookingFormWithModal({
     setBankInfo(info);
     setShowPayInstructions(true);
 
-    // bubble up if parent provided a handler
     if (typeof onShowPayInstructions === "function") {
       onShowPayInstructions(info);
     }
@@ -45,7 +47,8 @@ export default function BookingFormWithModal({
     }
   };
 
-  const maskAccount = (acct = "") => (acct.length > 4 ? `****${acct.slice(-4)}` : acct);
+  const maskAccount = (acct = "") =>
+    acct.length > 4 ? `****${acct.slice(-4)}` : acct;
 
   return (
     <Container className="py-3">
@@ -60,7 +63,7 @@ export default function BookingFormWithModal({
         onShowPayInstructions={handleShowPayInstructions}
       />
 
-      {/* Modal style panel for bank instructions */}
+      {/* Bank Instructions Modal */}
       <Modal
         show={showPayInstructions}
         onHide={() => setShowPayInstructions(false)}
@@ -70,104 +73,180 @@ export default function BookingFormWithModal({
       >
         <Modal.Header closeButton>
           <Modal.Title id="payment-instructions-title">
-            {room ? `Pay: ${room.roomTitle ?? room.title ?? room.name}` : "Payment instructions"}
+            {room
+              ? t("bookingModal.payTitle", {
+                  roomName:
+                    room.roomTitle ?? room.title ?? room.name ?? t("bookingModal.room"),
+                })
+              : t("bookingModal.paymentInstructions")}
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           {bankInfo ? (
-            <div ref={panelRef} tabIndex={-1} role="region" aria-labelledby="payment-instructions-title">
-              <h6 className="mb-3">Bank transfer instructions</h6>
+            <div
+              ref={panelRef}
+              tabIndex={-1}
+              role="region"
+              aria-labelledby="payment-instructions-title"
+            >
+              <h6 className="mb-3">{t("bookingModal.bankTransferTitle")}</h6>
 
+              {/* BANK NAME */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>Bank</strong>
+                  <strong>{t("bookingModal.bank")}</strong>
                   <div>{bankInfo.bankName ?? "-"}</div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("Bank", bankInfo.bankName)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(t("bookingModal.bank"), bankInfo.bankName)
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
+              {/* ACCOUNT NAME */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>Account name</strong>
+                  <strong>{t("bookingModal.accountName")}</strong>
                   <div>{bankInfo.accountName ?? "-"}</div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("Account name", bankInfo.accountName)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(
+                        t("bookingModal.accountName"),
+                        bankInfo.accountName
+                      )
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
+              {/* ACCOUNT NUMBER */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>Account number</strong>
+                  <strong>{t("bookingModal.accountNumber")}</strong>
                   <div>{maskAccount(bankInfo.accountNumber ?? "")}</div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("Account number", bankInfo.accountNumber)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(
+                        t("bookingModal.accountNumber"),
+                        bankInfo.accountNumber
+                      )
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
+              {/* ROUTING */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>Routing / Sort code</strong>
+                  <strong>{t("bookingModal.routing")}</strong>
                   <div>{bankInfo.routingNumber ?? "-"}</div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("Routing", bankInfo.routingNumber)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(
+                        t("bookingModal.routing"),
+                        bankInfo.routingNumber
+                      )
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
+              {/* IBAN */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>IBAN</strong>
+                  <strong>{t("bookingModal.iban")}</strong>
                   <div>{bankInfo.iban ?? "-"}</div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("IBAN", bankInfo.iban)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(t("bookingModal.iban"), bankInfo.iban)
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
+              {/* REFERENCE */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>Reference</strong>
+                  <strong>{t("bookingModal.reference")}</strong>
                   <div>{bankInfo.reference ?? "-"}</div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("Reference", bankInfo.reference)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(
+                        t("bookingModal.reference"),
+                        bankInfo.reference
+                      )
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
+              {/* AMOUNT */}
               <Row className="mb-2 align-items-start">
                 <Col xs={8}>
-                  <strong>Amount</strong>
+                  <strong>{t("bookingModal.amount")}</strong>
                   <div>
                     {bankInfo.currency ?? "USD"} {bankInfo.amount ?? "-"}
                   </div>
                 </Col>
                 <Col xs={4} className="text-end">
-                  <Button size="sm" variant="outline-secondary" onClick={() => handleCopy("Amount", `${bankInfo.amount ?? ""}`)}>
-                    Copy
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() =>
+                      handleCopy(
+                        t("bookingModal.amount"),
+                        `${bankInfo.amount ?? ""}`
+                      )
+                    }
+                  >
+                    {t("bookingModal.copy")}
                   </Button>
                 </Col>
               </Row>
 
               <div className="mt-3">
                 <small className="text-muted">
-                  {copiedLabel ? `Copied ${copiedLabel}` : "Use the Copy buttons to copy details to clipboard."}
+                  {copiedLabel
+                    ? t("bookingModal.copied", { field: copiedLabel })
+                    : t("bookingModal.copyHint")}
                 </small>
               </div>
             </div>
@@ -179,8 +258,11 @@ export default function BookingFormWithModal({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowPayInstructions(false)}>
-            Close
+          <Button
+            variant="secondary"
+            onClick={() => setShowPayInstructions(false)}
+          >
+            {t("bookingModal.close")}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -208,4 +290,4 @@ BookingFormWithModal.defaultProps = {
   onBooked: null,
   onCancel: () => {},
   onShowPayInstructions: null,
-}
+};

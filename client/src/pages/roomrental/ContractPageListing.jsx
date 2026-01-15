@@ -28,7 +28,7 @@ export default function ContractPageListing() {
 
     sessionStorage.setItem("listingContractAgreed", new Date().toISOString());
 
-        // Build request payload
+    // Build request payload
     const payload = {
       acknowledgedAt: new Date().toISOString(),
       acknowledgedByName: ownerName,
@@ -57,9 +57,7 @@ export default function ContractPageListing() {
       }
     } catch (err) {
       console.warn("Acknowledgement save failed:", err);
-      setError(
-        "We were unable to save your acknowledgement to the server. Your agreement is stored locally."
-      );
+      setError(t("notice.acknowledgeSaveFailed"));
     } finally {
       // Attempt to close the window; if blocked, navigate to the listing flow
       const fallbackRoute = "/room-listing-request";
@@ -89,119 +87,75 @@ export default function ContractPageListing() {
 
   return (
     <Container style={{ maxWidth: 900, marginTop: 30, marginBottom: 60 }}>
-      <h2>Listing Agreement — LM-Ltd Services and Owner</h2>
+      <h2>{t("page.title")}</h2>
       <p>
-        <strong>Effective date:</strong> <em>{todayIso}</em>
+        <strong>{t("effectiveDate.label")}</strong> <em>{todayIso}</em>
       </p>
       <p>
-        <strong>Owner:</strong> <em>{ownerName}</em>
+        <strong>{t("owner.label")}</strong> <em>{ownerName}</em>
       </p>
       <p>
-        <strong>Phone:</strong> <em>{ownerPhone}</em>
+        <strong>{t("phone.label")}</strong> <em>{ownerPhone}</em>
       </p>
+
       <section style={{ marginTop: 20 }}>
-        <h4>Term</h4>
-        <p>
-          Owner selects <strong>1 (13.5%) / 3 (10.5%) / 6 (8.5%) months</strong>{" "}
-          (circle one). The selected term governs the initial duration of this
-          Listing Agreement.
-        </p>
+        <h4>{t("term.title")}</h4>
+        <p>{t("term.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Fees and payment</h4>
-        <p>
-          Owner agrees to pay the commission percentage or one‑time fee
-          described in the chosen plan. For hybrid plans, an upfront listing fee
-          of <strong>$20 × months</strong> is charged at listing start;
-          commission applies to rent collected.
-        </p>
+        <h4>{t("fees.title")}</h4>
+        <p>{t("fees.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Billing timing</h4>
-        <p>
-          Per‑booking commissions are charged at the time of each rent
-          collection. One‑time fees are charged at listing start. Processing
-          fees are passed through as applicable.
-        </p>
+        <h4>{t("billing.title")}</h4>
+        <p>{t("billing.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Payouts to owner</h4>
-        <p>
-          Platform remits owner payouts <strong>7 days</strong> after confirmed
-          check‑in/receipt. The exact payout timing will be displayed in the
-          owner's payout settings.
-        </p>
+        <h4>{t("payouts.title")}</h4>
+        <p>{t("payouts.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Refunds and prorating</h4>
-        <p>
-          If owner terminates early, fees are prorated on a daily basis for the
-          unused portion; platform retains fees for services rendered. Platform
-          may withhold refunds for unresolved disputes or outstanding
-          chargebacks.
-        </p>
+        <h4>{t("refunds.title")}</h4>
+        <p>{t("refunds.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Cancellations and disputes</h4>
-        <p>
-          Cancellation rules follow the published cancellation policy. Disputes
-          must be submitted within 3 days of checkout.
-        </p>
+        <h4>{t("cancellations.title")}</h4>
+        <p>{t("cancellations.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Taxes and compliance</h4>
-        <p>
-          Owner is responsible for local lodging taxes unless platform is
-          contracted to collect and remit them. Platform will display taxes at
-          checkout where required by law.
-        </p>
+        <h4>{t("taxes.title")}</h4>
+        <p>{t("taxes.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Damage and security deposits</h4>
-        <p>
-          Platform may require a card pre‑authorization or hold for incidental
-          damages; capture will occur only on validated claims.
-        </p>
+        <h4>{t("damage.title")}</h4>
+        <p>{t("damage.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Data and privacy</h4>
-        <p>
-          Platform will process owner and guest data in accordance with its
-          privacy policy.
-        </p>
+        <h4>{t("data.title")}</h4>
+        <p>{t("data.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Termination and renewal</h4>
-        <p>
-          This Agreement auto‑renews unless either party gives 30 days' notice
-          prior to the term end.
-        </p>
+        <h4>{t("termination.title")}</h4>
+        <p>{t("termination.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Governing law and dispute resolution</h4>
-        <p>
-          This Agreement is governed by the laws of Luanda, Angola. Any disputes
-          will be resolved under those laws.
-        </p>
+        <h4>{t("governing.title")}</h4>
+        <p>{t("governing.text")}</p>
       </section>
 
       <section style={{ marginTop: 16 }}>
-        <h4>Signatures</h4>
-        <p>
-          By clicking <strong>Agree and Acknowledge</strong>, the Owner
-          digitally agrees to and acknowledges the terms of this Listing
-          Agreement.
-        </p>
+        <h4>{t("signatures.title")}</h4>
+        <p>{t("signatures.text")}</p>
       </section>
 
       {error && <Alert variant="warning">{error}</Alert>}
@@ -217,13 +171,14 @@ export default function ContractPageListing() {
                 role="status"
                 aria-hidden="true"
               />{" "}
-              Saving...
+              {t("button.saving")}
             </>
           ) : (
-            "Agree and Acknowledge"
+            t("button.agree")
           )}
         </Button>
       </div>
+
       <footer className="text-center py-4 border-top">
         <small>
           <p>
