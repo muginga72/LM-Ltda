@@ -17,6 +17,7 @@ i18n
           // ----- Home page -------
           whoWeAreBtn: "Who We Are",
           contactUsBtn: "Contact Us",
+          listRoom: "List a Room",
           seasonMessage:
             "Love served fresh. From intimate dinners to grand wedding celebrations — this season is made to be savored.",
 
@@ -39,16 +40,51 @@ i18n
           promoText2: "Enlist your room with us!",
           learnMoreBtn: "Learn More",
 
-          // ---------- Card Sets -----------
-          // Set-1
+          //================================================================
+          //          Cards Sets: Room Services & Others Services
+          //================================================================
+
+          card: {
+            left: {
+              rent_a_room_for_a_day: "🛏️ Rent a Room for a Day",
+              list_your_room: "🏷️ List Your Room",
+              beverages_service: "🍹 Beverages Service",
+              desc: {
+                rent_a_room_for_a_day:
+                  "Short‑term stays, hourly or daily bookings.",
+                list_your_room:
+                  "Earn from spare space by hosting on your terms",
+                beverages_service: "",
+              },
+            },
+            right: {
+              wedding_events: "💍 Wedding Events",
+              buffet_for_you: "🍽️ Buffet for You",
+              desc: {
+                wedding_events:
+                  "Elegant planning and coordination for unforgettable weddings.",
+                buffet_for_you:
+                  "Delicious self-serve meals for events and gatherings.",
+              },
+            },
+          },
+
+          video: {
+            beverages_service_overview: "Beverages service overview",
+            pixabay_sea_ocean_seagulls_birds_sunset:
+              "Pixabay Sea-ocean-seagulls-birds-sunset",
+          },
+
+          // Set-1 = To page 1
           "button.explore": "Explore",
-          "card.left.🍹 Beverages Service": "🍹 Beverages Service",
+          "card.left.🛏️ Rent a Room for a Day": "🛏️ Rent a Room for a Day",
+          "card.left.🏷️ List Your Room": "🏷️ List Your Room",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet for You",
           "card.right.💍 Wedding Events": "💍 Wedding Events",
-          // "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Made-to-Order Meals",
 
           // Do not remove: It is to be used later
-          // Set-2
+
+          // Set-2 = To page 2
           // "card.left.💍 Wedding Events": "💍 Wedding Events",
           // "card.right.📚 Tutoring": "📚 Tutoring",
           // "card.right.🍔 Hamburgers": "🍔 Hamburgers",
@@ -894,6 +930,7 @@ i18n
           // --------- Home page --------------
           whoWeAreBtn: "Quem Somos",
           contactUsBtn: "Contate-nos",
+          listRoom: "Publique seu Quarto",
           seasonMessage:
             "Servimos com amor num ambiente ameno. Desde jantares íntimos a grandes celebrações de casamento, esta estação foi feita para ser apreciada.",
 
@@ -913,20 +950,53 @@ i18n
           product7: "Salão de Festas",
           product8: "Edificio Caculo",
           promoText1: "Pare de ser aldrabado pelos “matoxeiros”.",
-          promoText2: "Aliste o seu quarto conosco!",
+          promoText2: "Publique seu quarto conosco!",
           learnMoreBtn: "Explore Mais",
 
-          // ---------------- Card Sets --------------------
-          // Set-1
+          //================================================================
+          //          Cards Sets: Room Services & Others Services
+          //================================================================
+          card: {
+            left: {
+              rent_a_room_for_a_day: "🛏️ Alugue um Quarto por Dia",
+              list_your_room: "🏷️ Anuncie seu Quarto",
+              beverages_service: "🍹 Serviço de Bebidas",
+              desc: {
+                rent_a_room_for_a_day:
+                  "Estadias de curta duração, reservas por hora ou por dia.",
+                list_your_room:
+                  "Ganhe com espaço extra hospedando nas suas condições",
+                beverages_service: "",
+              },
+            },
+            right: {
+              wedding_events: "💍 Casamentos",
+              buffet_for_you: "🍽️ Buffet para Você",
+              desc: {
+                wedding_events:
+                  "Planejamento e coordenação elegantes para casamentos inesquecíveis.",
+                buffet_for_you:
+                  "Refeições deliciosas self-service para eventos e encontros.",
+              },
+            },
+          },
+
+          video: {
+            beverages_service_overview: "Visão geral do serviço de bebidas",
+            pixabay_sea_ocean_seagulls_birds_sunset:
+              "Pixabay Mar-pássaros-pôr do sol",
+          },
+
+          // Set-1 = To page 1
           "button.explore": "Explorar",
-          "card.left.🍹 Beverages Service": "🍹 Bebidas a Retalho",
+          "card.left.🛏️ Rent a Room for a Day": "🛏️ Alugue um quarto por dia",
+          "card.left.🏷️ List Your Room": "🏷️ Publique seu Quarto",
+          "card.right.💍 Wedding Events": "💍 Eventos de Casamentos",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet para Você",
-          "card.rigth.💍 Wedding Events": "💍 Eventos de Casamento",
-          // "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Refeições por Encomenda",
 
           // Do not remove: It is to be used later
 
-          // Set-2
+          // Set-1 = To page 2
           // "card.left.💍 Wedding Events": "💍 Eventos de Casamento",
           // "card.right.📚 Tutoring": "📚 Aulas Particulares",
           // "card.right.🍔 Hamburgers": "🍔 Hambúrgueres",
@@ -1782,6 +1852,7 @@ i18n
           // ----- Home page -------
           whoWeAreBtn: "Qui sommes-nous",
           contactUsBtn: "Contactez-nous",
+          listRoom: "Publier une chambre",
           seasonMessage:
             "Servi avec amour et fraîcheur. Les dîners intimes aux grandes célébrations de mariage, cette saison est faite pour être savourée.",
 
@@ -1805,17 +1876,52 @@ i18n
           promoText2: "Réservez votre chambre chez nous!",
           learnMoreBtn: "Apprendre encore plus",
 
-          // ---------- Card Sets -----------
-          // Set-1
+          //================================================================
+          //          Cards Sets: Room Services & Others Services
+          //================================================================
+
+          card: {
+            left: {
+              rent_a_room_for_a_day: "🛏️ Louer une chambre à la journée",
+              list_your_room: "🏷️ Listez votre chambre",
+              beverages_service: "🍹 Service de boissons",
+              desc: {
+                rent_a_room_for_a_day:
+                  "Séjours de courte durée, réservations à l'heure ou à la journée.",
+                list_your_room:
+                  "Gagnez avec l'espace disponible en hébergeant selon vos conditions",
+                beverages_service: "",
+              },
+            },
+            right: {
+              wedding_events: "💍 Événements de mariage",
+              buffet_for_you: "🍽️ Buffet pour vous",
+              desc: {
+                wedding_events:
+                  "Planification et coordination élégantes pour des mariages inoubliables.",
+                buffet_for_you:
+                  "Délicieux repas en libre-service pour événements et rassemblements.",
+              },
+            },
+          },
+
+          video: {
+            beverages_service_overview: "Aperçu du service de boissons",
+            pixabay_sea_ocean_seagulls_birds_sunset:
+              "Pixabay Mer-oiseaux-coucher de soleil",
+          },
+
+          // Set-1 = To page 1
           "button.explore": "Explorer",
-          "card.left.🍹 Beverages Service": "🍹 Service de Boissons",
+          "card.left.🛏️ Rent a Room for a Day":
+            "🛏️ Location d'une Chambre pour Journée",
+          "card.left.🏷️ List Your Room": "🏷️ Publier votre Chambre",
           "card.right.💍 Wedding Events": "💍 Événements de Mariage",
           "card.right.🍽️ Buffet for You": "🍽️ Buffet Pour Vous",
-          // "card.right.👨‍🍳 Made-to-Order Meals": "👨‍🍳 Repas Sur Mesure",
 
           // Do not remove: It is to be used later
 
-          // Set-2
+          // Set-2  = To page 2
           // "card.left.💍 Wedding Events": "💍 Événements de Mariage",
           // "card.right.📚 Tutoring": "📚 Soutien Scolaire",
           // "card.right.🍔 Hamburgers": "🍔 Hamburgers",
