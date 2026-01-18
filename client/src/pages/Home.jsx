@@ -46,7 +46,7 @@ function HomePage() {
                 style={{ color: "green" }}
                 onClick={() => navigate("/room-listing-request")}
               >
-                {t("List a Room")}
+                {t("listRoom")}
               </Button>
             </div>
           </div>

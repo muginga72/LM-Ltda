@@ -1,11 +1,14 @@
 // src/components/roomrental/Bookings.jsx
-import React, { useEffect, useState } from 'react';
-import { Container, Spinner, Alert } from 'react-bootstrap';
-import { listMyBookings, cancelBooking, getBooking } from '../../api/bookingsApi';
-import BookingListItem from './BookingListItem';
-import BookingDetails from './BookingDetails';
+import React, { useEffect, useState } from "react";
+import { Container, Spinner, Alert } from "react-bootstrap";
+import { listMyBookings, cancelBooking, getBooking } from "../../api/bookingsApi";
+import BookingListItem from "./BookingListItem";
+import BookingDetails from "./BookingDetails";
+import { useTranslation } from "react-i18next";
 
 export default function Bookings() {
+  const { t } = useTranslation();
+
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,21 +21,23 @@ export default function Bookings() {
       const data = await listMyBookings();
       setBookings(data);
     } catch (err) {
-      setError('Failed to load bookings');
+      setError(t("bookings.error.load"));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const handleCancel = async (booking) => {
-    if (!window.confirm('Cancel this booking?')) return;
+    if (!window.confirm(t("bookings.confirmCancel"))) return;
     try {
       await cancelBooking(booking._id);
       await load();
     } catch (err) {
-      alert('Cancel failed');
+      alert(t("bookings.error.cancel"));
     }
   };
 
@@ -41,21 +46,37 @@ export default function Bookings() {
       const data = await getBooking(booking._id);
       setSelected(data);
     } catch (err) {
-      alert('Failed to load booking details');
+      alert(t("bookings.error.details"));
     }
   };
 
   return (
     <Container>
-      <h3 className="mb-3">My Bookings</h3>
+      <h3 className="mb-3">{t("bookings.title")}</h3>
+
       {loading && <Spinner animation="border" />}
+
       {error && <Alert variant="danger">{error}</Alert>}
-      {!loading && bookings.length === 0 && <div>No bookings yet.</div>}
-      {bookings.map(b => (
-        <BookingListItem key={b._id} booking={b} onCancel={handleCancel} onView={handleView} />
+
+      {!loading && bookings.length === 0 && (
+        <div>{t("bookings.empty")}</div>
+      )}
+
+      {bookings.map((b) => (
+        <BookingListItem
+          key={b._id}
+          booking={b}
+          onCancel={handleCancel}
+          onView={handleView}
+        />
       ))}
 
-      {selected && <BookingDetails booking={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <BookingDetails
+          booking={selected}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </Container>
   );
 }

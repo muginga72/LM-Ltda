@@ -1,6 +1,7 @@
 // src/components/roomrental/RoomListItem.jsx
 import React from "react";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import { resolveRoomImage } from "../../utils/imageUtils";
 
 const PLACEHOLDER_DATA_URI =
@@ -22,23 +23,153 @@ function getThumb(img) {
   }
 }
 
-export default function RoomListItem({
+/* ---------- Localization / formatting helpers (same approach as RoomDetails) ---------- */
+
+function localeForLang(lang) {
+  if (!lang) return "en-US";
+  const l = String(lang).toLowerCase();
+  if (l.startsWith("fr")) return "fr-FR";
+  if (l.startsWith("pt")) return "pt-PT";
+  return "en-US";
+}
+
+function localizedField(obj, baseKey, lang) {
+  if (!obj) return null;
+  const l = (lang || "en").split("-")[0];
+
+  const translationsMap = obj[`${baseKey}Translations`];
+  if (translationsMap && typeof translationsMap === "object") {
+    if (translationsMap[lang]) return translationsMap[lang];
+    if (translationsMap[l]) return translationsMap[l];
+  }
+
+  if (obj[`${baseKey}_${lang}`]) return obj[`${baseKey}_${lang}`];
+  if (obj[`${baseKey}_${l}`]) return obj[`${baseKey}_${l}`];
+  if (obj[baseKey]) return obj[baseKey];
+  return null;
+}
+
+const conversionRates = {
+  EUR: 0.8615, // 1 USD = 0.8615 EUR
+  AOA: 912.085, // 1 USD = 912.085 AOA
+  USD: 1,
+};
+
+function targetCurrencyForLang(lang) {
+  const l = String(lang || "en").toLowerCase();
+  if (l.startsWith("fr")) return "EUR";
+  if (l.startsWith("pt")) return "AOA";
+  return "USD";
+}
+
+function formatCurrencyForLang(value, currency, lang) {
+  const target = targetCurrencyForLang(lang);
+  const intlLocale = localeForLang(lang);
+
+  if (value == null) return "";
+
+  const from = currency ? String(currency).toUpperCase() : null;
+  const to = String(target).toUpperCase();
+
+  // If no source currency provided, just format the number
+  if (!from) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  // If same currency, format directly
+  if (from === to) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: to,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${to}`;
+    }
+  }
+
+  const rateFrom = conversionRates[from];
+  const rateTo = conversionRates[to];
+
+  // If we don't have rates for either currency, fall back to formatting original value with its code
+  if (typeof rateFrom !== "number" || typeof rateTo !== "number") {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: from,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${from}`;
+    }
+  }
+
+  // Convert: value (from) -> USD -> to
+  const converted = (value / rateFrom) * rateTo;
+
+  try {
+    return new Intl.NumberFormat(intlLocale, {
+      style: "currency",
+      currency: to,
+      maximumFractionDigits: 2,
+    }).format(converted);
+  } catch {
+    return `${converted.toFixed(2)} ${to}`;
+  }
+}
+
+/* ---------- Component ---------- */
+
+const RoomListItem = function RoomListItemComponent({
   room,
   onEdit,
   onDelete,
   onSelect,
   isAdmin,
 }) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n?.language ?? "en";
+
   const thumb =
     (room?.images && room.images.length && getThumb(room.images[0])) ||
     PLACEHOLDER_DATA_URI;
+
+  // Localized title and description
+  const localizedTitle =
+    localizedField(room, "title", lang) ??
+    localizedField(room, "roomTitle", lang) ??
+    room.name ??
+    t("untitledRoom", { defaultValue: "Untitled room" });
+
+  const localizedDescription =
+    localizedField(room, "description", lang) ??
+    localizedField(room, "roomDescription", lang) ??
+    (room.roomDescription ? String(room.roomDescription) : null) ??
+    t("noDescription", { defaultValue: "No description" });
+
+  // Price display: convert & format according to language
+  const priceAmount = room?.pricePerNight?.amount ?? room?.price ?? null;
+  const priceCurrency = room?.pricePerNight?.currency ?? room?.currency ?? null;
+  const priceDisplay =
+    priceAmount != null
+      ? formatCurrencyForLang(priceAmount, priceCurrency, lang)
+      : t("nA", { defaultValue: "N/A" });
+
+  const capacityDisplay = room.roomCapacity ?? room.capacity ?? "—";
 
   return (
     <div className="d-flex align-items-center py-2 border-bottom">
       <div style={{ width: 96, height: 72, flex: "0 0 96px", marginRight: 12 }}>
         <img
           src={thumb}
-          alt={room.roomTitle || room.title || "room"}
+          alt={localizedTitle}
           style={{
             width: "100%",
             height: "100%",
@@ -56,20 +187,17 @@ export default function RoomListItem({
       <div className="flex-grow-1">
         <div className="d-flex justify-content-between">
           <div>
-            <strong>{room.roomTitle || room.title}</strong>
+            <strong>{localizedTitle}</strong>
             <div className="text-muted small">
-              {room.roomDescription
-                ? String(room.roomDescription).slice(0, 120)
-                : "No description"}
+              {localizedDescription.length > 120
+                ? `${localizedDescription.slice(0, 120)}…`
+                : localizedDescription}
             </div>
           </div>
           <div className="text-end">
+            <div className="small text-muted">{priceDisplay}</div>
             <div className="small text-muted">
-              {room.pricePerNight?.amount ?? "N/A"}{" "}
-              {room.pricePerNight?.currency ?? ""}
-            </div>
-            <div className="small text-muted">
-              Cap: {room.roomCapacity ?? room.capacity ?? "—"}
+              {t("capacityShort", { defaultValue: "Cap:" })} {capacityDisplay}
             </div>
           </div>
         </div>
@@ -80,7 +208,7 @@ export default function RoomListItem({
               className="btn btn-sm btn-outline-primary"
               onClick={() => onSelect(room)}
             >
-              Open
+              {t("open", { defaultValue: "Open" })}
             </button>
           )}
           {isAdmin && (
@@ -89,13 +217,13 @@ export default function RoomListItem({
                 className="btn btn-sm btn-outline-secondary"
                 onClick={() => onEdit(room)}
               >
-                Edit
+                {t("edit", { defaultValue: "Edit" })}
               </button>
               <button
                 className="btn btn-sm btn-outline-danger"
                 onClick={() => onDelete(room._id)}
               >
-                Delete
+                {t("delete", { defaultValue: "Delete" })}
               </button>
             </>
           )}
@@ -103,7 +231,7 @@ export default function RoomListItem({
       </div>
     </div>
   );
-}
+};
 
 RoomListItem.propTypes = {
   room: PropTypes.object.isRequired,
@@ -119,3 +247,5 @@ RoomListItem.defaultProps = {
   onSelect: undefined,
   isAdmin: false,
 };
+
+export default RoomListItem;

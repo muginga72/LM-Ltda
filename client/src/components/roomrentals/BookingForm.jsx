@@ -1,7 +1,10 @@
+// client/src/components/roomrentals/BookingForm.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { Spinner, Alert, Button, Form } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
 
 export default function BookingForm({
   room,
@@ -13,6 +16,8 @@ export default function BookingForm({
   onShowPayInstructions,
   onCancel,
 }) {
+  const { t } = useTranslation();
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [guests, setGuests] = useState(room?.roomCapacity ?? room?.capacity ?? 1);
@@ -35,10 +40,10 @@ export default function BookingForm({
   // amount state (optional override)
   const [paymentMethod, setPaymentMethod] = useState("card");
 
-  const authToken = useMemo(() => token || user?.token || localStorage.getItem("authToken") || null, [
-    token,
-    user?.token,
-  ]);
+  const authToken = useMemo(
+    () => token || user?.token || localStorage.getItem("authToken") || null,
+    [token, user?.token]
+  );
 
   const defaultHeaders = useMemo(
     () => ({
@@ -70,7 +75,8 @@ export default function BookingForm({
   };
 
   const computeTotalPrice = (nights) => {
-    const perNight = Number(room?.pricePerNight?.amount ?? room?.pricePerNight ?? room?.price ?? 0) || 0;
+    const perNight =
+      Number(room?.pricePerNight?.amount ?? room?.pricePerNight ?? room?.price ?? 0) || 0;
     const amountCalc = Math.max(0, perNight * nights);
     const currency = room?.pricePerNight?.currency ?? room?.currency ?? "USD";
     return { amount: amountCalc, currency };
@@ -81,42 +87,43 @@ export default function BookingForm({
 
     const roomId = room?._id ?? room?.id;
     if (!roomId) {
-      setError("No room selected.");
+      setError(t("booking.error.noRoom"));
       return false;
     }
+
     if (!user || !(user._id || user.id)) {
-      setError("No user available. Please sign in.");
+      setError(t("booking.error.noUser"));
       return false;
     }
     if (!startDate || !endDate) {
-      setError("Start date and end date are required.");
+      setError(t("booking.error.datesRequired"));
       return false;
     }
     const s = new Date(startDate);
     const e = new Date(endDate);
     if (isNaN(s.getTime()) || isNaN(e.getTime())) {
-      setError("Invalid date format.");
+      setError(t("booking.error.invalidDate"));
       return false;
     }
     if (s >= e) {
-      setError("End date must be after start date.");
+      setError(t("booking.error.endBeforeStart"));
       return false;
     }
     if (!Number.isInteger(Number(guests)) || Number(guests) < 1) {
-      setError("Guests must be a positive integer.");
+      setError(t("booking.error.guestsPositive"));
       return false;
     }
     if (!guestOneName || guestOneName.trim() === "") {
-      setError("Primary guest name is required.");
+      setError(t("booking.error.primaryNameRequired"));
       return false;
     }
     if (!dateOfBirth) {
-      setError("Date of birth is required.");
+      setError(t("booking.error.dobRequired"));
       return false;
     }
     const dob = new Date(dateOfBirth);
     if (isNaN(dob.getTime())) {
-      setError("Invalid date of birth.");
+      setError(t("booking.error.invalidDob"));
       return false;
     }
     // basic age check (server also enforces >=18)
@@ -125,27 +132,28 @@ export default function BookingForm({
     const birthdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
     if (today < birthdayThisYear) age--;
     if (age < 18) {
-      setError("Guest must be at least 18 years old to book.");
+      setError(t("booking.error.ageMinimum"));
       return false;
     }
+
     if (!idFile) {
-      setError("Government ID / passport upload (idDocument) is required.");
+      setError(t("booking.error.idRequired"));
       return false;
     }
     // file size check (10MB)
     const maxSize = 10 * 1024 * 1024;
     if (idFile.size > maxSize) {
-      setError("ID file is too large. Maximum 10MB allowed.");
+      setError(t("booking.error.idTooLarge"));
       return false;
     }
     // basic email validation if provided
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (guestOneEmail && !emailRegex.test(guestOneEmail)) {
-      setError("Primary guest email is invalid.");
+      setError(t("booking.error.invalidEmail"));
       return false;
     }
     if (guestTwoEmail && !emailRegex.test(guestTwoEmail)) {
-      setError("Secondary guest email is invalid.");
+      setError(t("booking.error.invalidEmailSecondary"));
       return false;
     }
     return true;
@@ -153,7 +161,7 @@ export default function BookingForm({
 
   const handleFileChange = (e) => {
     setError(null);
-    const file = e.target.files?.[0] || null;
+    const file = (e.target.files && e.target.files[0]) || null;
     setIdFile(file);
   };
 
@@ -178,7 +186,6 @@ export default function BookingForm({
     setError(null);
     setSuccessMsg(null);
     if (!validate()) return;
-
     setLoading(true);
     setProgress(0);
     try {
@@ -229,7 +236,6 @@ export default function BookingForm({
             },
             timeout: 120000,
           };
-
           const res = await axios.post(url, formData, cfg);
           created = res?.data;
           break;
@@ -246,11 +252,11 @@ export default function BookingForm({
           lastErr?.response?.data?.message ||
           lastErr?.response?.data?.error ||
           lastErr?.message ||
-          "No bookings endpoint accepted the request (404).";
+          t("booking.error.createFailed");
         throw new Error(msg);
       }
 
-      setSuccessMsg("Booking created successfully.");
+      setSuccessMsg(t("booking.success"));
       setProgress(null);
       onBooked && onBooked(created);
 
@@ -264,7 +270,7 @@ export default function BookingForm({
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
-        "Failed to create booking. Please try again.";
+        t("booking.error.createFailed");
       setError(msg);
     } finally {
       setLoading(false);
@@ -287,69 +293,69 @@ export default function BookingForm({
       )}
 
       <Form.Group className="mb-2">
-        <Form.Label>Start date</Form.Label>
+        <Form.Label>{t("booking.startDate")}</Form.Label>
         <Form.Control type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-2">
-        <Form.Label>End date</Form.Label>
+        <Form.Label>{t("booking.endDate")}</Form.Label>
         <Form.Control type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Guests</Form.Label>
+        <Form.Label>{t("booking.guests")}</Form.Label>
         <Form.Control type="number" min={1} value={guests} onChange={(e) => setGuests(Number(e.target.value))} />
       </Form.Group>
 
       <hr />
 
       <Form.Group className="mb-3">
-        <Form.Label>Primary guest name</Form.Label>
+        <Form.Label>{t("booking.primaryGuestName")}</Form.Label>
         <Form.Control type="text" value={guestOneName} onChange={(e) => setGuestOneName(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Primary guest email</Form.Label>
+        <Form.Label>{t("booking.primaryGuestEmail")}</Form.Label>
         <Form.Control type="email" value={guestOneEmail} onChange={(e) => setGuestOneEmail(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Secondary guest name (optional)</Form.Label>
+        <Form.Label>{t("booking.secondaryGuestName")}</Form.Label>
         <Form.Control type="text" value={guestTwoName} onChange={(e) => setGuestTwoName(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Secondary guest email (optional)</Form.Label>
+        <Form.Label>{t("booking.secondaryGuestEmail")}</Form.Label>
         <Form.Control type="email" value={guestTwoEmail} onChange={(e) => setGuestTwoEmail(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Primary guest phone</Form.Label>
+        <Form.Label>{t("booking.primaryGuestPhone")}</Form.Label>
         <Form.Control type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Date of birth</Form.Label>
+        <Form.Label>{t("booking.dateOfBirth")}</Form.Label>
         <Form.Control type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Payment method</Form.Label>
+        <Form.Label>{t("booking.paymentMethod")}</Form.Label>
         <Form.Select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-          <option value="card">Bank deposit</option>
-          <option value="bank">Bank transfer</option>
+          <option value="card">{t("booking.paymentMethod.card")}</option>
+          <option value="bank">{t("booking.paymentMethod.bank")}</option>
         </Form.Select>
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Notes (optional)</Form.Label>
+        <Form.Label>{t("booking.notes")}</Form.Label>
         <Form.Control as="textarea" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>ID Document / Passport (required)</Form.Label>
-        <Form.Control type="file" accept=".pdf,image/*" onChange={handleFileChange} required />
-        <Form.Text className="text-muted">Max 10MB. PDF or image formats accepted.</Form.Text>
+        <Form.Label>{t("booking.idDocumentLabel")}</Form.Label>
+        <Form.Control type="file" accept=".pdf, image/*" onChange={handleFileChange} required />
+        <Form.Text className="text-muted">{t("booking.idDocumentHelp")}</Form.Text>
       </Form.Group>
 
       {progress !== null && (
@@ -371,10 +377,10 @@ export default function BookingForm({
 
       <div className="d-flex justify-content-end gap-2">
         <Button variant="secondary" onClick={onCancel} disabled={loading}>
-          Cancel
+          {t("booking.cancel")}
         </Button>
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? <Spinner animation="border" size="sm" /> : "Book room"}
+          {loading ? <Spinner animation="border" size="sm" /> : t("booking.submit")}
         </Button>
       </div>
     </Form>

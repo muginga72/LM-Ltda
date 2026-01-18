@@ -746,120 +746,106 @@ export default function UserOnlyDashboard({ apiBaseUrl, token, initialServices, 
           </Modal.Body>
         </Modal>
 
-        <Modal
-          show={showDetails}
-          onHide={handleCloseDetails}
-          centered
-          size="lg"
-        >
+          {/* Room details modal */}
+          <Modal show={showDetails} onHide={handleCloseDetails} centered size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {selectedRoom?.roomTitle ?? selectedRoom?.title ?? selectedRoom?.name ?? t("roomPage.detailsTitle") ?? "Room details"}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {selectedRoom ? (
+                <>
+                  {selectedRoom.imagePath ? (
+                    <img
+                      src={selectedRoom.imagePath}
+                      alt={selectedRoom.title ?? "Room"}
+                      className="img-fluid mb-3"
+                      style={{ maxHeight: 300, objectFit: "cover", width: "100%" }}
+                    />
+                  ) : null}
+                  <p>
+                    {selectedRoom.roomDescription ??
+                      selectedRoom.description ??
+                      selectedRoom.summary ??
+                      t("roomPage.noDescription") ??
+                      "No description available."}
+                  </p>
+                  <p>
+                    <strong>{t("roomPage.maxGuests") ?? "Max guests:"} </strong>
+                    {selectedRoom.roomCapacity ?? selectedRoom.capacity ?? "N/A"}
+                  </p>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        handleCloseDetails();
+                        handleRequestBooking(selectedRoom);
+                      }}
+                    >
+                      {t("roomPage.bookThisRoom") ?? "Book this room"}
+                    </Button>
+                    <Button variant="secondary" onClick={handleCloseDetails}>
+                      {t("roomPage.close") ?? "Close"}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-3">
+                  <Spinner animation="border" />
+                </div>
+              )}
+            </Modal.Body>
+          </Modal>
+        </Container>
+  
+        {/* Bank instructions modal shown after booking when payment method is bank transfer */}
+        <Modal show={showBankModal} onHide={closeBankModal} centered size="md">
           <Modal.Header closeButton>
-            <Modal.Title>
-              {selectedRoom?.roomTitle ||
-                selectedRoom?.title ||
-                selectedRoom?.name ||
-                "Room details"}
-            </Modal.Title>
+            <Modal.Title>{t("roomPage.paymentInstructionsTitle") || "Payment instructions"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedRoom ? (
-              <>
-                {selectedRoom.imagePath ? (
-                  <img
-                    src={selectedRoom.imagePath}
-                    alt={selectedRoom.title || "Room"}
-                    className="img-fluid mb-3"
-                    style={{
-                      maxHeight: 300,
-                      objectFit: "cover",
-                      width: "100%",
-                    }}
-                  />
-                ) : null}
-                <p>
-                  {selectedRoom.roomDescription ||
-                    selectedRoom.description ||
-                    selectedRoom.summary ||
-                    "No description available."}
+            {bankInfo ? (
+              <div>
+                <p style={{ fontWeight: 600, marginBottom: 8 }}>
+                  {t("roomPage.bankModal.thankYou") ||
+                    "Thank you for your booking. Pay the booking in the next 48 hours to avoid cancellation."}{" "}
+                  {t("roomPage.bankModal.contactSupport") || "If you need help contact the support team"}{" "}
+                  <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a>.
                 </p>
-                <p>
-                  <strong>Max guests :</strong>{" "}
-                  {selectedRoom.roomCapacity || selectedRoom.capacity || "N/A"}
-                </p>
-                <div className="d-flex gap-2">
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      handleCloseDetails();
-                      handleRequestBooking(selectedRoom);
-                    }}
-                  >
-                    Book this room
-                  </Button>
-                  <Button variant="secondary" onClick={handleCloseDetails}>
-                    Close
-                  </Button>
+  
+                <div>
+                  <div>
+                    <strong>{t("roomPage.bankModal.bank") || "Bank:"}</strong> {bankInfo.bankName}
+                  </div>
+                  <div>
+                    <strong>{t("roomPage.bankModal.accountName") || "Account name:"}</strong>{" "}
+                    {bankInfo.accountName ?? bankInfo.owner}
+                  </div>
+                  <div>
+                    <strong>{t("roomPage.bankModal.accountNumber") || "Account number:"}</strong> {bankInfo.accountNumber}
+                  </div>
+                  <div>
+                    <strong>{t("roomPage.bankModal.iban") || "IBAN:"}</strong> {bankInfo.routingNumber}
+                  </div>
+                  <div>
+                    <strong>{t("roomPage.bankModal.reference") || "Reference:"}</strong> {bankInfo.reference}
+                  </div>
+                  <div>
+                    <strong>{t("roomPage.bankModal.amount") || "Amount:"}</strong> {bankInfo.currency ?? "USD"} {bankInfo.amount}
+                  </div>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-3">
-                <Spinner animation="border" />
               </div>
+            ) : (
+              <div>{t("roomPage.bankModal.loading") || "Loading payment details..."}</div>
             )}
           </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeBankModal}>
+              {t("roomPage.bankModal.close") || "Close"}
+            </Button>
+          </Modal.Footer>
         </Modal>
-      </Container>
-
-      {/* Bank instructions modal shown after booking when payment method is bank transfer */}
-      <Modal show={showBankModal} onHide={closeBankModal} centered size="md">
-        <Modal.Header closeButton>
-          <Modal.Title>Payment instructions</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {bankInfo ? (
-            <div>
-              <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                Thank you for your booking. Pay the booking in the next{" "}
-                <strong>48 hours</strong> to avoid cancellation. If you need
-                help contact the support team{" "}
-                <a href="mailto:lmj.muginga@gmail.com">LM-Ltd Team</a>. Please
-                complete payment using the details below:
-              </p>
-              <div>
-                <div>
-                  <strong>Bank :</strong> {bankInfo.bankName}
-                </div>
-                <div>
-                  <strong>Account name :</strong>{" "}
-                  {bankInfo.accountName ?? bankInfo.owner}
-                </div>
-                <div>
-                  <strong>Account number :</strong> {bankInfo.accountNumber}
-                </div>
-                <div>
-                  <strong>IBAN :</strong> {bankInfo.routingNumber}
-                </div>
-                <div>
-                  <strong>Reference :</strong> {bankInfo.reference}
-                </div>
-                <div>
-                  <strong>Amount :</strong> {bankInfo.currency ?? "USD"}{" "}
-                  {bankInfo.amount}
-                </div> <br/>
-                <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                  <small><strong>Note:</strong> If you can't submit the proof, send us an email:<a href="mailto:lmj.muginga@gmail.com"> LM-Ltd Team</a>.</small>
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div>Loading payment details ...</div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeBankModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
 
       {/* Schedule Modal */}
       <ScheduleServiceModal

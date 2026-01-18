@@ -1,3 +1,4 @@
+// src/components/roomrentals/RoomForm.jsx
 import React, { useState, useContext, useEffect } from "react";
 import {
   Form,
@@ -10,17 +11,140 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../contexts/AuthContext";
 import { createRoom } from "../../api/roomsApi";
 
-function RoomForm({ onCreated, onCancel }) {
+const PLACEHOLDER_TEXT =
+  "data:image/svg+xml;charset=UTF-8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'>
+      <rect width='100%' height='100%' fill='#f3f3f3'/>
+      <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#999' font-size='16'>No image</text>
+    </svg>`
+  );
+
+// Static conversion rates (1 USD = X)
+const conversionRates = {
+  EUR: 0.8615, // 1 USD = 0.8615 EUR
+  AOA: 912.085, // 1 USD = 912.085 AOA
+  USD: 1,
+};
+
+function localeForLang(lang) {
+  if (!lang) return "en-US";
+  const l = String(lang).toLowerCase();
+  if (l.startsWith("fr")) return "fr-FR";
+  if (l.startsWith("pt")) return "pt-PT";
+  return "en-US";
+}
+
+function targetCurrencyForLang(lang) {
+  const l = String(lang || "en").toLowerCase();
+  if (l.startsWith("fr")) return "EUR";
+  if (l.startsWith("pt")) return "AOA";
+  return "USD";
+}
+
+function formatEuropeanDateTime(value, lang) {
+  if (!value) return "";
+  const locale = localeForLang(lang);
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function formatCurrency(value, currency, lang) {
+  const target = targetCurrencyForLang(lang);
+  const intlLocale = localeForLang(lang);
+
+  if (value == null) return "";
+
+  const from = currency ? String(currency).toUpperCase() : null;
+  const to = String(target).toUpperCase();
+
+  // If no source currency provided, just format the number
+  if (!from) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  // If same currency, format directly
+  if (from === to) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: to,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${to}`;
+    }
+  }
+
+  const rateFrom = conversionRates[from];
+  const rateTo = conversionRates[to];
+
+  // If we don't have rates for either currency, fall back to formatting original value with its code
+  if (typeof rateFrom !== "number" || typeof rateTo !== "number") {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: from,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${from}`;
+    }
+  }
+
+  // Convert: value (from) -> USD -> to
+  const converted = (value / rateFrom) * rateTo;
+
+  try {
+    return new Intl.NumberFormat(intlLocale, {
+      style: "currency",
+      currency: to,
+      maximumFractionDigits: 2,
+    }).format(converted);
+  } catch {
+    return `${converted.toFixed(2)} ${to}`;
+  }
+}
+
+function resolveInitialToken(user) {
+  try {
+    if (user?.token) return user.token;
+    const stored = localStorage.getItem("authToken");
+    return stored || null;
+  } catch {
+    return null;
+  }
+}
+
+export default function RoomForm({ onCreated, onCancel }) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n?.language ?? "en";
+
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const token = resolveInitialToken(user);
 
-  const token = user?.token || localStorage.getItem("authToken") || null;
-
+  // Determine role from user or token payload
   const role =
-    user?.role ||
+    user?.role ??
     (() => {
       if (!token) return null;
       try {
@@ -29,7 +153,7 @@ function RoomForm({ onCreated, onCancel }) {
         const payload = JSON.parse(
           atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
         );
-        return payload.role || payload.roles || null;
+        return payload.role ?? payload.roles ?? null;
       } catch {
         return null;
       }
@@ -69,23 +193,24 @@ function RoomForm({ onCreated, onCancel }) {
 
   useEffect(() => {
     if (!isAdmin) {
-      setError("You must be an admin to create rooms.");
+      setError(t("mustBeAdmin"));
     } else {
       setError("");
     }
-  }, [isAdmin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, t]);
 
   function updateField(path, value) {
     setForm((prev) => {
       const updated = { ...prev };
       const keys = path.split(".");
       let obj = updated;
-      while (keys.length > 1) {
-        const key = keys.shift();
-        obj[key] = obj[key] || {};
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (obj[key] == null || typeof obj[key] !== "object") obj[key] = {};
         obj = obj[key];
       }
-      obj[keys[0]] = value;
+      obj[keys[keys.length - 1]] = value;
       return updated;
     });
   }
@@ -110,10 +235,7 @@ function RoomForm({ onCreated, onCancel }) {
   }
 
   function removeRule(idx) {
-    updateField(
-      "rules",
-      form.rules.filter((_, i) => i !== idx)
-    );
+    updateField("rules", form.rules.filter((_, i) => i !== idx));
   }
 
   function handleFileChange(e) {
@@ -148,17 +270,17 @@ function RoomForm({ onCreated, onCancel }) {
     setSuccess("");
 
     if (!isAdmin) {
-      setError("You must be an admin to create a room.");
+      setError(t("mustBeAdmin"));
       return;
     }
 
     if (!form.roomTitle || !form.pricePerNight?.amount) {
-      setError("Please provide at least a title and price.");
+      setError(t("provideTitleAndPrice"));
       return;
     }
 
     if (!token) {
-      setError("You must be signed in to create a room.");
+      setError(t("mustBeSignedIn"));
       return;
     }
 
@@ -169,17 +291,13 @@ function RoomForm({ onCreated, onCancel }) {
       const formData = new FormData();
       formData.append("roomTitle", form.roomTitle);
       formData.append("roomDescription", form.roomDescription || "");
-      formData.append(
-        "roomCapacity",
-        JSON.stringify(Number(form.roomCapacity))
-      );
+      formData.append("roomCapacity", JSON.stringify(Number(form.roomCapacity)));
       formData.append("bedrooms", JSON.stringify(Number(form.bedrooms)));
       formData.append("bathrooms", JSON.stringify(Number(form.bathrooms)));
       formData.append("minNights", JSON.stringify(Number(form.minNights)));
       formData.append("maxNights", JSON.stringify(Number(form.maxNights)));
       formData.append("instantBook", JSON.stringify(Boolean(form.instantBook)));
 
-      // Nested objects
       formData.append(
         "pricePerNight",
         JSON.stringify({
@@ -208,13 +326,18 @@ function RoomForm({ onCreated, onCancel }) {
         formData.append("images", file, file.name);
       });
 
-      // createRoom from src/api/roomsApi.js supports FormData + onProgress
-      const created = await createRoom(formData, token, true, {
-        useCredentials: false,
-        onProgress: (pct) => setProgress(pct),
-      });
+      // createRoom supports FormData + onProgress
+      const created = await createRoom(
+        formData,
+        token,
+        true,
+        {
+          useCredentials: false,
+          onProgress: (pct) => setProgress(pct),
+        }
+      );
 
-      setSuccess("Room created successfully.");
+      setSuccess(t("roomCreated"));
       setSelectedFiles([]);
       setPreviews([]);
       setForm({
@@ -238,24 +361,34 @@ function RoomForm({ onCreated, onCancel }) {
         instantBook: false,
       });
       setProgress(0);
-      onCreated?.(created);
+      if (typeof onCreated === "function") onCreated(created);
     } catch (err) {
       console.error(err);
-      if (err?.status === 401 || err?.response?.status === 401) {
-        setError("Session expired. Please log in again.");
+      // handle 401-like errors
+      const status =
+        (err && err.status) ||
+        (err && err.response && err.response.status) ||
+        null;
+      if (status === 401) {
+        setError(t("sessionExpired"));
         localStorage.removeItem("authToken");
         setTimeout(() => navigate("/login"), 600);
       } else {
         setError(
-          err?.message ||
-            err?.response?.data?.message ||
-            "Failed to create room"
+          (err && (err.message || (err.response && err.response.data && err.response.data.message))) ||
+            t("failedToCreateRoom")
         );
       }
     } finally {
       setSaving(false);
     }
   }
+
+  // Price preview formatted for current language
+  const pricePreview =
+    form.pricePerNight?.amount != null
+      ? formatCurrency(form.pricePerNight.amount, form.pricePerNight.currency, lang)
+      : t("nA");
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -265,13 +398,13 @@ function RoomForm({ onCreated, onCancel }) {
       <Row className="mb-3">
         <Col>
           <Form.Group>
-            <Form.Label>Title</Form.Label>
+            <Form.Label>{t("title")}</Form.Label>
             <Form.Control
               required
               name="roomTitle"
               value={form.roomTitle}
               onChange={(e) => updateField("roomTitle", e.target.value)}
-              placeholder="Room title"
+              placeholder={t("roomTitlePlaceholder")}
               disabled={!isAdmin || saving}
             />
           </Form.Group>
@@ -281,14 +414,14 @@ function RoomForm({ onCreated, onCancel }) {
       <Row className="mb-3">
         <Col>
           <Form.Group>
-            <Form.Label>Description</Form.Label>
+            <Form.Label>{t("description")}</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
               name="roomDescription"
               value={form.roomDescription}
               onChange={(e) => updateField("roomDescription", e.target.value)}
-              placeholder="Short description"
+              placeholder={t("descriptionPlaceholder")}
               disabled={!isAdmin || saving}
             />
           </Form.Group>
@@ -298,14 +431,12 @@ function RoomForm({ onCreated, onCancel }) {
       <Row>
         <Col md={4} className="mb-3">
           <Form.Group>
-            <Form.Label>Capacity</Form.Label>
+            <Form.Label>{t("capacity")}</Form.Label>
             <Form.Control
               type="number"
               min={1}
               value={form.roomCapacity}
-              onChange={(e) =>
-                updateField("roomCapacity", Number(e.target.value))
-              }
+              onChange={(e) => updateField("roomCapacity", Number(e.target.value))}
               disabled={!isAdmin || saving}
             />
           </Form.Group>
@@ -313,7 +444,7 @@ function RoomForm({ onCreated, onCancel }) {
 
         <Col md={4} className="mb-3">
           <Form.Group>
-            <Form.Label>Bedrooms</Form.Label>
+            <Form.Label>{t("bedrooms")}</Form.Label>
             <Form.Control
               type="number"
               min={0}
@@ -326,7 +457,7 @@ function RoomForm({ onCreated, onCancel }) {
 
         <Col md={4} className="mb-3">
           <Form.Group>
-            <Form.Label>Bathrooms</Form.Label>
+            <Form.Label>{t("bathrooms")}</Form.Label>
             <Form.Control
               type="number"
               min={0}
@@ -339,33 +470,34 @@ function RoomForm({ onCreated, onCancel }) {
       </Row>
 
       <Form.Group className="mb-2">
-        <Form.Label>Address</Form.Label>
+        <Form.Label>{t("address")}</Form.Label>
         <Form.Control
           value={form.roomLocation.address}
           onChange={(e) => updateField("roomLocation.address", e.target.value)}
-          placeholder="Street address"
+          placeholder={t("addressPlaceholder")}
+          disabled={!isAdmin || saving}
         />
       </Form.Group>
 
       <Row>
         <Col md={6}>
           <Form.Group className="mb-2">
-            <Form.Label>City</Form.Label>
+            <Form.Label>{t("city")}</Form.Label>
             <Form.Control
               value={form.roomLocation.city}
               onChange={(e) => updateField("roomLocation.city", e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </Form.Group>
         </Col>
 
         <Col md={6}>
           <Form.Group className="mb-2">
-            <Form.Label>Country</Form.Label>
+            <Form.Label>{t("country")}</Form.Label>
             <Form.Control
               value={form.roomLocation.country}
-              onChange={(e) =>
-                updateField("roomLocation.country", e.target.value)
-              }
+              onChange={(e) => updateField("roomLocation.country", e.target.value)}
+              disabled={!isAdmin || saving}
             />
           </Form.Group>
         </Col>
@@ -374,7 +506,7 @@ function RoomForm({ onCreated, onCancel }) {
       <Row className="mb-3">
         <Col md={6}>
           <Form.Group>
-            <Form.Label>Price per night</Form.Label>
+            <Form.Label>{t("pricePerNight")}</Form.Label>
             <InputGroup>
               <Form.Control
                 type="number"
@@ -398,12 +530,15 @@ function RoomForm({ onCreated, onCancel }) {
                 <option value="AOA">AOA</option>
               </Form.Select>
             </InputGroup>
+            <div className="small text-muted mt-1">
+              {t("pricePreview")}: {pricePreview}
+            </div>
           </Form.Group>
         </Col>
 
         <Col md={3}>
           <Form.Group>
-            <Form.Label>Min nights</Form.Label>
+            <Form.Label>{t("minNights")}</Form.Label>
             <Form.Control
               type="number"
               min={1}
@@ -416,7 +551,7 @@ function RoomForm({ onCreated, onCancel }) {
 
         <Col md={3}>
           <Form.Group>
-            <Form.Label>Max nights</Form.Label>
+            <Form.Label>{t("maxNights")}</Form.Label>
             <Form.Control
               type="number"
               min={1}
@@ -429,7 +564,7 @@ function RoomForm({ onCreated, onCancel }) {
       </Row>
 
       <fieldset className="mb-3">
-        <legend>Amenities</legend>
+        <legend>{t("amenities")}</legend>
         <div className="mb-2">
           {form.amenities.map((a, i) => (
             <Badge bg="secondary" pill key={i} className="me-1">
@@ -453,7 +588,7 @@ function RoomForm({ onCreated, onCancel }) {
         </div>
         <InputGroup className="mb-2">
           <Form.Control
-            placeholder="Add amenity (e.g. Wifi)"
+            placeholder={t("addAmenityPlaceholder")}
             value={amenityInput}
             onChange={(e) => setAmenityInput(e.target.value)}
             onKeyDown={(e) => {
@@ -469,13 +604,13 @@ function RoomForm({ onCreated, onCancel }) {
             onClick={addAmenity}
             disabled={!isAdmin || saving}
           >
-            Add
+            {t("add")}
           </Button>
         </InputGroup>
       </fieldset>
 
       <fieldset className="mb-3">
-        <legend>Rules</legend>
+        <legend>{t("rules")}</legend>
         <div className="mb-2">
           {form.rules.map((r, i) => (
             <Badge bg="info" text="dark" key={i} className="me-1">
@@ -499,7 +634,7 @@ function RoomForm({ onCreated, onCancel }) {
         </div>
         <InputGroup className="mb-2">
           <Form.Control
-            placeholder="Add rule (e.g. No smoking)"
+            placeholder={t("addRulePlaceholder")}
             value={ruleInput}
             onChange={(e) => setRuleInput(e.target.value)}
             onKeyDown={(e) => {
@@ -515,7 +650,7 @@ function RoomForm({ onCreated, onCancel }) {
             onClick={addRule}
             disabled={!isAdmin || saving}
           >
-            Add
+            {t("add")}
           </Button>
         </InputGroup>
       </fieldset>
@@ -523,7 +658,7 @@ function RoomForm({ onCreated, onCancel }) {
       <Row className="mb-3">
         <Col>
           <Form.Group>
-            <Form.Label>Images</Form.Label>
+            <Form.Label>{t("images")}</Form.Label>
             <Form.Control
               type="file"
               accept="image/*"
@@ -532,7 +667,7 @@ function RoomForm({ onCreated, onCancel }) {
               disabled={!isAdmin || saving}
             />
             <Form.Text className="text-muted">
-              It's possible to select up to 12 images, 5MB each.
+              {t("imagesHelp")}
             </Form.Text>
             <div className="mt-2 d-flex flex-wrap">
               {previews.map((p, i) => (
@@ -594,15 +729,13 @@ function RoomForm({ onCreated, onCancel }) {
             disabled={saving}
             className="me-2"
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button type="submit" variant="primary" disabled={saving || !isAdmin}>
-            {saving ? "Saving..." : "Create Room"}
+            {saving ? `${t("saving")}...` : t("createRoom")}
           </Button>
         </Col>
       </Row>
     </Form>
   );
 }
-
-export default RoomForm;

@@ -4,8 +4,135 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
 
+const conversionRates = {
+  EUR: 0.8615, // 1 USD = 0.8615 EUR
+  AOA: 912.085, // 1 USD = 912.085 AOA
+  USD: 1,
+};
+
+function localeForLang(lang) {
+  if (!lang) return "en-US";
+  const l = String(lang).toLowerCase();
+  if (l.startsWith("pt")) return "pt-PT";
+  if (l.startsWith("fr")) return "fr-FR";
+  return "en-US";
+}
+
+export function formatEuropeanDateTime(value, lang) {
+  if (!value) return "";
+  const locale = localeForLang(lang);
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+export function formatDate(dateLike, lang) {
+  if (!dateLike) return "";
+  const date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return "";
+  const intlLocale = localeForLang(lang);
+  const dateFormatter = new Intl.DateTimeFormat(intlLocale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  return dateFormatter.format(date);
+}
+
+export function formatTime(dateLike, lang) {
+  if (!dateLike) return "";
+  const date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return "";
+  const intlLocale = localeForLang(lang);
+  const timeFormatter = new Intl.DateTimeFormat(intlLocale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return timeFormatter.format(date);
+}
+
+function targetCurrencyForLang(lang) {
+  const l = String(lang || "en").toLowerCase();
+  if (l.startsWith("fr")) return "EUR";
+  if (l.startsWith("pt")) return "AOA";
+  // default target for other languages: USD
+  return "USD";
+}
+
+export function formatCurrency(value, currency, lang) {
+  const target = targetCurrencyForLang(lang);
+  const intlLocale = localeForLang(lang);
+  if (value == null) return "";
+
+  // Normalize currency codes
+  const from = currency ? String(currency).toUpperCase() : null;
+  const to = String(target).toUpperCase();
+
+  // If no source currency provided, just format the number
+  if (!from) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  // If same currency, format directly
+  if (from === to) {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: to,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${to}`;
+    }
+  }
+
+  const rateFrom = conversionRates[from];
+  const rateTo = conversionRates[to];
+
+  // If we don't have rates for either currency, fall back to formatting original value with its code
+  if (typeof rateFrom !== "number" || typeof rateTo !== "number") {
+    try {
+      return new Intl.NumberFormat(intlLocale, {
+        style: "currency",
+        currency: from,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return `${value} ${from}`;
+    }
+  }
+
+  const converted = (value / rateFrom) * rateTo;
+  try {
+    return new Intl.NumberFormat(intlLocale, {
+      style: "currency",
+      currency: to,
+      maximumFractionDigits: 2,
+    }).format(converted);
+  } catch {
+    return `${converted.toFixed(2)} ${to}`;
+  }
+}
+
 export default function RoomListingRequest() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const lang = (i18n && i18n.language) || "en";
+
   const [form, setForm] = useState({
     roomTitle: "",
     description: "",
@@ -54,7 +181,6 @@ export default function RoomListingRequest() {
       }));
       return;
     }
-
     if (type === "checkbox") {
       setForm((s) => ({ ...s, [name]: checked }));
       return;
@@ -113,6 +239,7 @@ export default function RoomListingRequest() {
       email: "",
       phone: "",
     });
+
     setImages([]);
     setImagePreviews([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -123,27 +250,26 @@ export default function RoomListingRequest() {
   }
 
   function validate() {
-    if (!form.roomTitle.trim()) return "Room title is required.";
-    if (!form.description.trim()) return "Description is required.";
-    if (!form.name.trim()) return "Your name is required.";
-    if (!form.email.trim()) return "Email is required.";
-    if (!form.phone.trim()) return "Phone is required.";
-    if (!form.priceAmount && form.priceAmount !== 0)
-      return "Price per night is required.";
-    if (!form.acknowledge) return "You must acknowledge the listing terms.";
+    if (!form.roomTitle || !form.roomTitle.trim()) return t("Room title is required.");
+    if (!form.description || !form.description.trim()) return t("Description is required.");
+    if (!form.name || !form.name.trim()) return t("Your name is required.");
+    if (!form.email || !form.email.trim()) return t("Email is required.");
+    if (!form.phone || !form.phone.trim()) return t("Phone is required.");
+    if ((form.priceAmount === "" || form.priceAmount == null) && form.priceAmount !== 0)
+      return t("Price per night is required.");
+    if (!form.acknowledge) return t("You must acknowledge the listing terms.");
     // basic email pattern
-    const emailRe = /\S+@\S+\.\S+/;
-    if (!emailRe.test(form.email)) return "Invalid email address.";
-    // phone basic
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(form.email)) return t("Invalid email address.");
+    // phone basic: allow digits, spaces, parentheses, plus and hyphen; length 7-20
     const phoneRe = /^[\d\s()+-]{7,20}$/;
-    if (!phoneRe.test(form.phone)) return "Invalid phone number.";
+    if (!phoneRe.test(form.phone)) return t("Invalid phone number.");
     return null;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setResult(null);
-
     const err = validate();
     if (err) {
       setResult({ ok: false, message: err });
@@ -180,6 +306,7 @@ export default function RoomListingRequest() {
             .filter(Boolean)
         : [];
       const coordsNum = coords.length === 2 ? coords.map((c) => Number(c)) : [];
+
       const roomLocation = {
         address: form.roomLocation.address,
         city: form.roomLocation.city,
@@ -187,6 +314,7 @@ export default function RoomListingRequest() {
         country: form.roomLocation.country,
         coordinates: coordsNum,
       };
+
       fd.append("roomLocation", JSON.stringify(roomLocation));
 
       // Amenities & rules as JSON arrays
@@ -204,10 +332,8 @@ export default function RoomListingRequest() {
         : [];
       fd.append("amenities", JSON.stringify(amenitiesArr));
       fd.append("rules", JSON.stringify(rulesArr));
-
       fd.append("terms", form.terms);
       fd.append("acknowledge", form.acknowledge ? "true" : "false");
-
       fd.append("name", form.name);
       fd.append("email", form.email);
       fd.append("phone", form.phone);
@@ -225,16 +351,16 @@ export default function RoomListingRequest() {
       const json = await resp.json().catch(() => null);
 
       if (!resp.ok) {
-        const msg = (json && json.description) || `Server error ${resp.status}`;
+        const msg = (json && json.description) || `${t("Saved")} ${resp.status}`;
         setResult({ ok: false, message: msg });
       } else {
         const id = json && json.id ? json.id : null;
         setLastSavedId(id);
-        setResult({ ok: true, message: `Saved${id ? ` (id: ${id})` : ""}` });
+        setResult({ ok: true, message: `${t("Saved")}${id ? ` (id: ${id})` : ""}` });
         setShowThankYouAlert(true);
       }
     } catch (err) {
-      setResult({ ok: false, message: err.message || "Network error" });
+      setResult({ ok: false, message: err.message || t("Network error") });
     } finally {
       setSubmitting(false);
     }
@@ -245,7 +371,6 @@ export default function RoomListingRequest() {
     setShowThankYouAlert(false);
     setShowPaymentModal(true);
   }
-
   // Called when payment modal is closed (after reading instructions)
   function handleClosePaymentModal() {
     setShowPaymentModal(false);
@@ -254,13 +379,13 @@ export default function RoomListingRequest() {
 
   return (
     <div className="container my-4">
-      <h3>Room Listing Request</h3>
+      <h3>{t("Room Listing Request")}</h3>
 
       <form onSubmit={handleSubmit} className="needs-validation" noValidate>
         <div className="row">
           <div className="col-md-8">
             <div className="mb-3">
-              <label className="form-label">Room Title</label>
+              <label className="form-label">{t("Room Title")}</label>
               <input
                 name="roomTitle"
                 className="form-control"
@@ -271,7 +396,7 @@ export default function RoomListingRequest() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Description</label>
+              <label className="form-label">{t("Description")}</label>
               <textarea
                 name="description"
                 className="form-control"
@@ -284,7 +409,7 @@ export default function RoomListingRequest() {
 
             <div className="row g-2 mb-3">
               <div className="col-6 col-md-3">
-                <label className="form-label">Capacity</label>
+                <label className="form-label">{t("Capacity")}</label>
                 <input
                   name="roomCapacity"
                   type="number"
@@ -295,7 +420,7 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-6 col-md-3">
-                <label className="form-label">Bedrooms</label>
+                <label className="form-label">{t("Bedrooms")}</label>
                 <input
                   name="bedrooms"
                   type="number"
@@ -306,7 +431,7 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-6 col-md-3">
-                <label className="form-label">Bathrooms</label>
+                <label className="form-label">{t("Bathrooms")}</label>
                 <input
                   name="bathrooms"
                   type="number"
@@ -327,7 +452,7 @@ export default function RoomListingRequest() {
                     onChange={handleChange}
                   />
                   <label htmlFor="instantBook" className="form-check-label">
-                    Instant Book
+                    {t("Instant Book")}
                   </label>
                 </div>
               </div>
@@ -335,7 +460,7 @@ export default function RoomListingRequest() {
 
             <div className="row g-2 mb-3">
               <div className="col-md-4">
-                <label className="form-label">Min Nights</label>
+                <label className="form-label">{t("Min Nights")}</label>
                 <input
                   name="minNights"
                   type="number"
@@ -346,7 +471,7 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Max Nights</label>
+                <label className="form-label">{t("Max Nights")}</label>
                 <input
                   name="maxNights"
                   type="number"
@@ -356,9 +481,10 @@ export default function RoomListingRequest() {
                   onChange={handleNumberChange}
                 />
               </div>
+
               <div className="col-md-4">
                 <label className="form-label" htmlFor="terms">
-                  Terms
+                  {t("Terms")}
                 </label>
                 <select
                   id="terms"
@@ -367,23 +493,23 @@ export default function RoomListingRequest() {
                   value={form.terms}
                   onChange={handleChange}
                 >
-                  <option value="">Select term</option>
+                  <option value="">{t("Select term")}</option>
                   <option value="1 month (13.5%)">1 month (13.5%)</option>
                   <option value="3 months (10.5%)">3 months (10.5%)</option>
                   <option value="6 months (8.5%)">6 months (8.5%)</option>
                 </select>
                 <p>
-                  <strong>Selected</strong>: {form.terms || "none"}
+                  <strong>{t("Selected")}</strong>: {form.terms || t("Select term")}
                 </p>
               </div>
             </div>
 
             <hr />
 
-            <h5>Pricing</h5>
+            <h5>{t("Pricing")}</h5>
             <div className="row g-2 mb-3">
               <div className="col-md-6">
-                <label className="form-label">Price Amount</label>
+                <label className="form-label">{t("Price Amount")}</label>
                 <input
                   name="priceAmount"
                   type="number"
@@ -396,8 +522,8 @@ export default function RoomListingRequest() {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label" htmlFor="terms">
-                  Currency
+                <label className="form-label" htmlFor="priceCurrency">
+                  {t("Currency")}
                 </label>
                 <select
                   id="priceCurrency"
@@ -406,22 +532,22 @@ export default function RoomListingRequest() {
                   value={form.priceCurrency}
                   onChange={handleChange}
                 >
-                  <option value="">Select Currency</option>
+                  <option value="">{t("Select Currency")}</option>
                   <option value="USD">USD</option>
-                  <option value="EU">EURO</option>
-                  <option value="AOA">KWANZA</option>
+                  <option value="EUR">EUR</option>
+                  <option value="AOA">AOA</option>
                 </select>
                 <p>
-                  <strong>Selected</strong>: {form.priceCurrency || "none"}
+                  <strong>{t("Selected")}</strong>: {form.priceCurrency || t("Select Currency")}
                 </p>
               </div>
             </div>
 
             <hr />
 
-            <h5>Location</h5>
+            <h5>{t("Location")}</h5>
             <div className="mb-3">
-              <label className="form-label">Address</label>
+              <label className="form-label">{t("Address")}</label>
               <input
                 name="roomLocation.address"
                 className="form-control"
@@ -431,7 +557,7 @@ export default function RoomListingRequest() {
             </div>
             <div className="row g-2 mb-3">
               <div className="col-md-4">
-                <label className="form-label">City</label>
+                <label className="form-label">{t("City")}</label>
                 <input
                   name="roomLocation.city"
                   className="form-control"
@@ -440,7 +566,7 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Region</label>
+                <label className="form-label">{t("Region")}</label>
                 <input
                   name="roomLocation.region"
                   className="form-control"
@@ -449,7 +575,7 @@ export default function RoomListingRequest() {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Country</label>
+                <label className="form-label">{t("Country")}</label>
                 <input
                   name="roomLocation.country"
                   className="form-control"
@@ -459,11 +585,11 @@ export default function RoomListingRequest() {
               </div>
             </div>
             <div className="mb-3">
-              <label className="form-label">Coordinates (lat, lng)</label>
+              <label className="form-label">{t("Coordinates (lat, lng)")}</label>
               <input
                 name="roomLocation.coordinates"
                 className="form-control"
-                placeholder="e.g. 43.6591, -70.2568"
+                placeholder={t("Coordinates (lat, lng)")}
                 value={form.roomLocation.coordinates}
                 onChange={handleChange}
               />
@@ -472,7 +598,7 @@ export default function RoomListingRequest() {
             <hr />
 
             <div className="mb-3">
-              <label className="form-label">Amenities (comma separated)</label>
+              <label className="form-label">{t("Amenities (comma separated)")}</label>
               <input
                 name="amenities"
                 className="form-control"
@@ -483,7 +609,7 @@ export default function RoomListingRequest() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Rules (comma separated)</label>
+              <label className="form-label">{t("Rules (comma separated)")}</label>
               <input
                 name="rules"
                 className="form-control"
@@ -494,9 +620,7 @@ export default function RoomListingRequest() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">
-                You can upload up to 12 images.
-              </label>
+              <label className="form-label">{t("You can upload up to 12 images.")}</label>
               <input
                 ref={fileInputRef}
                 name="images"
@@ -508,11 +632,7 @@ export default function RoomListingRequest() {
               />
               <div className="mt-2 d-flex flex-wrap">
                 {imagePreviews.map((p) => (
-                  <div
-                    key={p.name}
-                    className="me-2 mb-2"
-                    style={{ width: 100 }}
-                  >
+                  <div key={p.name} className="me-2 mb-2" style={{ width: 100 }}>
                     <img
                       src={p.src}
                       alt={p.name}
@@ -533,27 +653,27 @@ export default function RoomListingRequest() {
           <div className="col-md-4">
             <div className="card mb-3">
               <div className="card-body">
-                <h5 className="card-title">Contact</h5>
+                <h5 className="card-title">{t("Contact")}</h5>
 
                 <div className="mb-3">
-                  <label className="form-label">Your Name</label>
+                  <label className="form-label">{t("Your Name")}</label>
                   <input
                     name="name"
                     className="form-control"
                     value={form.name}
-                    placeholder="First and last name"
+                    placeholder={t("Your Name")}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Email</label>
+                  <label className="form-label">{t("Email")}</label>
                   <input
                     name="email"
                     type="email"
                     className="form-control"
-                    placeholder="e. g. yourEmail@sample.com"
+                    placeholder="e.g. yourEmail@sample.com"
                     value={form.email}
                     onChange={handleChange}
                     required
@@ -561,12 +681,12 @@ export default function RoomListingRequest() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Phone</label>
+                  <label className="form-label">{t("Phone")}</label>
                   <input
                     name="phone"
                     className="form-control"
                     value={form.phone}
-                    placeholder="e. g. +244 xxx xxx xxx"
+                    placeholder="e.g. +244 xxx xxx xxx"
                     onChange={handleChange}
                     required
                   />
@@ -582,26 +702,21 @@ export default function RoomListingRequest() {
                     onChange={handleChange}
                   />
                   <label htmlFor="acknowledge" className="form-check-label">
-                    I acknowledge the contract for listing and agree to the
-                    terms.{" "}
+                    {t("I acknowledge the contract for listing and agree to the terms.")}{" "}
                     <Link
                       to="/room-rental/contract-listing"
                       target="_blank"
                       rel="noreferrer"
                       style={{ textDecoration: "none" }}
                     >
-                      listing contract
+                      {t("listing contract")}
                     </Link>
                   </label>
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={submitting}
-                  >
-                    {submitting ? "Submitting..." : "Submit Listing"}
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? t("Submitting ...") : t("Submit Listing")}
                   </button>
                   <button
                     type="button"
@@ -609,15 +724,13 @@ export default function RoomListingRequest() {
                     onClick={resetForm}
                     disabled={submitting}
                   >
-                    Reset
+                    {t("Reset")}
                   </button>
                 </div>
 
                 {result && (
                   <div
-                    className={`mt-3 alert ${
-                      result.ok ? "alert-success" : "alert-danger"
-                    }`}
+                    className={`mt-3 alert ${result.ok ? "alert-success" : "alert-danger"}`}
                     role="alert"
                   >
                     {result.message}
@@ -625,8 +738,7 @@ export default function RoomListingRequest() {
                 )}
 
                 <small className="text-muted d-block mt-2">
-                  <strong>Required:</strong> room title, description, price, name, email, phone,
-                  and acknowledgement.
+                  <strong>{t("Required:")}</strong> {t("Room Title")}, {t("Description")}, {t("Price Amount")}, {t("Your Name")}, {t("Email")}, {t("Phone")}, {t("I acknowledge the contract for listing and agree to the terms.")}
                 </small>
               </div>
             </div>
@@ -637,7 +749,7 @@ export default function RoomListingRequest() {
       {/* Thank you alert that host must close to see payment modal */}
       {showThankYouAlert && (
         <div className="alert alert-success alert-dismissible fade show" role="alert">
-          <strong>Thank you for booking!</strong> Please close this message to view payment instructions.
+          <strong>{t("Thank you for booking!")}</strong> {t("Please close this message to view payment instructions.") || ""}
           <button
             type="button"
             className="btn-close"
@@ -660,32 +772,32 @@ export default function RoomListingRequest() {
           <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Payment Instructions</h5>
+                <h5 className="modal-title">{t("Payment Instructions")}</h5>
                 <button type="button" className="btn-close" aria-label="Close" onClick={handleClosePaymentModal} />
               </div>
               <div className="modal-body">
                 <p>
-                  <strong>Notice:</strong> Please pay for the listing within <strong>48 hours</strong> or the listing will
-                  be cancelled.
+                  <strong>{t("Notice")}:</strong> {t("Please pay for the listing within 48 hours or the listing will be cancelled.") || "Please pay for the listing within 48 hours or the listing will be cancelled."}
                 </p>
 
-                <h6>Bank Payment Details</h6>
-                <p className="mb-1"><strong>Bank:</strong> BFA</p>
-                <p className="mb-1"><strong>Account name:</strong> Maria Miguel</p>
-                <p className="mb-1"><strong>Account number:</strong> 342295560 30 001</p>
-                <p className="mb-1"><strong>IBAN:</strong> AO06 0006 0000 42295560301 25</p>
-                <p className="mb-1"><strong>Reference:</strong> Please include your listing ID or email{lastSavedId ? ` (ID: ${lastSavedId})` : ""}</p>
+                <h6>{t("Bank Payment Details") || t("Bank")}</h6>
+                <p className="mb-1"><strong>{t("Bank")}:</strong> BFA</p>
+                <p className="mb-1"><strong>{t("Account name")}:</strong> Maria Miguel</p>
+                <p className="mb-1"><strong>{t("Account number")}:</strong> 342295560 30 001</p>
+                <p className="mb-1"><strong>{t("IBAN")}:</strong> AO06 0006 0000 42295560301 25</p>
+                <p className="mb-1">
+                  <strong>{t("Reference")}:</strong> {t("Please include your listing ID or email")}{lastSavedId ? ` (ID: ${lastSavedId})` : ""}
+                </p>
 
                 <hr />
                 <p>
-                  After you complete the payment, please reply to the confirmation email or contact support at{" "}
-                  <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a> with your payment receipt so we can
-                  activate your listing.
+                  {t("After you complete the payment, please reply to the confirmation email or contact support at")}{" "}
+                  <a href="mailto:lmj.muginga@gmail.com">LM-ltd Team</a> {t("with your payment receipt so we can activate your listing.") || ""}
                 </p>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={handleClosePaymentModal}>
-                  Close
+                  {t("Close")}
                 </button>
               </div>
             </div>
@@ -696,13 +808,11 @@ export default function RoomListingRequest() {
       <footer className="text-center py-4 border-top">
         <small>
           <p>
-            <strong>{t("whoWeAre.footer.phones")}:</strong> (+244) 222 022 351;
-            (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
+            <strong>{t("whoWeAre.footer.phones")}:</strong> (+244) 222 022 351; (+244) 942 154 545; (+244) 921 588 083; (+244) 939 207 046
             <br />
             {t("whoWeAre.footer.address")}
           </p>
-          &copy; {new Date().getFullYear()} LM-Ltd Services.{" "}
-          {t("whoWeAre.footer.copyright")}
+          &copy; {new Date().getFullYear()} LM-Ltd Services. {t("whoWeAre.footer.copyright")}
         </small>
       </footer>
     </div>
