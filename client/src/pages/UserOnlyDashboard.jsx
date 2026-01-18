@@ -826,23 +826,23 @@ export default function UserOnlyDashboard({ apiBaseUrl, token, initialServices, 
               </p>
               <div>
                 <div>
-                  <strong>Bank :</strong> {bankInfo.bankName}
+                  <strong>Bank:</strong> {bankInfo.bankName}
                 </div>
                 <div>
-                  <strong>Account name :</strong>{" "}
+                  <strong>Account name:</strong>{" "}
                   {bankInfo.accountName ?? bankInfo.owner}
                 </div>
                 <div>
-                  <strong>Account number :</strong> {bankInfo.accountNumber}
+                  <strong>Account number:</strong> {bankInfo.accountNumber}
                 </div>
                 <div>
-                  <strong>IBAN :</strong> {bankInfo.routingNumber}
+                  <strong>IBAN:</strong> {bankInfo.routingNumber}
                 </div>
                 <div>
-                  <strong>Reference :</strong> {bankInfo.reference}
+                  <strong>Reference:</strong> {bankInfo.reference}
                 </div>
                 <div>
-                  <strong>Amount :</strong> {bankInfo.currency ?? "USD"}{" "}
+                  <strong>Amount:</strong> {bankInfo.currency ?? "USD"}{" "}
                   {bankInfo.amount}
                 </div> <br/>
                 <p style={{ fontWeight: 600, marginBottom: 8 }}>
