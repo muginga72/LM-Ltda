@@ -1,5 +1,5 @@
 // src/api/bookingsApi.js
-const BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+const BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000/api';
 
 function authHeader(role = 'user') {
   // Demo: replace with real token retrieval
@@ -25,7 +25,7 @@ export async function createBooking(formData) {
 }
 
 export async function listMyBookings() {
-  const res = await fetch(`${BASE}/bookings/my`, {
+  const res = await fetch(`${BASE}/api/bookings/my`, {
     headers: { ...authHeader('user') },
   });
   return res.json();
