@@ -20,7 +20,7 @@ function buildAbsoluteUrl(base, pathWithQs) {
   const origin =
     typeof window !== 'undefined' && window.location && window.location.origin
       ? window.location.origin
-      : 'http://localhost:5000/api';
+      : 'http://localhost:5000';
 
   return `${origin}${normalizedPath}`;
 }
