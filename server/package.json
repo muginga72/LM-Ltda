@@ -1,8 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.1",
-  "main": "index.js",
-  "proxy": "http://localhost:5000",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "build": "npm && npm install --prefix frontend && npm run build --prefix frontend",
