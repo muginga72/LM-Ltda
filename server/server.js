@@ -1,14 +1,17 @@
+// server/server.js
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-// const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
+const { Server } = require('socket.io');
 
+// --- Route imports (keep your existing routes) ---
 const authRoutes = require('./routes/authRoutes');
 const servicesRoutes = require('./routes/servicesRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -22,51 +25,65 @@ const uploadFilesRoutes = require('./routes/uploadFilesRoutes');
 const paymentsRouter = require('./routes/payments/payments');
 const calendarRouter = require('./routes/calendar');
 const contactRouter = require('./routes/contact');
-const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequestRoutes'); // user list request
+const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequestRoutes');
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
 const roomsRoutes = require('./routes/roomrental/roomRoutes');
 const uploadsRouter = require('./routes/uploads/uploads');
 const roomRequestRoutes = require('./routes/roomrental/roomRequestRoutes');
 const bookingRoutes = require('./routes/roomrental/bookingRoutes');
-const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRoutes'); // admin list all bookings
+const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRoutes');
 
-const { Server } = require('socket.io');
-const multer = require('multer');
-
+// --- App setup ---
 const app = express();
-const PORT = process.env.PORT || 5000;
-const server = http.createServer(app);
+app.set('trust proxy', true); // important when behind Render's proxy/load balancer
 
-// ---------- Security & logging ----------
+// --- Security & logging ---
 app.use(helmet());
 app.use(morgan('dev'));
 
-// Express CORS snippet
-const cors = require('cors');
+// --- Environment-driven origins ---
+// Set CLIENT_ORIGIN in Render to your client URL (e.g., https://www.lmuginga.com or https://lm-ltda-client.onrender.com)
+const CLIENT_ORIGIN = (process.env.CLIENT_ORIGIN || '').trim() || null;
 
+// Build allowed origins list and filter out falsy values
 const allowedOrigins = [
-  'https://www.lmuginga.com',
-  'https://lmuginga.com',
-];
+  'http://localhost:3000',
+  CLIENT_ORIGIN,
+].filter(Boolean);
 
-function isLocalhostOrigin(origin) {
-  if (!origin) return false;
+// Helper to check origin safely
+function isOriginAllowed(origin) {
+  if (!origin) return true; // allow non-browser requests (curl, server-to-server)
+  // Exact match with configured allowed origins
+  if (allowedOrigins.includes(origin)) return true;
+  // Allow Render subdomains automatically (useful if you use onrender.com URLs)
   try {
     const u = new URL(origin);
-    return u.hostname === 'localhost' || u.hostname === '127.0.0.1';
-  } catch {
-    return false;
+    if (u.hostname && u.hostname.endsWith('.onrender.com')) return true;
+  } catch (e) {
+    // ignore parse errors
   }
+  // Allow your custom domain root and www variant if CLIENT_ORIGIN provided
+  if (CLIENT_ORIGIN) {
+    try {
+      const clientHost = new URL(CLIENT_ORIGIN).hostname;
+      const originHost = new URL(origin).hostname;
+      if (originHost === clientHost) return true;
+      // allow www vs non-www variants
+      if (originHost === `www.${clientHost}` || `www.${originHost}` === clientHost) return true;
+    } catch (e) {}
+  }
+  // Allow localhost patterns
+  if (/localhost(:\d+)?$/.test(origin)) return true;
+  return false;
 }
 
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true); // allow server-to-server or curl
-    if (isLocalhostOrigin(origin)) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    console.warn('CORS blocked origin:', origin);
-    return callback(new Error('Not allowed by CORS'));
+// --- CORS for REST endpoints (Express) ---
+app.use(require('cors')({
+  origin: (origin, cb) => {
+    if (isOriginAllowed(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
@@ -74,33 +91,58 @@ app.use(cors({
   optionsSuccessStatus: 204,
 }));
 
-// convert CORS origin errors into 403 JSON
-app.use((err, req, res, next) => {
-  if (err && err.message === 'Not allowed by CORS') {
-    return res.status(403).json({ error: 'CORS error: origin not allowed' });
-  }
-  next(err);
-});
-
-// ---------- Body parsers ----------
+// --- Body parsers ---
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ---------- Socket.IO with same CORS ----------
+// --- Create HTTP server and Socket.IO with explicit CORS ---
+const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+
 const io = new Server(server, {
+  // Socket.IO needs its own CORS config
   cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: (origin, callback) => {
+      // socket.io passes undefined origin for non-browser clients
+      if (isOriginAllowed(origin)) return callback(null, true);
+      return callback(new Error('Socket.IO CORS not allowed'));
+    },
+    methods: ['GET', 'POST'],
     credentials: true,
   },
+  // allow polling fallback for debugging; keep websocket first
+  transports: ['websocket', 'polling'],
+  // increase timeouts slightly for slow networks
+  pingInterval: 25000,
+  pingTimeout: 60000,
 });
 
+// --- Socket logging and handshake error handling ---
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  console.log('Socket connected:', socket.id, 'handshake address:', socket.handshake.address);
+  // Example event handlers (keep or replace with your own)
+  socket.on('join-room', (roomId) => {
+    console.log('join-room', roomId, socket.id);
+    socket.join(roomId);
+    io.to(roomId).emit('user-joined', { id: socket.id });
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('Socket disconnected:', socket.id, 'reason:', reason);
+  });
+
+  socket.on('error', (err) => {
+    console.error('Socket error on', socket.id, err);
+  });
 });
 
-// ---------- Ensure uploads dir exists and is exposed ----------
+// Engine-level connection error (handshake) logging
+io.engine.on('connection_error', (err) => {
+  console.error('Socket.IO engine connection_error:', err);
+});
+
+// --- Ensure uploads dir exists and is exposed ---
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
   console.warn(`uploads directory not found, creating at ${UPLOADS_DIR}`);
@@ -120,10 +162,10 @@ const multerUpload = multer({
   },
 });
 
-// Allow cross-origin image use
+// Allow cross-origin image use for uploads static route
 app.use('/uploads', (req, res, next) => {
   const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
+  if (!origin || isOriginAllowed(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
   }
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -131,21 +173,18 @@ app.use('/uploads', (req, res, next) => {
 });
 
 // Serve uploads as static files
-app.use(
-  '/uploads',
-  express.static(UPLOADS_DIR, {
-    index: false,
-    maxAge: '1d',
-  })
-);
+app.use('/uploads', express.static(UPLOADS_DIR, {
+  index: false,
+  maxAge: '1d',
+}));
 
-// Mount the uploads router at /api/uploads
+// Mount uploads router
 app.use('/api/uploads', uploadsRouter);
 
 // Optionally also serve common images assets
 app.use('/api/images', express.static(path.join(__dirname, 'assets', 'images')));
 
-// ---------- Mount other API routes ----------
+// --- Mount other API routes (keep your existing routes) ---
 app.use('/api', uploadFilesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
@@ -167,7 +206,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/room-listing-request', roomListingRequestRoutes);
 app.use('/admin', adminListBookingsRoutes);
 
-// ---------- Booking route (accepts JSON or multipart/form-data) ----------
+// Booking route (accepts JSON or multipart/form-data)
 app.post('/api/bookings', multerUpload.single('idDocument'), (req, res) => {
   try {
     const isMultipart = !!req.file;
@@ -222,6 +261,11 @@ app.use('/api/room-requests', roomRequestRoutes);
 // mount admin calendar routes with io
 app.use('/api/admin/calendar', adminCalendarRouterFactory(io));
 
+// Health check endpoint (use this for Render health check)
+app.get('/health', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
 // No-store on API responses if you prefer
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
@@ -247,17 +291,27 @@ app.use((err, req, res, next) => {
   res.status(err?.status || 500).json({ error: err?.message || 'Internal Server Error' });
 });
 
-// Start DB + server
+// --- Start DB + server ---
+const startServer = () => {
+  server.listen(PORT, () => {
+    console.log(`🚀 Server + Socket. IO listening on port ${PORT}`);
+    console.log(`Allowed origins: ${allowedOrigins.join(', ') || 'none configured'}`);
+    if (CLIENT_ORIGIN) console.log(`CLIENT_ORIGIN: ${CLIENT_ORIGIN}`);
+  });
+};
+
+// Connect to MongoDB (non-blocking start)
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
   .then(() => {
     console.log('✅ MongoDB connected');
-    server.listen(PORT, () => {
-      console.log(`🚀 Server + Socket.IO listening on port ${PORT}`);
-    });
+    startServer();
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
+    // Start server anyway so you can debug socket/CORS issues even if DB is down
+    startServer();
   });

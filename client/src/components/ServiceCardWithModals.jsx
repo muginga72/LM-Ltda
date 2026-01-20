@@ -1,17 +1,10 @@
 // components/ServiceCardWithModals.jsx
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Card,
-  Button,
-  ButtonGroup,
-  Modal,
-  Form,
-  Spinner,
-} from "react-bootstrap";
+import { Card, Button, ButtonGroup, Modal, Form, Spinner, } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTranslation } from "react-i18next";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "https://lmltda-api.onrender.com";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ServiceCardWithModals = ({
   serviceId,
@@ -20,6 +13,7 @@ const ServiceCardWithModals = ({
   price = "",
   imagePath = "",
 }) => {
+
   const { t, i18n } = useTranslation();
 
   const idKey = serviceId ?? title;
@@ -39,7 +33,7 @@ const ServiceCardWithModals = ({
       },
       shareData: { fullName: "", email: "", notes: "" },
     }),
-    []
+    [],
   );
 
   const [state, setState] = useState(defaultState);
@@ -63,13 +57,9 @@ const ServiceCardWithModals = ({
     } catch {}
   }, [state, localKey]);
 
-  const conversionRates = useMemo(
-    () => ({
-      USD: 1,
-      EUR: 0.8615,
-      AOA: 912.085,
-    }),
-    []
+  const conversionRates = useMemo(() => (
+    { USD: 1, EUR: 0.8615, AOA: 912.085}),
+    [],
   );
 
   const getCurrencyForLocale = (locale) => {
@@ -198,7 +188,7 @@ const ServiceCardWithModals = ({
 
       if (missing.length > 0) {
         throw new Error(
-          `${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} required.`
+          `${missing.join(", ")} ${missing.length > 1 ? "are" : "is"} required.`,
         );
       }
 
@@ -220,7 +210,7 @@ const ServiceCardWithModals = ({
         t("notification.success", {
           defaultValue:
             type.charAt(0).toUpperCase() + type.slice(1) + " successful.",
-        })
+        }),
       );
 
       setState((prev) => ({
@@ -306,7 +296,9 @@ const ServiceCardWithModals = ({
         style={{ borderRadius: 24, overflow: "hidden" }}
         key={`card-${idKey}`}
       >
-        <div style={{ position: "relative", height: "300px", overflow: "hidden" }}>
+        <div
+          style={{ position: "relative", height: "300px", overflow: "hidden" }}
+        >
           <Card.Img
             src={fullImageUrl}
             alt={title}
@@ -332,7 +324,9 @@ const ServiceCardWithModals = ({
                 zIndex: 2,
               }}
             >
-              <span className="badge bg-warning fs-6">{formatPrice(price)}</span>
+              <span className="badge bg-warning fs-6">
+                {formatPrice(price)}
+              </span>
             </div>
           )}
         </div>
@@ -343,13 +337,25 @@ const ServiceCardWithModals = ({
         <div className="px-2 pb-3">
           <ButtonGroup vertical className="w-100 px-3">
             <div className="d-flex gap-4 mt-2 flex-wrap">
-              <Button variant="outline-primary" onClick={() => handleShow("request")} style={{borderRadius: 24}}>
+              <Button
+                variant="outline-primary"
+                onClick={() => handleShow("request")}
+                style={{ borderRadius: 24 }}
+              >
                 {t("button.request", { defaultValue: "Request" })}
               </Button>
-              <Button variant="outline-secondary" onClick={() => handleShow("schedule")} style={{borderRadius: 24}}>
+              <Button
+                variant="outline-secondary"
+                onClick={() => handleShow("schedule")}
+                style={{ borderRadius: 24 }}
+              >
                 {t("button.schedule", { defaultValue: "Schedule" })}
               </Button>
-              <Button variant="outline-info" onClick={() => handleShow("share")} style={{borderRadius: 24}}>
+              <Button
+                variant="outline-info"
+                onClick={() => handleShow("share")}
+                style={{ borderRadius: 24 }}
+              >
                 {t("button.share", { defaultValue: "Share" })}
               </Button>
             </div>
@@ -358,7 +364,7 @@ const ServiceCardWithModals = ({
       </Card>
 
       {renderModal("request", ["fullName", "email", "serviceType", "details"])}
-      {renderModal("schedule", ["fullName", "email", "serviceType", "date", "time"])}
+      {renderModal("schedule", [ "fullName", "email", "serviceType", "date", "time" ])}
       {renderModal("share", ["fullName", "email", "notes"])}
     </>
   );
