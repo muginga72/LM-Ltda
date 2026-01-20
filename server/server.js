@@ -38,15 +38,12 @@ const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRo
 const app = express();
 app.set('trust proxy', true); // important when behind Render's proxy/load balancer
 
-// --- Security & logging ---
 app.use(helmet());
 app.use(morgan('dev'));
 
-// --- Environment-driven origins ---
 // Set CLIENT_ORIGIN in Render to your client URL (e.g., https://www.lmuginga.com or https://lm-ltda-client.onrender.com)
 const CLIENT_ORIGIN = (process.env.CLIENT_ORIGIN || '').trim() || null;
 
-// Build allowed origins list and filter out falsy values
 const allowedOrigins = [
   'http://localhost:3000',
   CLIENT_ORIGIN,
@@ -54,17 +51,16 @@ const allowedOrigins = [
 
 // Helper to check origin safely
 function isOriginAllowed(origin) {
-  if (!origin) return true; // allow non-browser requests (curl, server-to-server)
-  // Exact match with configured allowed origins
+  if (!origin) return true; 
   if (allowedOrigins.includes(origin)) return true;
-  // Allow Render subdomains automatically (useful if you use onrender.com URLs)
+  
+  // Allow Render app domains
   try {
     const u = new URL(origin);
     if (u.hostname && u.hostname.endsWith('.onrender.com')) return true;
   } catch (e) {
     // ignore parse errors
   }
-  // Allow your custom domain root and www variant if CLIENT_ORIGIN provided
   if (CLIENT_ORIGIN) {
     try {
       const clientHost = new URL(CLIENT_ORIGIN).hostname;
@@ -101,27 +97,21 @@ const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  // Socket.IO needs its own CORS config
   cors: {
     origin: (origin, callback) => {
-      // socket.io passes undefined origin for non-browser clients
       if (isOriginAllowed(origin)) return callback(null, true);
       return callback(new Error('Socket.IO CORS not allowed'));
     },
     methods: ['GET', 'POST'],
     credentials: true,
   },
-  // allow polling fallback for debugging; keep websocket first
   transports: ['websocket', 'polling'],
-  // increase timeouts slightly for slow networks
   pingInterval: 25000,
   pingTimeout: 60000,
 });
 
-// --- Socket logging and handshake error handling ---
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id, 'handshake address:', socket.handshake.address);
-  // Example event handlers (keep or replace with your own)
   socket.on('join-room', (roomId) => {
     console.log('join-room', roomId, socket.id);
     socket.join(roomId);
@@ -156,7 +146,6 @@ const multerUpload = multer({
     fileSize: 5 * 1024 * 1024, // 5 MB limit
   },
   fileFilter: (req, file, cb) => {
-    // allow images and pdfs
     if (/image\/|pdf$/.test(file.mimetype)) cb(null, true);
     else cb(null, false);
   },
@@ -178,10 +167,8 @@ app.use('/uploads', express.static(UPLOADS_DIR, {
   maxAge: '1d',
 }));
 
-// Mount uploads router
 app.use('/api/uploads', uploadsRouter);
 
-// Optionally also serve common images assets
 app.use('/api/images', express.static(path.join(__dirname, 'assets', 'images')));
 
 // --- Mount other API routes (keep your existing routes) ---
@@ -258,10 +245,8 @@ app.post('/api/bookings', multerUpload.single('idDocument'), (req, res) => {
 
 app.use('/api/room-requests', roomRequestRoutes);
 
-// mount admin calendar routes with io
 app.use('/api/admin/calendar', adminCalendarRouterFactory(io));
 
-// Health check endpoint (use this for Render health check)
 app.get('/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
