@@ -1,10 +1,32 @@
+// src/pages/Services.jsx
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import ServicesList from "../components/ServicesList";
 import { useTranslation } from "react-i18next";
 import "../i18n";
 
-const BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const stripTrailingSlash = (s) => (s ? s.replace(/\/+$/, "") : s);
+
+function resolveApiBase() {
+  if (process.env.REACT_APP_API_BASE) {
+    return stripTrailingSlash(process.env.REACT_APP_API_BASE);
+  }
+
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+    return "http://localhost:5000";
+  }
+
+  // Production default (override by setting REACT_APP_API_BASE)
+  return "https://lmltda-api.onrender.com";
+}
+
+const API_BASE = resolveApiBase();
+
+const buildUrl = (path) => {
+  const cleanBase = stripTrailingSlash(API_BASE);
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${cleanBase}/${cleanPath}`;
+};
 
 const Services = () => {
   const [services, setServices] = useState([]);
@@ -19,7 +41,9 @@ const Services = () => {
     if (browserLang && i18n.language !== browserLang) {
       i18n.changeLanguage(browserLang).catch(() => {});
     }
-  });
+    // run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -29,12 +53,15 @@ const Services = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${BASE}/api/services`, { signal });
+        const url = buildUrl("/api/services");
+        const res = await fetch(url, { method: "GET", signal, credentials: "include" });
+
         if (!res.ok) {
           const txt = await res.text().catch(() => "");
           throw new Error(`Failed to fetch services: ${res.status} ${txt}`);
         }
-        const data = await res.json();
+
+        const data = await res.json().catch(() => null);
         if (!Array.isArray(data)) throw new Error("Invalid response format");
         setServices(data);
       } catch (err) {
@@ -55,15 +82,21 @@ const Services = () => {
 
   const normalizeImagePath = (raw) => {
     if (!raw) return null;
+
+    // If it's already an absolute URL, return it
     try {
       const u = new URL(raw);
       return u.toString();
     } catch {
+      // not an absolute URL
     }
-    // It starts with /uploads or uploads
-    if (raw.startsWith("/uploads")) return `${BASE}${raw}`;
-    if (raw.startsWith("uploads/")) return `${BASE}/${raw}`;
-    return `${BASE}/uploads/${raw.replace(/^\/+/, "")}`;
+
+    const base = stripTrailingSlash(API_BASE);
+
+    // Common patterns: /uploads/..., uploads/..., filename.jpg
+    if (raw.startsWith("/uploads")) return `${base}${raw}`;
+    if (raw.startsWith("uploads/")) return `${base}/${raw}`;
+    return `${base}/uploads/${raw.replace(/^\/+/, "")}`;
   };
 
   if (loading) return <p className="text-center my-4">{t("services.loading") || "Loading services…"}</p>;
@@ -81,11 +114,7 @@ const Services = () => {
               const key = service._id || service.id || service.title;
               const imgPath = service.imagePath || service.image || service.filename || null;
               return (
-                <Col
-                  key={key}
-                  xs="auto"
-                  className="d-flex justify-content-center mb-4"
-                >
+                <Col key={key} xs="auto" className="d-flex justify-content-center mb-4">
                   <div style={{ width: "400px" }}>
                     <ServicesList
                       serviceId={service._id || service.id}
@@ -118,6 +147,6 @@ const Services = () => {
       </div>
     </>
   );
-}
+};
 
 export default Services;
