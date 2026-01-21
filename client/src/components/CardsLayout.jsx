@@ -1,8 +1,19 @@
 // client/src/components/CardsLayout.jsx
 import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
 import CardSet from "./CardSet";
 import axios from "axios";
+
+const API_FALLBACK = "https://lmltda-api.onrender.com"; 
+const API_BASE = process.env.REACT_APP_API_URL?.trim() || API_FALLBACK;
+
+const api = axios.create({
+  baseURL: API_BASE,
+  timeout: 10000,
+  headers: {
+    "Accept": "application/json",
+  },
+});
 
 const CardsLayout = () => {
   const [cardSets, setCardSets] = useState([]);
@@ -10,11 +21,22 @@ const CardsLayout = () => {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     const fetchCardSetsAndVideos = async () => {
       try {
-        const res = await axios.get("/api/cards");
-        const data = Array.isArray(res.data) ? res.data : res.data.cardSets;
+        const res = await api.get("/api/cards", { signal: controller.signal });
+
+        let data = res?.data;
+        if (Array.isArray(data)) {
+        } else if (Array.isArray(data?.cardSets)) {
+          data = data.cardSets;
+        } else if (Array.isArray(data?.data)) {
+          data = data.data;
+        } else {
+          data = [];
+        }
+
         const sets = Array.isArray(data) ? data : [];
 
         if (sets.length === 0) {
@@ -25,10 +47,17 @@ const CardsLayout = () => {
           return;
         }
 
+        // Try to load a global videos index from the frontend static assets (relative to site)
         let videosIndex = null;
         try {
-          const idxRes = await axios.get("/videos/index.json");
-          videosIndex = Array.isArray(idxRes.data) ? idxRes.data : null;
+          // videos index is likely hosted on the frontend static site; use relative path
+          const idxRes = await fetch("/videos/index.json");
+          if (idxRes.ok) {
+            const idxJson = await idxRes.json();
+            videosIndex = Array.isArray(idxJson) ? idxJson : null;
+          } else {
+            videosIndex = null;
+          }
         } catch (err) {
           videosIndex = null;
         }
@@ -37,7 +66,6 @@ const CardsLayout = () => {
           sets.map(async (s) => {
             const setCopy = { ...s };
 
-            // prefer videos from index.json when available
             if (videosIndex) {
               const match = videosIndex.find((v) => String(v.setId) === String(s.id));
               if (match && Array.isArray(match.videos)) {
@@ -49,14 +77,18 @@ const CardsLayout = () => {
               }
             }
 
+            // Try per-set JSON hosted on the frontend static site
             try {
-              const perSetRes = await axios.get(`/videos/${s.id}.json`);
-              if (perSetRes && Array.isArray(perSetRes.data)) {
-                setCopy.left = {
-                  ...setCopy.left,
-                  videos: perSetRes.data,
-                };
-                return setCopy;
+              const perSetRes = await fetch(`/videos/${s.id}.json`);
+              if (perSetRes.ok) {
+                const perSetJson = await perSetRes.json();
+                if (Array.isArray(perSetJson)) {
+                  setCopy.left = {
+                    ...setCopy.left,
+                    videos: perSetJson,
+                  };
+                  return setCopy;
+                }
               }
             } catch (err) {
               // ignore; no per-set json found
@@ -76,7 +108,8 @@ const CardsLayout = () => {
           setLoading(false);
         }
       } catch (err) {
-        console.error("Failed to fetch card sets or videos:", err);
+        // Provide clearer logging for debugging
+        console.error("Failed to fetch card sets or videos:", err?.message ?? err, err);
         if (!cancelled) {
           setCardSets([]);
           setLoading(false);
@@ -88,17 +121,23 @@ const CardsLayout = () => {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, []);
 
   return (
     <Container className="px-3 px-md-5 py-4">
-      {!loading &&
+      {loading ? (
+        <div className="d-flex justify-content-center py-5">
+          <Spinner animation="border" role="status" />
+        </div>
+      ) : (
         cardSets.map((set) => (
-          <div key={set.id} className="mb-4 mb-md-5">
+          <div key={set.id ?? set._id ?? Math.random()} className="mb-4 mb-md-5">
             <CardSet set={set} />
           </div>
-        ))}
+        ))
+      )}
     </Container>
   );
 };
