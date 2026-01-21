@@ -41,7 +41,6 @@ const Services = () => {
     if (browserLang && i18n.language !== browserLang) {
       i18n.changeLanguage(browserLang).catch(() => {});
     }
-    // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -83,7 +82,6 @@ const Services = () => {
   const normalizeImagePath = (raw) => {
     if (!raw) return null;
 
-    // If it's already an absolute URL, return it
     try {
       const u = new URL(raw);
       return u.toString();
