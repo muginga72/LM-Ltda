@@ -3,21 +3,26 @@ const stripTrailingSlash = (s) => (s ? s.replace(/\/+$/, '') : s);
 
 let API_BASE = null;
 
+// Use explicit env var if provided
 if (process.env.REACT_APP_API_BASE) {
   API_BASE = stripTrailingSlash(process.env.REACT_APP_API_BASE);
 } else if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  // Local development
   API_BASE = 'http://localhost:5000';
 } else {
-  // Production API host (explicit, avoids using the frontend host + /api)
+  // Production API host (explicit)
   API_BASE = 'https://lmltda-api.onrender.com';
 }
 
+// Helper to join base and path without duplicating slashes or segments
 const buildUrl = (path) => {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return `${API_BASE}${p}`;
+  const cleanBase = stripTrailingSlash(API_BASE);
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${cleanBase}/${cleanPath}`;
 };
 
 async function parseResponse(res) {
+  // Read text first to avoid json() throwing on empty body
   const text = await res.text().catch(() => '');
   if (!text) return null;
   try {
@@ -42,6 +47,7 @@ export async function createService(payload, token, isFormData = false) {
   const url = buildUrl('/api/services');
   const res = await fetch(url, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -60,6 +66,7 @@ export async function updateService(id, payload, token) {
   const url = buildUrl(`/api/services/${id}`);
   const res = await fetch(url, {
     method: 'PUT',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -78,6 +85,7 @@ export async function deleteService(id, token) {
   const url = buildUrl(`/api/services/${id}`);
   const res = await fetch(url, {
     method: 'DELETE',
+    credentials: 'include',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
