@@ -9,30 +9,44 @@ const ServicesList = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const mountedRef = useRef(true);
+  const mountedRef = useRef(false);
 
-  // build endpoint: prefer configured base, otherwise use same-origin relative path
   const getEndpoint = useCallback(() => {
     if (BASE) return `${BASE}/api/services`;
     return `/api/services`;
   }, []);
 
+  const normalizeResponseToArray = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.services)) return data.services;
+    if (Array.isArray(data.data)) return data.data;
+    if (Array.isArray(data.results)) return data.results;
+
+    if (typeof data === "object" && (data._id || data.id)) return [data];
+    return [];
+  };
+
   const loadServices = useCallback(
-    async (opts = {}) => {
-      const { timeoutMs = DEFAULT_TIMEOUT_MS, includeCredentials = false } = opts;
+    async ({ signal, timeoutMs = DEFAULT_TIMEOUT_MS, includeCredentials = false } = {}) => {
       setLoading(true);
       setError(null);
 
-      const controller = new AbortController();
-      const signal = controller.signal;
+      let timeoutId = null;
+      if (timeoutMs > 0) {
+        timeoutId = setTimeout(() => {
 
-      // timeout abort
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+          try {
+            console.info("loadServices timeout reached");
+          } catch (e) {
+            // ignore
+          }
+        }, timeoutMs);
+      }
 
       try {
         const endpoint = getEndpoint();
 
-        // If the page is HTTPS and the endpoint is explicitly HTTP, warn in console
         if (typeof window !== "undefined" && endpoint.startsWith("http://") && window.location.protocol === "https:") {
           console.warn(
             "Requesting an insecure HTTP API from an HTTPS page may be blocked by the browser (mixed content). Use HTTPS for the API."
@@ -50,10 +64,12 @@ const ServicesList = () => {
           signal,
         });
 
-        clearTimeout(timeoutId);
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
 
         if (!res.ok) {
-          // Try to read text for better error message, but don't crash if body can't be read
           const txt = await res.text().catch(() => "");
           throw new Error(`Failed to load services: ${res.status}${txt ? ` ${txt}` : ""}`);
         }
@@ -62,17 +78,17 @@ const ServicesList = () => {
 
         if (!mountedRef.current) return;
 
-        setServices(Array.isArray(data) ? data : []);
+        const normalized = normalizeResponseToArray(data);
+        setServices(normalized);
       } catch (err) {
-        // AbortError is expected on timeout/cleanup
-        if (err.name === "AbortError") {
-          console.info("loadServices aborted or timed out");
-          if (mountedRef.current) setError("Request timed out or was cancelled");
+        if (err && err.name === "AbortError") {
+          console.info("loadServices aborted");
+          if (mountedRef.current) setError("Request was cancelled");
           return;
         }
 
         console.error("loadServices error:", err);
-        if (mountedRef.current) setError(err.message || "Failed to load services");
+        if (mountedRef.current) setError(err?.message || "Failed to load services");
       } finally {
         if (mountedRef.current) setLoading(false);
       }
@@ -82,16 +98,19 @@ const ServicesList = () => {
 
   useEffect(() => {
     mountedRef.current = true;
-    // initial load
-    loadServices();
+    const controller = new AbortController();
+
+    loadServices({ signal: controller.signal });
 
     return () => {
       mountedRef.current = false;
+      controller.abort();
     };
   }, [loadServices]);
 
   // UI states
   if (loading) return <div>Loading services…</div>;
+
   if (error)
     return (
       <div>
@@ -100,7 +119,10 @@ const ServicesList = () => {
         </div>
         <div>
           <button
-            onClick={() => { loadServices();}}
+            onClick={() => {
+              const controller = new AbortController();
+              loadServices({ signal: controller.signal });
+            }}
             style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
           >
             Retry
@@ -108,7 +130,24 @@ const ServicesList = () => {
         </div>
       </div>
     );
-  if (!services.length) return <div>No services found</div>;
+
+  if (!services || services.length === 0)
+    return (
+      <div>
+        <div>No services found</div>
+        <div style={{ marginTop: 8 }}>
+          <button
+            onClick={() => {
+              const controller = new AbortController();
+              loadServices({ signal: controller.signal });
+            }}
+            style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
 
   return (
     <div
