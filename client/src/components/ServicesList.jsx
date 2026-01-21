@@ -74,6 +74,7 @@ const ServicesList = () => {
           throw new Error(`Failed to load services: ${res.status}${txt ? ` ${txt}` : ""}`);
         }
 
+        // Try to parse JSON; if parsing fails, treat as empty
         const data = await res.json().catch(() => null);
 
         if (!mountedRef.current) return;
