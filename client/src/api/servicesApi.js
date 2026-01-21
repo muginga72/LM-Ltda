@@ -1,23 +1,46 @@
-// servicesApi.js
-const API_BASE =
-  (process.env.REACT_APP_API_BASE && process.env.REACT_APP_API_BASE.replace(/\/$/, '')) ||
-  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
-    : `${window.location.protocol}//${window.location.host}/api`);
+// api/servicesApi.js
+const stripTrailingSlash = (s) => (s ? s.replace(/\/+$/, '') : s);
+
+let API_BASE = null;
+
+if (process.env.REACT_APP_API_BASE) {
+  API_BASE = stripTrailingSlash(process.env.REACT_APP_API_BASE);
+} else if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  API_BASE = 'http://localhost:5000';
+} else {
+  // Production API host (explicit, avoids using the frontend host + /api)
+  API_BASE = 'https://lmltda-api.onrender.com';
+}
+
+const buildUrl = (path) => {
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}${p}`;
+};
+
+async function parseResponse(res) {
+  const text = await res.text().catch(() => '');
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
 
 export async function fetchServices(signal) {
-  const url = `${API_BASE}/api/services`;
+  const url = buildUrl('/api/services');
   const res = await fetch(url, { method: 'GET', signal, credentials: 'include' });
 
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     throw new Error(`Failed to fetch services: ${res.status} ${res.statusText} - ${body}`);
   }
-  return res.json();
+  return parseResponse(res);
 }
 
 export async function createService(payload, token, isFormData = false) {
-  const res = await fetch(`${API_BASE}/api/services`, {
+  const url = buildUrl('/api/services');
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -27,14 +50,15 @@ export async function createService(payload, token, isFormData = false) {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to create service');
+    const err = await parseResponse(res).catch(() => ({}));
+    throw new Error((err && err.error) || 'Failed to create service');
   }
-  return res.json();
+  return parseResponse(res);
 }
 
 export async function updateService(id, payload, token) {
-  const res = await fetch(`${API_BASE}/api/services/${id}`, {
+  const url = buildUrl(`/api/services/${id}`);
+  const res = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -44,14 +68,15 @@ export async function updateService(id, payload, token) {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to update service');
+    const err = await parseResponse(res).catch(() => ({}));
+    throw new Error((err && err.error) || 'Failed to update service');
   }
-  return res.json();
+  return parseResponse(res);
 }
 
 export async function deleteService(id, token) {
-  const res = await fetch(`${API_BASE}/api/services/${id}`, {
+  const url = buildUrl(`/api/services/${id}`);
+  const res = await fetch(url, {
     method: 'DELETE',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -59,8 +84,8 @@ export async function deleteService(id, token) {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Failed to delete service');
+    const err = await parseResponse(res).catch(() => ({}));
+    throw new Error((err && err.error) || 'Failed to delete service');
   }
-  return res.json();
+  return parseResponse(res);
 }
