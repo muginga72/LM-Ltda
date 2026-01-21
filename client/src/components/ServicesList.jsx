@@ -11,7 +11,6 @@ const ServicesList = () => {
   const [error, setError] = useState(null);
   const mountedRef = useRef(false);
 
-  // build endpoint: prefer configured base, otherwise use same-origin relative path
   const getEndpoint = useCallback(() => {
     if (BASE) return `${BASE}/api/services`;
     return `/api/services`;
@@ -23,7 +22,7 @@ const ServicesList = () => {
     if (Array.isArray(data.services)) return data.services;
     if (Array.isArray(data.data)) return data.data;
     if (Array.isArray(data.results)) return data.results;
-    // If the API returns an object with a single service, wrap it
+
     if (typeof data === "object" && (data._id || data.id)) return [data];
     return [];
   };
@@ -33,11 +32,10 @@ const ServicesList = () => {
       setLoading(true);
       setError(null);
 
-      // timeout abort (only if caller didn't already set up a timeout)
       let timeoutId = null;
       if (timeoutMs > 0) {
         timeoutId = setTimeout(() => {
-          // If signal is already aborted, this does nothing
+
           try {
             console.info("loadServices timeout reached");
           } catch (e) {
@@ -103,7 +101,6 @@ const ServicesList = () => {
     mountedRef.current = true;
     const controller = new AbortController();
 
-    // Start load and pass the controller.signal so it can be aborted on unmount
     loadServices({ signal: controller.signal });
 
     return () => {
@@ -124,9 +121,7 @@ const ServicesList = () => {
         <div>
           <button
             onClick={() => {
-              // create a fresh controller for retry
               const controller = new AbortController();
-              // call loadServices with the new signal
               loadServices({ signal: controller.signal });
             }}
             style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
