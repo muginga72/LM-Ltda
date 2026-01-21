@@ -2,11 +2,11 @@
 const API_BASE =
   (process.env.REACT_APP_API_BASE && process.env.REACT_APP_API_BASE.replace(/\/$/, '')) ||
   (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:5000/api'
+    ? 'http://localhost:5000'
     : `${window.location.protocol}//${window.location.host}/api`);
 
 export async function fetchServices(signal) {
-  const url = `${API_BASE}/services`;
+  const url = `${API_BASE}/api/services`;
   const res = await fetch(url, { method: 'GET', signal, credentials: 'include' });
 
   if (!res.ok) {
@@ -17,7 +17,7 @@ export async function fetchServices(signal) {
 }
 
 export async function createService(payload, token, isFormData = false) {
-  const res = await fetch(`${API_BASE}/services`, {
+  const res = await fetch(`${API_BASE}/api/services`, {
     method: 'POST',
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -34,7 +34,7 @@ export async function createService(payload, token, isFormData = false) {
 }
 
 export async function updateService(id, payload, token) {
-  const res = await fetch(`${API_BASE}/services/${id}`, {
+  const res = await fetch(`${API_BASE}/api/services/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export async function updateService(id, payload, token) {
 }
 
 export async function deleteService(id, token) {
-  const res = await fetch(`${API_BASE}/services/${id}`, {
+  const res = await fetch(`${API_BASE}/api/services/${id}`, {
     method: 'DELETE',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
