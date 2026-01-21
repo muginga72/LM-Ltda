@@ -1,18 +1,23 @@
 // api/servicesApi.js
+
 const stripTrailingSlash = (s) => (s ? s.replace(/\/+$/, '') : s);
 
-let API_BASE = null;
+function getDefaultApiBase() {
+  // Use explicit env var if provided
+  if (process.env.REACT_APP_API_BASE) {
+    return stripTrailingSlash(process.env.REACT_APP_API_BASE);
+  }
 
-// Use explicit env var if provided
-if (process.env.REACT_APP_API_BASE) {
-  API_BASE = stripTrailingSlash(process.env.REACT_APP_API_BASE);
-} else if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
   // Local development
-  API_BASE = 'http://localhost:5000';
-} else {
-  // Production API host (explicit)
-  API_BASE = 'https://lmltda-api.onrender.com';
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://localhost:5000';
+  }
+
+  // Production default (override by setting REACT_APP_API_BASE)
+  return 'https://lmltda-api.onrender.com';
 }
+
+const API_BASE = getDefaultApiBase();
 
 // Helper to join base and path without duplicating slashes or segments
 const buildUrl = (path) => {
