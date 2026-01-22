@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ServiceCardWithModals from "./ServiceCardWithModals";
 
-const ENV_BASE = process.env.REACT_APP_API_URL || "";
+const ENV_BASE = process.env.REACT_APP_API_BASE || "";
 const BASE = ENV_BASE.replace(/\/$/, "");
 const ENDPOINT = BASE ? `${BASE}/api/services` : `/api/services`;
 const PRIMARY_COLOR = "#0d6efd";
