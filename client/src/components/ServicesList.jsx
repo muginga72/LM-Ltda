@@ -1,170 +1,117 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ServiceCardWithModals from "./ServiceCardWithModals";
 
-const ENV_BASE = process.env.REACT_APP_API_BASE || "";
-const BASE = ENV_BASE.replace(/\/$/, ""); // remove trailing slash if present
-const DEFAULT_TIMEOUT_MS = 10000; // 10s timeout
-const BOOTSTRAP_PRIMARY = "#0d6efd"; // fallback primary color for outline
+const ENV_BASE = process.env.REACT_APP_API_URL || "";
+const BASE = ENV_BASE.replace(/\/$/, "");
+const ENDPOINT = BASE ? `${BASE}/api/services` : `/api/services`;
+const PRIMARY_COLOR = "#0d6efd";
 
-const ServicesList = () => {
+function ServicesList() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const mountedRef = useRef(false);
 
-  // build endpoint: prefer configured base, otherwise use same-origin relative path
-  const getConfiguredEndpoint = useCallback(() => {
-    if (BASE) return `${BASE}/api/services`;
-    return null;
-  }, []);
+  // Normalize many possible API shapes into an array of service objects
+  const extractServices = (payload) => {
+    if (!payload) return [];
 
-  const getSameOriginEndpoint = useCallback(() => {
-    return `/api/services`;
-  }, []);
+    if (Array.isArray(payload)) return payload;
 
-  const normalizeResponseToArray = (data) => {
-    if (!data) return [];
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.services)) return data.services;
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.results)) return data.results;
-    if (typeof data === "object" && (data._id || data.id)) return [data];
+    if (Array.isArray(payload.services)) return payload.services;
+
+    if (payload.data) {
+      if (Array.isArray(payload.data.services)) return payload.data.services;
+      if (Array.isArray(payload.data)) return payload.data;
+    }
+
+    if (payload.results) {
+      if (Array.isArray(payload.results.services)) return payload.results.services;
+      if (Array.isArray(payload.results)) return payload.results;
+    }
+
+    if (payload.services && typeof payload.services === "object") {
+      if (Array.isArray(payload.services.services)) return payload.services.services;
+      if (Array.isArray(payload.services.items)) return payload.services.items;
+    }
+
+    if (Array.isArray(payload.items)) return payload.items;
+
+    if (typeof payload === "object" && (payload._id || payload.id || payload.title)) return [payload];
+
     return [];
   };
 
-  const fetchFromEndpoints = useCallback(
-    async (endpoints = [], signal) => {
-      let lastError = null;
+  // Deduplicate services by id or title
+  const dedupeServices = (arr) => {
+    const map = new Map();
+    for (const s of arr || []) {
+      const id = s && (s._id || s.id || s.slug || s.title);
+      const key = id != null ? String(id) : JSON.stringify(s);
+      if (!map.has(key)) {
+        map.set(key, s);
+      }
+    }
+    return Array.from(map.values());
+  };
 
-      for (let i = 0; i < endpoints.length; i++) {
-        const endpoint = endpoints[i];
-        try {
-          if (!endpoint) continue;
+  const load = async () => {
+    setLoading(true);
+    setError(null);
 
-          if (typeof window !== "undefined" && endpoint.startsWith("http://") && window.location.protocol === "https:") {
-            console.warn(
-              `Mixed content risk: requesting insecure HTTP API from HTTPS page: ${endpoint}. This may be blocked by the browser.`
-            );
-          }
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      });
 
-          const res = await fetch(endpoint, {
-            method: "GET",
-            mode: "cors",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            credentials: "same-origin",
-            signal,
-          });
-
-          if (!res.ok) {
-            const txt = await res.text().catch(() => "");
-            throw new Error(`HTTP ${res.status}${txt ? ` ${txt}` : ""}`);
-          }
-
-          const data = await res.json().catch(() => null);
-          return { data, endpoint };
-        } catch (err) {
-          lastError = err;
-          // If it's an AbortError, rethrow so caller can handle cleanup
-          if (err && err.name === "AbortError") throw err;
-
-          // If it's a network-level failure (TypeError: Failed to fetch), try next endpoint
-          if (err instanceof TypeError || (err.message && err.message.toLowerCase().includes("failed to fetch"))) {
-            console.warn(`Network fetch failed for ${endpoint}: ${err.message}. Trying next endpoint if available.`);
-            continue;
-          }
-
-          throw err;
-        }
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}${txt ? ` ${txt}` : ""}`);
       }
 
-      throw lastError || new Error("No endpoints available to fetch services");
-    },
-    []
-  );
+      const json = await res.json().catch(() => null);
+      const extracted = extractServices(json);
+      const normalized = dedupeServices(extracted);
 
-  const loadServices = useCallback(
-    async ({ signal, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) => {
-      setLoading(true);
-      setError(null);
+      if (!mountedRef.current) return;
 
-      let timeoutId = null;
-      if (timeoutMs > 0) {
-        timeoutId = setTimeout(() => {
+      setServices(normalized);
 
-          console.info("loadServices timeout reached");
-        }, timeoutMs);
+      if (normalized.length === 0) {
+        console.warn("Services endpoint returned no services after normalization. Response payload:", json);
+      } else {
+        console.info(`Loaded ${normalized.length} unique services from ${ENDPOINT}`);
       }
-
-      try {
-        const endpoints = [];
-        const configured = getConfiguredEndpoint();
-        const sameOrigin = getSameOriginEndpoint();
-
-        if (configured) endpoints.push(configured);
-        if (!configured || configured !== sameOrigin) endpoints.push(sameOrigin);
-
-        const { data, endpoint } = await fetchFromEndpoints(endpoints, signal);
-
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-
-        if (!mountedRef.current) return;
-
-        const normalized = normalizeResponseToArray(data);
-        setServices(normalized);
-        setError(null);
-
-        console.info(`Loaded services from ${endpoint}`);
-      } catch (err) {
-        if (err && err.name === "AbortError") {
-          console.info("loadServices aborted");
-          if (mountedRef.current) setError("Request was cancelled");
-          return;
-        }
-
-        console.error("loadServices error:", err);
-        if (mountedRef.current) setError(err?.message || "Failed to load services");
-      } finally {
-        if (mountedRef.current) setLoading(false);
-      }
-    },
-    [fetchFromEndpoints, getConfiguredEndpoint, getSameOriginEndpoint]
-  );
+    } catch (err) {
+      console.error("load services error:", err);
+      if (mountedRef.current) setError(err.message || "Failed to load services");
+    } finally {
+      if (mountedRef.current) setLoading(false);
+    }
+  };
 
   useEffect(() => {
     mountedRef.current = true;
-    const controller = new AbortController();
-
-    loadServices({ signal: controller.signal });
-
+    load();
     return () => {
       mountedRef.current = false;
-      controller.abort();
     };
-  }, [loadServices]);
-
-  const retryLoad = useCallback(() => {
-    const controller = new AbortController();
-    loadServices({ signal: controller.signal });
-  }, [loadServices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const retryButtonStyle = {
     padding: "0.5rem 1rem",
     cursor: "pointer",
     borderRadius: 24,
     background: "transparent",
-    color: BOOTSTRAP_PRIMARY,
-    border: `2px solid ${BOOTSTRAP_PRIMARY}`,
+    color: PRIMARY_COLOR,
+    border: `2px solid ${PRIMARY_COLOR}`,
     outline: "none",
     fontWeight: 600,
   };
 
-  // UI states
   if (loading) return <div>Loading services…</div>;
 
   if (error)
@@ -174,7 +121,7 @@ const ServicesList = () => {
           <strong>Error loading services:</strong> {error}
         </div>
         <div>
-          <button onClick={retryLoad} style={retryButtonStyle}>
+          <button onClick={load} style={retryButtonStyle}>
             Retry
           </button>
         </div>
@@ -186,7 +133,7 @@ const ServicesList = () => {
       <div>
         <div>No services found</div>
         <div style={{ marginTop: 8 }}>
-          <button onClick={retryLoad} style={retryButtonStyle}>
+          <button onClick={load} style={retryButtonStyle}>
             Retry
           </button>
         </div>
@@ -195,25 +142,34 @@ const ServicesList = () => {
 
   return (
     <div
-      className="services-grid gap-4"
+      className="services-grid"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
         gap: "1rem",
       }}
     >
-      {services.map((svc) => (
-        <ServiceCardWithModals
-          key={svc._id || svc.id || svc.title}
-          serviceId={svc._id || svc.id}
-          title={svc.title}
-          description={svc.description}
-          price={svc.price}
-          imagePath={svc.imagePath}
-        />
-      ))}
+      {services.map((svc) => {
+        // Defensive mapping: ensure required fields exist
+        const id = svc._id || svc.id || svc.slug || svc.title;
+        const title = svc.title || svc.name || "Untitled service";
+        const description = svc.description || svc.summary || "";
+        const price = svc.price ?? svc.cost ?? null;
+        const imagePath = svc.imagePath || svc.image || svc.imageUrl || svc.thumbnail || "";
+
+        return (
+          <ServiceCardWithModals
+            key={id || title}
+            serviceId={id || title}
+            title={title}
+            description={description}
+            price={price}
+            imagePath={imagePath}
+          />
+        );
+      })}
     </div>
   );
-};
+}
 
 export default ServicesList;
