@@ -11,6 +11,7 @@ function ServicesList() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const mountedRef = useRef(false);
+  const abortRef = useRef(null);
 
   // Normalize many possible API shapes into an array of service objects
   const extractServices = (payload) => {
@@ -56,6 +57,17 @@ function ServicesList() {
   };
 
   const load = async () => {
+    if (abortRef.current) {
+      try {
+        abortRef.current.abort();
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
 
@@ -64,6 +76,7 @@ function ServicesList() {
         method: "GET",
         headers: { Accept: "application/json" },
         credentials: "same-origin",
+        signal: controller.signal,
       });
 
       if (!res.ok) {
@@ -71,7 +84,19 @@ function ServicesList() {
         throw new Error(`HTTP ${res.status}${txt ? ` ${txt}` : ""}`);
       }
 
-      const json = await res.json().catch(() => null);
+      // Try to parse JSON safely. If parsing fails, treat as null.
+      let json = null;
+      try {
+        const text = await res.text();
+        json = text ? JSON.parse(text) : null;
+      } catch (parseErr) {
+        try {
+          json = await res.json();
+        } catch {
+          json = null;
+        }
+      }
+
       const extracted = extractServices(json);
       const normalized = dedupeServices(extracted);
 
@@ -85,18 +110,33 @@ function ServicesList() {
         console.info(`Loaded ${normalized.length} unique services from ${ENDPOINT}`);
       }
     } catch (err) {
+      if (err && err.name === "AbortError") {
+        return;
+      }
+
+      // eslint-disable-next-line no-console
       console.error("load services error:", err);
       if (mountedRef.current) setError(err.message || "Failed to load services");
     } finally {
       if (mountedRef.current) setLoading(false);
+      if (abortRef.current === controller) abortRef.current = null;
     }
   };
 
   useEffect(() => {
     mountedRef.current = true;
     load();
+
     return () => {
       mountedRef.current = false;
+      if (abortRef.current) {
+        try {
+          abortRef.current.abort();
+        } catch (e) {
+          /* ignore */
+        }
+        abortRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -151,11 +191,11 @@ function ServicesList() {
     >
       {services.map((svc) => {
         // Defensive mapping: ensure required fields exist
-        const id = svc._id || svc.id || svc.slug || svc.title;
-        const title = svc.title || svc.name || "Untitled service";
-        const description = svc.description || svc.summary || "";
-        const price = svc.price ?? svc.cost ?? null;
-        const imagePath = svc.imagePath || svc.image || svc.imageUrl || svc.thumbnail || "";
+        const id = svc && (svc._id || svc.id || svc.slug || svc.title);
+        const title = (svc && (svc.title || svc.name)) || "Untitled service";
+        const description = (svc && (svc.description || svc.summary)) || "";
+        const price = svc && (svc.price ?? svc.cost ?? null);
+        const imagePath = svc && (svc.imagePath || svc.image || svc.imageUrl || svc.thumbnail || "");
 
         return (
           <ServiceCardWithModals
