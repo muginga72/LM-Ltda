@@ -5,7 +5,7 @@ import CardSet from "./CardSet";
 import axios from "axios";
 
 const API_FALLBACK = "https://lmltda-api.onrender.com"; 
-const API_BASE = process.env.REACT_APP_API_URL?.trim() || API_FALLBACK;
+const API_BASE = process.env.REACT_APP_API_BASE?.trim() || API_FALLBACK;
 
 const api = axios.create({
   baseURL: API_BASE,
