@@ -1,23 +1,35 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ServiceCardWithModals from "./ServiceCardWithModals";
 
+// Build default endpoint from env safely
 const ENV_BASE = process.env.REACT_APP_API_BASE || "";
 const BASE = ENV_BASE.replace(/\/$/, "");
-const DEFAULT_ENDPOINT = BASE ? `${BASE}/api/services` : `/api/services`;
+const DEFAULT_ENDPOINT = BASE ? `${BASE}/api/services` : "/api/services";
 const PRIMARY_COLOR = "#0d6efd";
 
-function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
+function ServicesList({ endpoint: endpointProp }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const mountedRef = useRef(false);
   const abortRef = useRef(null);
 
-  // Normalize many possible API shapes into an array of service objects
+  // Resolve endpoint order: prop -> env -> runtime window config -> default
+  const resolveEndpoint = useCallback(() => {
+    if (endpointProp) return endpointProp;
+    if (BASE) return `${BASE}/api/services`;
+
+    try {
+      const runtime = typeof window !== "undefined" ? window.__ENV__ : null;
+      if (runtime && runtime.API_BASE) {
+        return `${runtime.API_BASE.replace(/\/$/, "")}/api/services`;
+      }
+    } catch {}
+    return DEFAULT_ENDPOINT;
+  }, [endpointProp]);
+
   const extractServices = useCallback((payload) => {
     if (!payload) return [];
-
     if (Array.isArray(payload)) return payload;
 
     if (Array.isArray(payload.services)) return payload.services;
@@ -39,12 +51,21 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
 
     if (Array.isArray(payload.items)) return payload.items;
 
-    if (typeof payload === "object" && (payload._id || payload.id || payload.title || payload.name)) return [payload];
+    if (typeof payload === "object" && (payload._id || payload.id || payload.title || payload.name)) {
+      return [payload];
+    }
 
     return [];
   }, []);
 
-  // Deduplicate services by id or title
+  const normalizeServices = useCallback((arr, rawPayload) => {
+    if (!Array.isArray(arr)) {
+      console.warn("Services endpoint returned no services after normalization. Response payload:", rawPayload);
+      return [];
+    }
+    return arr;
+  }, []);
+
   const dedupeServices = useCallback((arr) => {
     const map = new Map();
     for (const s of arr || []) {
@@ -57,93 +78,115 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
     return Array.from(map.values());
   }, []);
 
-  const load = useCallback(async () => {
-    // Abort any previous in-flight request
-    if (abortRef.current) {
-      try {
-        abortRef.current.abort();
-      } catch (e) {
-        /* ignore */
-      }
-      abortRef.current = null;
-    }
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    setLoading(true);
-    setError(null);
-
+  // Robust response parsing
+  const parseResponseSafely = useCallback(async (res) => {
     try {
-      const res = await fetch(endpoint, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        credentials: "same-origin",
-        signal: controller.signal,
-      });
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}${txt ? ` ${txt}` : ""}`);
+      const contentType = (res.headers.get("content-type") || "").toLowerCase();
+      if (contentType.includes("application/json")) {
+        const j = await res.json().catch(() => null);
+        if (j !== null && j !== undefined) return j;
       }
-
-      // Read text then try to parse JSON defensively
-      let json = null;
+      const txt = await res.text().catch(() => "");
+      if (!txt) return null;
       try {
-        const text = await res.text();
-        json = text ? JSON.parse(text) : null;
-      } catch (parseErr) {
-        // If parsing from text failed, try res.json() as a fallback
-        try {
-          json = await res.json();
-        } catch {
-          json = null;
-        }
+        return JSON.parse(txt);
+      } catch {
+        return null;
       }
-
-      const extracted = extractServices(json);
-      const normalized = dedupeServices(extracted);
-
-      if (!mountedRef.current) return;
-
-      setServices(normalized);
-
-      if (normalized.length === 0) {
-        console.warn("Services endpoint returned no services after normalization. Response payload:", json);
-      } else {
-        // eslint-disable-next-line no-console
-        console.info(`Loaded ${normalized.length} unique services from ${endpoint}`);
-      }
-    } catch (err) {
-      if (err && err.name === "AbortError") {
-        return;
-      }
-
-      // eslint-disable-next-line no-console
-      console.error("load services error:", err);
-
-      if (mountedRef.current) {
-        setError(err.message || "Failed to load services");
-        setServices([]); // keep UI stable
-      }
-    } finally {
-      if (mountedRef.current) setLoading(false);
-      if (abortRef.current === controller) abortRef.current = null;
+    } catch {
+      return null;
     }
-  }, [endpoint, extractServices, dedupeServices]);
+  }, []);
+
+  const load = useCallback(
+    async (opts = { retry: true }) => {
+      const endpoint = resolveEndpoint();
+
+      if (abortRef.current) {
+        try {
+          abortRef.current.abort();
+        } catch {}
+        abortRef.current = null;
+      }
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          let errText = `HTTP ${res.status}`;
+          try {
+            const errBody = await res.json();
+            errText += errBody?.message ? ` ${errBody.message}` : ` ${JSON.stringify(errBody)}`;
+          } catch {
+            const txt = await res.text().catch(() => "");
+            if (txt) errText += ` ${txt}`;
+          }
+          throw new Error(errText);
+        }
+
+        const payload = await parseResponseSafely(res);
+
+        // If payload is null and retry allowed, try one more time
+        if ((payload === null || payload === undefined) && opts.retry) {
+          await new Promise((r) => setTimeout(r, 300));
+          return load({ retry: false });
+        }
+
+        const extracted = extractServices(payload);
+        const normalized = normalizeServices(extracted, payload);
+        const unique = dedupeServices(normalized);
+
+        if (unique.length === 0) {
+          // If no services found, log the original payload once
+          if (!Array.isArray(extracted) || extracted.length === 0) {
+            console.warn("Services endpoint returned no services after normalization. Response payload:", payload);
+          }
+        } else {
+          console.info(`Loaded ${unique.length} unique services from ${endpoint}`);
+        }
+
+        if (!mountedRef.current) return;
+        setServices(unique);
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+
+        console.error("load services error:", err);
+
+        if (mountedRef.current) {
+          setError(
+            // Provide a helpful message that hints at common build-time issues
+            `${err.message || "Falha ao carregar serviços."} If this is a static build, ensure the API base URL is configured at build time or injected at runtime.`
+          );
+          setServices([]);
+        }
+      } finally {
+        if (mountedRef.current) setLoading(false);
+        if (abortRef.current === controller) abortRef.current = null;
+      }
+    },
+    [resolveEndpoint, parseResponseSafely, extractServices, normalizeServices, dedupeServices]
+  );
 
   useEffect(() => {
     mountedRef.current = true;
     load();
-
     return () => {
       mountedRef.current = false;
       if (abortRef.current) {
         try {
           abortRef.current.abort();
-        } catch (e) {
-          /* ignore */
-        }
+        } catch {}
         abortRef.current = null;
       }
     };
@@ -160,31 +203,27 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
     fontWeight: 600,
   };
 
-  if (loading) return <div>Loading services…</div>;
+  if (loading) return <div>Carregando serviços...</div>;
 
   if (error)
     return (
       <div>
         <div style={{ marginBottom: 8, color: "crimson" }}>
-          <strong>Error loading services:</strong> {error}
+          <strong>Falha ao carregar serviços:</strong> {error}
         </div>
-        <div>
-          <button onClick={load} style={retryButtonStyle}>
-            Retry
-          </button>
-        </div>
+        <button onClick={() => load({ retry: true })} style={retryButtonStyle}>
+          Tentar novamente
+        </button>
       </div>
     );
 
   if (!services || services.length === 0)
     return (
       <div>
-        <div>No services found</div>
-        <div style={{ marginTop: 8 }}>
-          <button onClick={load} style={retryButtonStyle}>
-            Retry
-          </button>
-        </div>
+        <div>Nenhum serviço encontrado</div>
+        <button onClick={() => load({ retry: true })} style={{ ...retryButtonStyle, marginTop: 8 }}>
+          Tentar novamente
+        </button>
       </div>
     );
 
@@ -198,7 +237,6 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
       }}
     >
       {services.map((svc, idx) => {
-        // Defensive mapping: ensure required fields exist
         const id = svc && (svc._id || svc.id || svc.slug || svc.title || svc.name);
         const title = (svc && (svc.title || svc.name)) || "Untitled service";
         const description = (svc && (svc.description || svc.summary)) || "";

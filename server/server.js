@@ -1,4 +1,3 @@
-// server/server.js
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
@@ -10,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { Server } = require('socket.io');
+const cors = require('cors');
 
 // --- Route imports (keep your existing routes) ---
 const authRoutes = require('./routes/authRoutes');
@@ -37,13 +37,11 @@ const adminListBookingsRoutes = require('./routes/roomrental/adminListBookingsRo
 // --- App setup ---
 const app = express();
 app.set('trust proxy', true); // important when behind Render's proxy/load balancer
-
 app.use(helmet());
 app.use(morgan('dev'));
 
-// Set CLIENT_ORIGIN in Render to your client URL (e.g., https://www.lmuginga.com or https://lm-ltda-client.onrender.com)
-const CLIENT_ORIGIN = (process.env.CLIENT_ORIGIN || '').trim() || null;
-
+// Build CLIENT_ORIGIN safely
+const CLIENT_ORIGIN = (process.env.CLIENT_ORIGIN || "").trim() || null;
 const allowedOrigins = [
   'http://localhost:3000',
   'https://www.lmuginga.com',
@@ -52,9 +50,9 @@ const allowedOrigins = [
 
 // Helper to check origin safely
 function isOriginAllowed(origin) {
-  if (!origin) return true; 
+  if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
-  
+
   // Allow Render app domains
   try {
     const u = new URL(origin);
@@ -77,7 +75,7 @@ function isOriginAllowed(origin) {
 }
 
 // --- CORS for REST endpoints (Express) ---
-app.use(require('cors')({
+app.use(cors({
   origin: (origin, cb) => {
     if (isOriginAllowed(origin)) return cb(null, true);
     cb(new Error('Not allowed by CORS'));
@@ -96,7 +94,6 @@ app.use(express.urlencoded({ extended: true }));
 // --- Create HTTP server and Socket.IO with explicit CORS ---
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
-
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
@@ -139,7 +136,6 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   console.warn(`uploads directory not found, creating at ${UPLOADS_DIR}`);
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
-
 // Multer store uploads in uploads directory
 const multerUpload = multer({
   dest: UPLOADS_DIR,
@@ -147,7 +143,8 @@ const multerUpload = multer({
     fileSize: 5 * 1024 * 1024, // 5 MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (/image\/|pdf$/.test(file.mimetype)) cb(null, true);
+    // Accept images and PDFs
+    if (file && file.mimetype && (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf')) cb(null, true);
     else cb(null, false);
   },
 });
@@ -169,16 +166,48 @@ app.use('/uploads', express.static(UPLOADS_DIR, {
 }));
 
 app.use('/api/uploads', uploadsRouter);
-
 app.use('/api/images', express.static(path.join(__dirname, 'assets', 'images')));
 
+async function getServicesFromDB() {
+  try {
+    const Service = mongoose.models.Service || (() => {
+      try {
+        return require('./models/Service');
+      } catch (e) {
+        return null;
+      }
+    })();
+
+    if (Service && typeof Service.find === 'function') {
+      const docs = await Service.find({}).lean().exec();
+      return docs || [];
+    }
+  } catch (e) {
+    console.error('getServicesFromDB error:', e);
+  }
+  return null;
+}
+
+app.get('/api/services', async (req, res) => {
+  try {
+    const raw = await getServicesFromDB(); // may be null or array
+    const services = Array.isArray(raw) ? raw : [];
+    return res.status(200).json(services);
+  } catch (err) {
+    console.error('Services endpoint error:', err);
+    return res.status(200).json([]); // keep contract: always return array
+  }
+});
+
 // --- Mount other API routes (keep your existing routes) ---
+// Mount the rest of your routes after the defensive GET so they can still handle other verbs and subpaths
 app.use('/api', uploadFilesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/cards', cardsRoutes);
+// servicesRoutes remains mounted for other methods and subpaths (e.g., POST /api/services, /api/services/:id)
 app.use('/api/services', servicesRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/shares', shareRoutes);
@@ -199,7 +228,6 @@ app.post('/api/bookings', multerUpload.single('idDocument'), (req, res) => {
   try {
     const isMultipart = !!req.file;
     const body = req.body || {};
-
     const roomId = body.roomId;
     const userId = body.userId;
     const startDate = body.startDate;
@@ -221,7 +249,6 @@ app.post('/api/bookings', multerUpload.single('idDocument'), (req, res) => {
         .status(400)
         .json({ message: 'startDate must be before or equal to endDate.' });
     }
-
     if (isMultipart) {
       console.log('Received file:', req.file.originalname, 'stored at', req.file.path);
     }
@@ -245,9 +272,7 @@ app.post('/api/bookings', multerUpload.single('idDocument'), (req, res) => {
 });
 
 app.use('/api/room-requests', roomRequestRoutes);
-
 app.use('/api/admin/calendar', adminCalendarRouterFactory(io));
-
 app.get('/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
@@ -280,7 +305,7 @@ app.use((err, req, res, next) => {
 // --- Start DB + server ---
 const startServer = () => {
   server.listen(PORT, () => {
-    console.log(`🚀 Server + Socket. IO listening on port ${PORT}`);
+    console.log(`🚀 Server + Socket.IO listening on port ${PORT}`);
     console.log(`Allowed origins: ${allowedOrigins.join(', ') || 'none configured'}`);
     if (CLIENT_ORIGIN) console.log(`CLIENT_ORIGIN: ${CLIENT_ORIGIN}`);
   });
