@@ -1,12 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ServiceCardWithModals from "./ServiceCardWithModals";
 
-// Build default endpoint from env safely
+// Build-time env (set REACT_APP_API_BASE when building if API is on a different origin)
 const ENV_BASE = process.env.REACT_APP_API_BASE || "";
 const BASE = ENV_BASE.replace(/\/$/, "");
-const DEFAULT_ENDPOINT = BASE ? `${BASE}/api/services` : "/api/services";
+const DEFAULT_PATH = "/api/services";
 const PRIMARY_COLOR = "#0d6efd";
 
+/**
+ * ServicesList
+ * - Resolves endpoint to an absolute URL (prop -> build-time env -> runtime window.__ENV__ -> same-origin)
+ * - Handles 304/204/404 correctly
+ * - Retries once forcing no-cache when server returns no body
+ * - Defensive parsing, normalization, dedupe
+ */
 function ServicesList({ endpoint: endpointProp }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -14,18 +21,51 @@ function ServicesList({ endpoint: endpointProp }) {
   const mountedRef = useRef(false);
   const abortRef = useRef(null);
 
-  // Resolve endpoint order: prop -> env -> runtime window config -> default
-  const resolveEndpoint = useCallback(() => {
-    if (endpointProp) return endpointProp;
-    if (BASE) return `${BASE}/api/services`;
+  const resolveEndpointAbsolute = useCallback(() => {
+    // 1) explicit prop
+    if (endpointProp) {
+      try {
+        return new URL(endpointProp).toString();
+      } catch {
+        // relative provided — resolve against origin
+        try {
+          return new URL(endpointProp, window.location.origin).toString();
+        } catch {
+          // fallback to prop as-is
+          return endpointProp;
+        }
+      }
+    }
 
+    // 2) build-time env
+    if (BASE) {
+      try {
+        return new URL(`${BASE}${DEFAULT_PATH}`).toString();
+      } catch {
+        return `${BASE}${DEFAULT_PATH}`;
+      }
+    }
+
+    // 3) runtime-injected config (inject window.__ENV__ in index.html)
     try {
+      // eslint-disable-next-line no-undef
       const runtime = typeof window !== "undefined" ? window.__ENV__ : null;
       if (runtime && runtime.API_BASE) {
-        return `${runtime.API_BASE.replace(/\/$/, "")}/api/services`;
+        const base = runtime.API_BASE.replace(/\/$/, "");
+        try {
+          return new URL(`${base}${DEFAULT_PATH}`).toString();
+        } catch {
+          return `${base}${DEFAULT_PATH}`;
+        }
       }
     } catch {}
-    return DEFAULT_ENDPOINT;
+
+    // 4) same-origin absolute path
+    try {
+      return new URL(DEFAULT_PATH, window.location.origin).toString();
+    } catch {
+      return DEFAULT_PATH;
+    }
   }, [endpointProp]);
 
   const extractServices = useCallback((payload) => {
@@ -71,15 +111,16 @@ function ServicesList({ endpoint: endpointProp }) {
     for (const s of arr || []) {
       const id = s && (s._id || s.id || s.slug || s.title || s.name);
       const key = id != null ? String(id) : JSON.stringify(s);
-      if (!map.has(key)) {
-        map.set(key, s);
-      }
+      if (!map.has(key)) map.set(key, s);
     }
     return Array.from(map.values());
   }, []);
 
-  // Robust response parsing
+  // Parse response safely; return null when no body (204/304) or unparsable
   const parseResponseSafely = useCallback(async (res) => {
+    if (!res) return null;
+    if (res.status === 204 || res.status === 304) return null;
+
     try {
       const contentType = (res.headers.get("content-type") || "").toLowerCase();
       if (contentType.includes("application/json")) {
@@ -98,9 +139,19 @@ function ServicesList({ endpoint: endpointProp }) {
     }
   }, []);
 
+  // Single fetch attempt
+  const fetchOnce = useCallback(
+    async (url, options) => {
+      const res = await fetch(url, options);
+      const payload = await parseResponseSafely(res);
+      return { res, payload };
+    },
+    [parseResponseSafely]
+  );
+
   const load = useCallback(
     async (opts = { retry: true }) => {
-      const endpoint = resolveEndpoint();
+      const endpoint = resolveEndpointAbsolute();
 
       if (abortRef.current) {
         try {
@@ -116,31 +167,48 @@ function ServicesList({ endpoint: endpointProp }) {
       setError(null);
 
       try {
-        const res = await fetch(endpoint, {
+        // First attempt: allow caching (server may return 304)
+        const firstOptions = {
           method: "GET",
           headers: { Accept: "application/json" },
           credentials: "same-origin",
           signal: controller.signal,
-        });
+        };
 
-        if (!res.ok) {
-          let errText = `HTTP ${res.status}`;
-          try {
-            const errBody = await res.json();
-            errText += errBody?.message ? ` ${errBody.message}` : ` ${JSON.stringify(errBody)}`;
-          } catch {
-            const txt = await res.text().catch(() => "");
-            if (txt) errText += ` ${txt}`;
-          }
-          throw new Error(errText);
+        let { res, payload } = await fetchOnce(endpoint, firstOptions);
+
+        // If 404, treat as configuration error (API not found at this URL)
+        if (res.status === 404) {
+          throw new Error(
+            `API not found (404) at ${endpoint}. Check REACT_APP_API_BASE or runtime config and ensure the API is reachable.`
+          );
         }
 
-        const payload = await parseResponseSafely(res);
+        // If no body (304/204/null) and retry allowed, force fresh fetch
+        if ((res.status === 304 || payload === null || payload === undefined) && opts.retry) {
+          const retryOptions = {
+            method: "GET",
+            headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+            credentials: "same-origin",
+            signal: controller.signal,
+            cache: "no-store",
+          };
+          // small delay to avoid immediate double-hit
+          await new Promise((r) => setTimeout(r, 150));
+          const retryResult = await fetchOnce(endpoint, retryOptions);
+          res = retryResult.res;
+          payload = retryResult.payload;
 
-        // If payload is null and retry allowed, try one more time
-        if ((payload === null || payload === undefined) && opts.retry) {
-          await new Promise((r) => setTimeout(r, 300));
-          return load({ retry: false });
+          if (res.status === 404) {
+            throw new Error(
+              `API not found (404) at ${endpoint} on retry. Check REACT_APP_API_BASE or runtime config and ensure the API is reachable.`
+            );
+          }
+        }
+
+        // If still not ok (non-2xx and not 304/204 handled), throw
+        if (!res.ok && res.status !== 304 && res.status !== 204) {
+          throw new Error(`HTTP ${res.status} when fetching services from ${endpoint}`);
         }
 
         const extracted = extractServices(payload);
@@ -148,7 +216,6 @@ function ServicesList({ endpoint: endpointProp }) {
         const unique = dedupeServices(normalized);
 
         if (unique.length === 0) {
-          // If no services found, log the original payload once
           if (!Array.isArray(extracted) || extracted.length === 0) {
             console.warn("Services endpoint returned no services after normalization. Response payload:", payload);
           }
@@ -165,8 +232,7 @@ function ServicesList({ endpoint: endpointProp }) {
 
         if (mountedRef.current) {
           setError(
-            // Provide a helpful message that hints at common build-time issues
-            `${err.message || "Falha ao carregar serviços."} If this is a static build, ensure the API base URL is configured at build time or injected at runtime.`
+            `${err.message || "Falha ao carregar serviços."} If this is a static build, ensure the API base URL is configured at build time (REACT_APP_API_BASE) or injected at runtime (window.__ENV__.API_BASE).`
           );
           setServices([]);
         }
@@ -175,7 +241,7 @@ function ServicesList({ endpoint: endpointProp }) {
         if (abortRef.current === controller) abortRef.current = null;
       }
     },
-    [resolveEndpoint, parseResponseSafely, extractServices, normalizeServices, dedupeServices]
+    [resolveEndpointAbsolute, fetchOnce, extractServices, normalizeServices, dedupeServices]
   );
 
   useEffect(() => {
