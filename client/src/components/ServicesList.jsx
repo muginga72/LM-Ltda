@@ -1,23 +1,75 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ServiceCardWithModals from "./ServiceCardWithModals";
 
+// Build-time env (set REACT_APP_API_BASE when building if API is on a different origin)
 const ENV_BASE = process.env.REACT_APP_API_BASE || "";
 const BASE = ENV_BASE.replace(/\/$/, "");
-const DEFAULT_ENDPOINT = BASE ? `${BASE}/api/services` : `/api/services`;
+const DEFAULT_PATH = "/api/services";
 const PRIMARY_COLOR = "#0d6efd";
 
-function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
+/**
+ * ServicesList
+ * - Resolves endpoint to an absolute URL (prop -> build-time env -> runtime window.__ENV__ -> same-origin)
+ * - Handles 304/204/404 correctly
+ * - Retries once forcing no-cache when server returns no body
+ * - Defensive parsing, normalization, dedupe
+ */
+function ServicesList({ endpoint: endpointProp }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const mountedRef = useRef(false);
   const abortRef = useRef(null);
 
-  // Normalize many possible API shapes into an array of service objects
+  const resolveEndpointAbsolute = useCallback(() => {
+    // 1) explicit prop
+    if (endpointProp) {
+      try {
+        return new URL(endpointProp).toString();
+      } catch {
+        // relative provided — resolve against origin
+        try {
+          return new URL(endpointProp, window.location.origin).toString();
+        } catch {
+          // fallback to prop as-is
+          return endpointProp;
+        }
+      }
+    }
+
+    // 2) build-time env
+    if (BASE) {
+      try {
+        return new URL(`${BASE}${DEFAULT_PATH}`).toString();
+      } catch {
+        return `${BASE}${DEFAULT_PATH}`;
+      }
+    }
+
+    // 3) runtime-injected config (inject window.__ENV__ in index.html)
+    try {
+      // eslint-disable-next-line no-undef
+      const runtime = typeof window !== "undefined" ? window.__ENV__ : null;
+      if (runtime && runtime.API_BASE) {
+        const base = runtime.API_BASE.replace(/\/$/, "");
+        try {
+          return new URL(`${base}${DEFAULT_PATH}`).toString();
+        } catch {
+          return `${base}${DEFAULT_PATH}`;
+        }
+      }
+    } catch {}
+
+    // 4) same-origin absolute path
+    try {
+      return new URL(DEFAULT_PATH, window.location.origin).toString();
+    } catch {
+      return DEFAULT_PATH;
+    }
+  }, [endpointProp]);
+
   const extractServices = useCallback((payload) => {
     if (!payload) return [];
-
     if (Array.isArray(payload)) return payload;
 
     if (Array.isArray(payload.services)) return payload.services;
@@ -39,111 +91,168 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
 
     if (Array.isArray(payload.items)) return payload.items;
 
-    if (typeof payload === "object" && (payload._id || payload.id || payload.title || payload.name)) return [payload];
+    if (typeof payload === "object" && (payload._id || payload.id || payload.title || payload.name)) {
+      return [payload];
+    }
 
     return [];
   }, []);
 
-  // Deduplicate services by id or title
+  const normalizeServices = useCallback((arr, rawPayload) => {
+    if (!Array.isArray(arr)) {
+      console.warn("Services endpoint returned no services after normalization. Response payload:", rawPayload);
+      return [];
+    }
+    return arr;
+  }, []);
+
   const dedupeServices = useCallback((arr) => {
     const map = new Map();
     for (const s of arr || []) {
       const id = s && (s._id || s.id || s.slug || s.title || s.name);
       const key = id != null ? String(id) : JSON.stringify(s);
-      if (!map.has(key)) {
-        map.set(key, s);
-      }
+      if (!map.has(key)) map.set(key, s);
     }
     return Array.from(map.values());
   }, []);
 
-  const load = useCallback(async () => {
-    // Abort any previous in-flight request
-    if (abortRef.current) {
-      try {
-        abortRef.current.abort();
-      } catch (e) {
-        /* ignore */
-      }
-      abortRef.current = null;
-    }
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    setLoading(true);
-    setError(null);
+  // Parse response safely; return null when no body (204/304) or unparsable
+  const parseResponseSafely = useCallback(async (res) => {
+    if (!res) return null;
+    if (res.status === 204 || res.status === 304) return null;
 
     try {
-      const res = await fetch(endpoint, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        credentials: "same-origin",
-        signal: controller.signal,
-      });
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}${txt ? ` ${txt}` : ""}`);
+      const contentType = (res.headers.get("content-type") || "").toLowerCase();
+      if (contentType.includes("application/json")) {
+        const j = await res.json().catch(() => null);
+        if (j !== null && j !== undefined) return j;
       }
-
-      // Read text then try to parse JSON defensively
-      let json = null;
+      const txt = await res.text().catch(() => "");
+      if (!txt) return null;
       try {
-        const text = await res.text();
-        json = text ? JSON.parse(text) : null;
-      } catch (parseErr) {
-        // If parsing from text failed, try res.json() as a fallback
-        try {
-          json = await res.json();
-        } catch {
-          json = null;
-        }
+        return JSON.parse(txt);
+      } catch {
+        return null;
       }
-
-      const extracted = extractServices(json);
-      const normalized = dedupeServices(extracted);
-
-      if (!mountedRef.current) return;
-
-      setServices(normalized);
-
-      if (normalized.length === 0) {
-        console.warn("Services endpoint returned no services after normalization. Response payload:", json);
-      } else {
-        // eslint-disable-next-line no-console
-        console.info(`Loaded ${normalized.length} unique services from ${endpoint}`);
-      }
-    } catch (err) {
-      if (err && err.name === "AbortError") {
-        return;
-      }
-
-      // eslint-disable-next-line no-console
-      console.error("load services error:", err);
-
-      if (mountedRef.current) {
-        setError(err.message || "Failed to load services");
-        setServices([]); // keep UI stable
-      }
-    } finally {
-      if (mountedRef.current) setLoading(false);
-      if (abortRef.current === controller) abortRef.current = null;
+    } catch {
+      return null;
     }
-  }, [endpoint, extractServices, dedupeServices]);
+  }, []);
+
+  // Single fetch attempt
+  const fetchOnce = useCallback(
+    async (url, options) => {
+      const res = await fetch(url, options);
+      const payload = await parseResponseSafely(res);
+      return { res, payload };
+    },
+    [parseResponseSafely]
+  );
+
+  const load = useCallback(
+    async (opts = { retry: true }) => {
+      const endpoint = resolveEndpointAbsolute();
+
+      if (abortRef.current) {
+        try {
+          abortRef.current.abort();
+        } catch {}
+        abortRef.current = null;
+      }
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        // First attempt: allow caching (server may return 304)
+        const firstOptions = {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+          signal: controller.signal,
+        };
+
+        let { res, payload } = await fetchOnce(endpoint, firstOptions);
+
+        // If 404, treat as configuration error (API not found at this URL)
+        if (res.status === 404) {
+          throw new Error(
+            `API not found (404) at ${endpoint}. Check REACT_APP_API_BASE or runtime config and ensure the API is reachable.`
+          );
+        }
+
+        // If no body (304/204/null) and retry allowed, force fresh fetch
+        if ((res.status === 304 || payload === null || payload === undefined) && opts.retry) {
+          const retryOptions = {
+            method: "GET",
+            headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+            credentials: "same-origin",
+            signal: controller.signal,
+            cache: "no-store",
+          };
+          // small delay to avoid immediate double-hit
+          await new Promise((r) => setTimeout(r, 150));
+          const retryResult = await fetchOnce(endpoint, retryOptions);
+          res = retryResult.res;
+          payload = retryResult.payload;
+
+          if (res.status === 404) {
+            throw new Error(
+              `API not found (404) at ${endpoint} on retry. Check REACT_APP_API_BASE or runtime config and ensure the API is reachable.`
+            );
+          }
+        }
+
+        // If still not ok (non-2xx and not 304/204 handled), throw
+        if (!res.ok && res.status !== 304 && res.status !== 204) {
+          throw new Error(`HTTP ${res.status} when fetching services from ${endpoint}`);
+        }
+
+        const extracted = extractServices(payload);
+        const normalized = normalizeServices(extracted, payload);
+        const unique = dedupeServices(normalized);
+
+        if (unique.length === 0) {
+          if (!Array.isArray(extracted) || extracted.length === 0) {
+            console.warn("Services endpoint returned no services after normalization. Response payload:", payload);
+          }
+        } else {
+          console.info(`Loaded ${unique.length} unique services from ${endpoint}`);
+        }
+
+        if (!mountedRef.current) return;
+        setServices(unique);
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+
+        console.error("load services error:", err);
+
+        if (mountedRef.current) {
+          setError(
+            `${err.message || "Falha ao carregar serviços."} If this is a static build, ensure the API base URL is configured at build time (REACT_APP_API_BASE) or injected at runtime (window.__ENV__.API_BASE).`
+          );
+          setServices([]);
+        }
+      } finally {
+        if (mountedRef.current) setLoading(false);
+        if (abortRef.current === controller) abortRef.current = null;
+      }
+    },
+    [resolveEndpointAbsolute, fetchOnce, extractServices, normalizeServices, dedupeServices]
+  );
 
   useEffect(() => {
     mountedRef.current = true;
     load();
-
     return () => {
       mountedRef.current = false;
       if (abortRef.current) {
         try {
           abortRef.current.abort();
-        } catch (e) {
-          /* ignore */
-        }
+        } catch {}
         abortRef.current = null;
       }
     };
@@ -160,31 +269,27 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
     fontWeight: 600,
   };
 
-  if (loading) return <div>Loading services…</div>;
+  if (loading) return <div>Carregando serviços...</div>;
 
   if (error)
     return (
       <div>
         <div style={{ marginBottom: 8, color: "crimson" }}>
-          <strong>Error loading services:</strong> {error}
+          <strong>Falha ao carregar serviços:</strong> {error}
         </div>
-        <div>
-          <button onClick={load} style={retryButtonStyle}>
-            Retry
-          </button>
-        </div>
+        <button onClick={() => load({ retry: true })} style={retryButtonStyle}>
+          Tentar novamente
+        </button>
       </div>
     );
 
   if (!services || services.length === 0)
     return (
       <div>
-        <div>No services found</div>
-        <div style={{ marginTop: 8 }}>
-          <button onClick={load} style={retryButtonStyle}>
-            Retry
-          </button>
-        </div>
+        <div>Nenhum serviço encontrado</div>
+        <button onClick={() => load({ retry: true })} style={{ ...retryButtonStyle, marginTop: 8 }}>
+          Tentar novamente
+        </button>
       </div>
     );
 
@@ -198,7 +303,6 @@ function ServicesList({ endpoint = DEFAULT_ENDPOINT }) {
       }}
     >
       {services.map((svc, idx) => {
-        // Defensive mapping: ensure required fields exist
         const id = svc && (svc._id || svc.id || svc.slug || svc.title || svc.name);
         const title = (svc && (svc.title || svc.name)) || "Untitled service";
         const description = (svc && (svc.description || svc.summary)) || "";
