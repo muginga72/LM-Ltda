@@ -167,6 +167,7 @@ app.use('/uploads', express.static(UPLOADS_DIR, {
 
 app.use('/api/uploads', uploadsRouter);
 app.use('/api/images', express.static(path.join(__dirname, 'assets', 'images')));
+app.use("/uploads/avatars", express.static(path.join(__dirname, "uploads", "avatars")));
 
 async function getServicesFromDB() {
   try {
