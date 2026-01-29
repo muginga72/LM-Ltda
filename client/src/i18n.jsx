@@ -14,6 +14,82 @@ i18n
     resources: {
       en: {
         translation: {
+          // ----------- Navigation Bar --------------
+          brandAlt: "LM Ltd Logo",
+          home: "Home",
+          planServices: "Plan Services",
+          login: "Login",
+          registerNav: "Register",
+          admin: "Admin",
+          navigationBar: "Dashboard",
+          profile: "Profile",
+          logout: "Logout",
+          openProfile: "Open profile",
+          userAvatarAlt: "{{name}} avatar",
+          userTitle: "{{name}}",
+          logoTitle: "LM-Ltd",
+
+          // =============== AdminLogin and User Login ================
+          // Shared
+          "app.copyright": "© {{year}} LM-Ltd Services. All rights reserved.",
+          // Login
+          "login.title": "Login",
+          "login.email": "Email",
+          "login.password": "Password",
+          "login.placeholder.email": "e.g. example@lm-ltd.com",
+          "login.placeholder.password": "••••••••",
+          "login.button": "Login",
+          "login.logging": "Logging in...",
+          "login.failed":
+            "Login failed. Check credentials and API configuration.",
+          // Change password
+          "change.title": "Change Password",
+          "change.hint":
+            "If you are logged in you can change your password here. After a successful change you will be logged out and must sign in again.",
+          "change.current": "Current Password",
+          "change.new": "New Password",
+          "change.confirm": "Confirm New Password",
+          "change.button": "Change Password",
+          "change.changing": "Changing...",
+          "change.success":
+            "Password changed successfully. Please log in again with your new password.",
+          "change.fillAll": "Please fill all password fields.",
+          "change.minLength":
+            "New password must be at least 8 characters long.",
+          "change.mismatch": "New password and confirmation do not match.",
+          // Admin
+          "admin.title": "Admin",
+          "admin.loginButton": "Login as Admin",
+          "admin.logging": "Logging in...",
+          "admin.accessDenied": "Access denied: Admins only",
+          // Errors / hints
+          "error.apiBaseMissing":
+            "API base URL not configured. Set REACT_APP_API_BASE at build time or inject window.__ENV__.API_BASE at runtime.",
+          "error.endpoint404":
+            "Endpoint not found at {{url}}. Check API base configuration.",
+          "error.noBody":
+            "The server returned no body. If this is a static build and the API is on a different origin, ensure CORS allows credentials and the API base is configured.",
+
+          // =============== Register Page ================
+          register: {
+            title: "Register",
+            name: "Name",
+            email: "Email",
+            password: "Password",
+            confirmPassword: "Confirm password",
+            registerButton: "Register",
+            registering: "Registering...",
+            successRedirect: "Registration successful. Redirecting...",
+            passwordMismatch: "Passwords do not match.",
+            apiBaseMissing:
+              "API base URL not configured. Set REACT_APP_API_BASE at build time or inject window.__ENV__.API_BASE at runtime.",
+            endpointNotFound:
+              "Registration endpoint not found (404) at {{url}}. Check REACT_APP_API_BASE or runtime config.",
+            registrationFailed: "Registration failed. Please try again.",
+            loading: "Loading...",
+            footer: "All rights reserved.",
+          },
+
           // ----- Home page -------
           whoWeAreBtn: "Who We Are",
           contactUsBtn: "Contact Us",
@@ -927,6 +1003,83 @@ i18n
       //================================================================
       pt: {
         translation: {
+          // --------- Navigation Bar --------------
+          brandAlt: "Logotipo LM Ltd",
+          home: "Início",
+          planServices: "Selecione o serviço",
+          login: "Entrar",
+          registerNav: "Registrar",
+          admin: "Admin",
+          navigationBar: "Painel do utilizador",
+          profile: "Perfil",
+          logout: "Sair",
+          openProfile: "Abrir perfil",
+          userAvatarAlt: "Avatar de {{name}}",
+          userTitle: "{{name}}",
+          logoTitle: "LM-Ltda",
+
+          // =============== AdminLogin & User Login =====================
+          // Shared
+          "app.copyright":
+            "© {{year}} LM-Ltd Services. Todos os direitos reservados.",
+          // Login
+          "login.title": "Entrar",
+          "login.email": "Email",
+          "login.password": "Senha",
+          "login.placeholder.email": "ex.: exemplo@lm-ltd.com",
+          "login.placeholder.password": "••••••••",
+          "login.button": "Entrar",
+          "login.logging": "Entrando...",
+          "login.failed":
+            "Falha no login. Verifique as credenciais e a configuração da API.",
+          // Change password
+          "change.title": "Alterar Senha",
+          "change.hint":
+            "So podera alterar a sua senha depois de você entrar com sucesso. Após a alteração, você será desconectado e deverá entrar novamente.",
+          "change.current": "Senha Atual",
+          "change.new": "Nova Senha",
+          "change.confirm": "Confirmar Nova Senha",
+          "change.button": "Alterar Senha",
+          "change.changing": "Alterando...",
+          "change.success":
+            "Senha alterada com sucesso. Faça login novamente com a nova senha.",
+          "change.fillAll": "Preencha todos os campos de senha.",
+          "change.minLength": "A nova senha deve ter pelo menos 8 caracteres.",
+          "change.mismatch": "A nova senha e a confirmação não coincidem.",
+          // Admin
+          "admin.title": "Admin",
+          "admin.loginButton": "Entrar como Admin",
+          "admin.logging": "Entrando...",
+          "admin.accessDenied": "Acesso negado: apenas administradores",
+          // Errors / hints
+          "error.apiBaseMissing":
+            "URL base da API não configurada. Defina REACT_APP_API_BASE no build ou injete window.__ENV__.API_BASE em tempo de execução.",
+          "error.endpoint404":
+            "Endpoint não encontrado em {{url}}. Verifique a configuração da API.",
+          "error.noBody":
+            "O servidor não retornou corpo. Se este for um build estático e a API estiver em outra origem, habilite CORS e configure a base da API.",
+
+          // --------------- Register  -----------------
+          register: {
+            title: "Registrar",
+            name: "Nome",
+            email: "Email",
+            password: "Senha",
+            confirmPassword: "Confirmar senha",
+            registerButton: "Registrar",
+            registering: "Registrando...",
+            successRedirect: "Registro bem-sucedido. Redirecionando...",
+            passwordMismatch: "As senhas não coincidem.",
+            apiBaseMissing:
+              "URL base da API não configurada. Defina REACT_APP_API_BASE em tempo de build ou injete window.__ENV__.API_BASE em tempo de execução.",
+            endpointNotFound:
+              "Endpoint de registro não encontrado (404) em {{url}}. Verifique REACT_APP_API_BASE ou a configuração em tempo de execução.",
+            registrationFailed:
+              "Falha no registro. Por favor, tente novamente.",
+            loading: "Carregando...",
+            footer: "Todos os direitos reservados.",
+          },
+
           // --------- Home page --------------
           whoWeAreBtn: "Quem Somos",
           contactUsBtn: "Contate-nos",
@@ -1849,6 +2002,83 @@ i18n
       //================================================================
       fr: {
         translation: {
+          // ----------- Navigation Bar --------------
+          brandAlt: "Logo LM Ltd",
+          home: "Accueil",
+          planServices: "Plan des Services",
+          login: "Connexion",
+          registerNav: "Inscription",
+          admin: "Admin",
+          navigationBar: "Tableau de bord",
+          profile: "Profil",
+          logout: "Déconnexion",
+          openProfile: "Ouvrir le profil",
+          userAvatarAlt: "Avatar de {{name}}",
+          userTitle: "{{name}}",
+          logoTitle: "LM-Ltd",
+
+          // =============== AdminLogin & User Login =====================
+          // Shared
+          "app.copyright": "© {{year}} LM-Ltd Services. Tous droits réservés.",
+          // Login
+          "login.title": "Connexion",
+          "login.email": "Email",
+          "login.password": "Mot de passe",
+          "login.placeholder.email": "ex. exemple@lm-ltd.com",
+          "login.placeholder.password": "••••••••",
+          "login.button": "Se connecter",
+          "login.logging": "Connexion...",
+          "login.failed":
+            "Échec de la connexion. Vérifiez les identifiants et la configuration de l'API.",
+          // Change password
+          "change.title": "Changer le mot de passe",
+          "change.hint":
+            "Si vous êtes connecté, vous pouvez changer votre mot de passe ici. Après un changement réussi, vous serez déconnecté et devrez vous reconnecter.",
+          "change.current": "Mot de passe actuel",
+          "change.new": "Nouveau mot de passe",
+          "change.confirm": "Confirmer le nouveau mot de passe",
+          "change.button": "Changer le mot de passe",
+          "change.changing": "Modification...",
+          "change.success":
+            "Mot de passe modifié avec succès. Veuillez vous reconnecter avec le nouveau mot de passe.",
+          "change.fillAll": "Veuillez remplir tous les champs de mot de passe.",
+          "change.minLength":
+            "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+          "change.mismatch":
+            "Le nouveau mot de passe et la confirmation ne correspondent pas.",
+          // Admin
+          "admin.title": "Admin",
+          "admin.loginButton": "Se connecter en tant qu'admin",
+          "admin.logging": "Connexion...",
+          "admin.accessDenied": "Accès refusé : administrateurs uniquement",
+          // Errors / hints
+          "error.apiBaseMissing":
+            "URL de base de l'API non configurée. Définissez REACT_APP_API_BASE lors du build ou injectez window.__ENV__.API_BASE à l'exécution.",
+          "error.endpoint404":
+            "Point de terminaison introuvable à {{url}}. Vérifiez la configuration de l'API.",
+          "error.noBody":
+            "Le serveur n'a renvoyé aucun contenu. Si c'est une build statique et que l'API est sur une autre origine, activez CORS et configurez la base de l'API.",
+
+          // Register
+          register: {
+            title: "S'inscrire",
+            name: "Nom",
+            email: "E-mail",
+            password: "Mot de passe",
+            confirmPassword: "Confirmer le mot de passe",
+            registerButton: "S'inscrire",
+            registering: "Inscription en cours...",
+            successRedirect: "Inscription réussie. Redirection...",
+            passwordMismatch: "Les mots de passe ne correspondent pas.",
+            apiBaseMissing:
+              "URL de base de l'API non configurée. Définissez REACT_APP_API_BASE au moment de la compilation ou injectez window.__ENV__.API_BASE à l'exécution.",
+            endpointNotFound:
+              "Point de terminaison d'inscription introuvable (404) à {{url}}. Vérifiez REACT_APP_API_BASE ou la configuration d'exécution.",
+            registrationFailed: "Échec de l'inscription. Veuillez réessayer.",
+            loading: "Chargement...",
+            footer: "Tous droits réservés.",
+          },
+
           // ----- Home page -------
           whoWeAreBtn: "Qui sommes-nous",
           contactUsBtn: "Contactez-nous",
