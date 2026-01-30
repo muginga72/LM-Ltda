@@ -10,13 +10,6 @@ import "../i18n";
 const LOGIN_PATH = "/api/auth/login";
 const ME_PATH = "/api/auth/me";
 
-/**
- * resolveApiBase: robustly resolve an API base URL from:
- * - explicit endpointProp
- * - REACT_APP_API_BASE env var
- * - runtime window._ENV_.API_BASE
- * - window.location.origin
- */
 function resolveApiBase(endpointProp) {
   const envBase =
     typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE
@@ -56,9 +49,6 @@ function resolveApiBase(endpointProp) {
   return "";
 }
 
-/**
- * parseJsonSafe: attempt to parse JSON, fall back to text, handle no-content statuses.
- */
 async function parseJsonSafe(res) {
   if (!res) return null;
   if (res.status === 204 || res.status === 304) return null;
@@ -83,9 +73,6 @@ async function parseJsonSafe(res) {
   }
 }
 
-/**
- * loginFallback: POST to /api/auth/login
- */
 async function loginFallback(emailArg, passwordArg, apiBaseOverride) {
   const base = resolveApiBase(apiBaseOverride);
   if (!base) throw new Error("API base missing");
@@ -107,9 +94,6 @@ async function loginFallback(emailArg, passwordArg, apiBaseOverride) {
   return payload;
 }
 
-/**
- * fetchCurrentUser: GET /api/auth/me
- */
 async function fetchCurrentUser(apiBaseOverride) {
   const base = resolveApiBase(apiBaseOverride);
   if (!base) return null;
@@ -129,7 +113,6 @@ async function fetchCurrentUser(apiBaseOverride) {
 function Login({ apiBaseProp, apiBase }) {
   const { t } = useTranslation();
   const authContext = useContext(AuthContext) || {};
-  // authContext may expose: login, setUser, setAuth, user, token
   const contextLogin = authContext.login || null;
   const contextSetUser = authContext.setUser || null;
   const contextSetAuth = authContext.setAuth || null;
@@ -173,7 +156,6 @@ function Login({ apiBaseProp, apiBase }) {
       let token = result?.token ?? result?.accessToken ?? result?.access_token ?? null;
 
       if (!user) {
-        // try /me endpoint
         const me = await fetchCurrentUser(apiBaseProp || apiBase);
         if (me) user = me.user || me;
       }
@@ -253,7 +235,7 @@ function Login({ apiBaseProp, apiBase }) {
               {loading ? (t("login.logging") || "Logging in...") : (t("login.button") || "Login")}
             </Button>
 
-            {/* Link below login button to open change-password modal */}
+            {/* Link below login button to open change-password modal 
             <div className="mt-2">
               <a
                 href="#change-password"
@@ -265,7 +247,7 @@ function Login({ apiBaseProp, apiBase }) {
               >
                 Change password
               </a>
-            </div>
+            </div>*/}
           </Form>
 
           {/* The modal can be opened even if user is not logged in; it will attempt to use token/localStorage */}

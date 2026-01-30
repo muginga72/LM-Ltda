@@ -39,6 +39,22 @@ const signup = async (req, res) => {
   }
 };
 
+const getCurrentUser = async (req, res) => {
+  try {
+    const userId = (req.user && (req.user.id || req.user._id)) || null;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const user = await User.findById(userId).lean();
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.password) delete user.password;
+    return res.json({ user });
+  } catch (err) {
+    console.error("Get current user error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 // LOGIN
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -67,4 +83,4 @@ const logout = (req, res) => {
   res.json({ message: 'Logged out' });
 };
 
-module.exports = { signup, login, logout };
+module.exports = { signup, login, logout, getCurrentUser };
