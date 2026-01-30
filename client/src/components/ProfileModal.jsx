@@ -1,48 +1,193 @@
 // src/components/ProfileModal.jsx
 import React, { useContext, useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
-import { Modal, Row, Col, Image, Form, Button, Card } from "react-bootstrap";
+import { Modal, Row, Col, Image, Form, Button, Card, Spinner } from "react-bootstrap";
 import { AuthContext } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 
-const ProfileModal = ({ show, onHide }) => {
+export default function ProfileModal({ show, onHide, apiBase = "" }) {
   const { t } = useTranslation();
-  const { user } = useContext(AuthContext);
+  const auth = useContext(AuthContext) || {};
+  const contextUser = auth.user || null;
 
-  const [fullName, setFullName] = useState(user?.fullName || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar || "/avatar.png");
-  const [phone, setPhone] = useState(user?.phone || "");
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("/avatar.png");
+  const [avatarFile, setAvatarFile] = useState(null);
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(false);
 
-  // File state and preview
-  const [avatarFile, setAvatarFile] = useState(null);
   const fileInputRef = useRef(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    setFullName(user?.fullName || "");
-    setEmail(user?.email || "");
-    setAvatarUrl(user?.avatar || "/avatar.png");
-    setPhone(user?.phone || "");
-    setMessage("");
-    setError("");
-    setAvatarFile(null);
-  }, [user, show]);
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
-  // When user chooses a file, create preview and store file
+  // Resolve API base robustly
+  const resolveApiBase = (override) => {
+    const base = override || apiBase || "";
+    if (!base && typeof window !== "undefined") return window.location.origin;
+    try {
+      return new URL(base).toString();
+    } catch {
+      return base;
+    }
+  };
+
+  // Convert server avatar path to absolute URL if needed
+  const toAbsoluteAvatarUrl = (maybeUrl) => {
+    if (!maybeUrl) return "/avatar.png";
+    try {
+      // If it's already absolute, URL constructor will succeed
+      return new URL(maybeUrl).toString();
+    } catch {
+      // If relative path (e.g., /uploads/avatars/xxx.jpg), resolve against origin or apiBase
+      try {
+        const base = resolveApiBase();
+        return new URL(maybeUrl, base).toString();
+      } catch {
+        return maybeUrl;
+      }
+    }
+  };
+
+  // Try to fetch profile from multiple endpoints, fallback to localStorage
+  useEffect(() => {
+    if (!show) return;
+
+    let cancelled = false;
+    const controller = new AbortController();
+
+    const getToken = () => {
+      if (auth.token) return auth.token;
+      try {
+        const stored = JSON.parse(localStorage.getItem("user") || "{}");
+        return stored?.token || localStorage.getItem("auth_token") || null;
+      } catch {
+        return localStorage.getItem("auth_token") || null;
+      }
+    };
+
+    const populateFromObject = (userObj) => {
+      if (!mountedRef.current || cancelled) return;
+      setFullName(userObj.fullName || userObj.userName || "");
+      setEmail(userObj.email || "");
+      setPhone(userObj.phone || "");
+      setAvatarUrl(toAbsoluteAvatarUrl(userObj.avatarUrl ?? userObj.avatar ?? "") || "/avatar.png");
+      setAvatarFile(null);
+      setMessage("");
+      setError("");
+    };
+
+    const fetchProfile = async () => {
+      setLoadingProfile(true);
+      setError("");
+      try {
+        // If we already have a context user, populate immediately (optimistic)
+        if (contextUser) populateFromObject(contextUser);
+
+        const base = resolveApiBase();
+        const token = getToken();
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const withCredentials = token ? false : true;
+
+        // Try /api/users/profile (GET)
+        try {
+          const url = `${base.replace(/\/$/, "")}/api/users/profile`;
+          const res = await axios.get(url, {
+            headers,
+            withCredentials,
+            signal: controller.signal,
+          });
+          if (res?.status === 200) {
+            const returned = res?.data;
+            const user = returned?.user ?? returned ?? null;
+            if (user) {
+              populateFromObject(user);
+              return;
+            }
+          }
+        } catch (err) {
+          // ignore and try next endpoint unless it's a non-recoverable error
+          if (axios.isCancel(err)) return;
+        }
+
+        // Try /api/auth/me
+        try {
+          const url2 = `${base.replace(/\/$/, "")}/api/auth/me`;
+          const res2 = await axios.get(url2, {
+            headers,
+            withCredentials,
+            signal: controller.signal,
+          });
+          if (res2?.status === 200) {
+            const returned = res2?.data;
+            const user = returned?.user ?? returned ?? null;
+            if (user) {
+              populateFromObject(user);
+              return;
+            }
+          }
+        } catch (err) {
+          if (axios.isCancel(err)) return;
+        }
+
+        // Fallback to localStorage user
+        try {
+          const storedRaw = localStorage.getItem("user");
+          const stored = storedRaw ? JSON.parse(storedRaw) : null;
+          if (stored && typeof stored === "object") {
+            populateFromObject(stored);
+            return;
+          }
+        } catch {
+          // ignore
+        }
+
+        // If we reach here, nothing worked
+        if (!cancelled && mountedRef.current) {
+          setError(t("Failed to load profile") || "Failed to load profile");
+        }
+      } catch (err) {
+        if (!cancelled && mountedRef.current) {
+          console.error("Failed to fetch profile:", err);
+          setError(t("Failed to load profile") || "Failed to load profile");
+        }
+      } finally {
+        if (!cancelled && mountedRef.current) setLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show]);
+
+  // File input change handler: preview and store file
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Basic client-side validation: image type and size limit (5MB)
     if (!file.type.startsWith("image/")) {
-      setError(t("Please select a valid image file"));
+      setError(t("Please select a valid image file") || "Please select a valid image file");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError(t("Image too large. Max 5MB."));
+      setError(t("Image too large. Max 5MB.") || "Image too large. Max 5MB.");
       return;
     }
 
@@ -54,104 +199,129 @@ const ProfileModal = ({ show, onHide }) => {
     reader.readAsDataURL(file);
   };
 
-  // Trigger hidden file input
   const triggerFileSelect = () => fileInputRef.current?.click();
 
+  // Save handler: sends FormData if file present, otherwise JSON
   const handleSave = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
-    setUploading(true);
+    setSaving(true);
 
     try {
-      const stored = JSON.parse(localStorage.getItem("user")) || {};
-      const token = stored?.token;
-      if (!token) throw new Error(t("No token found"));
+      const base = resolveApiBase();
+      const url = `${base.replace(/\/$/, "")}/api/users/profile`;
+
+      // token handling
+      let token = auth.token || null;
+      if (!token) {
+        try {
+          const stored = JSON.parse(localStorage.getItem("user") || "{}");
+          token = stored?.token || localStorage.getItem("auth_token") || null;
+        } catch {
+          token = localStorage.getItem("auth_token") || null;
+        }
+      }
+
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
 
       let res;
-      // If an avatar file was selected, use FormData (multipart)
       if (avatarFile) {
         const form = new FormData();
-        // Append only fields you want to update
-        form.append("phone", phone || "");
-        form.append("avatar", avatarFile);
-        // Keep fullName/email editable? we keep them read-only as before but include them if present
         form.append("fullName", fullName || "");
         form.append("email", email || "");
+        form.append("phone", phone || "");
+        form.append("avatar", avatarFile);
 
-        res = await axios.put("/api/users/profile", form, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            // Let browser set Content-Type with boundary
-          },
+        res = await axios.put(url, form, {
+          headers,
+          withCredentials: token ? false : true,
         });
       } else {
-        // Send JSON when no file chosen
-        const payload = { phone, avatar: avatarUrl, fullName, email };
-        res = await axios.put("/api/users/profile", payload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+        const payload = { fullName, email, phone };
+        res = await axios.put(url, payload, {
+          headers: { ...headers, "Content-Type": "application/json" },
+          withCredentials: token ? false : true,
         });
       }
 
-      const {
-        fullName: updatedName,
-        email: updatedEmail,
-        avatar: updatedAvatar,
-        phone: updatedPhone,
-      } = res.data;
+      const returned = res?.data;
+      const updatedUser = returned?.user ?? returned ?? null;
+      if (!updatedUser) {
+        throw new Error(t("Unexpected server response") || "Unexpected server response");
+      }
 
-      setFullName(updatedName || "");
-      setEmail(updatedEmail || "");
-      setAvatarUrl(updatedAvatar || "/avatar.png");
-      setPhone(updatedPhone || "");
+      const resolvedAvatar = toAbsoluteAvatarUrl(updatedUser.avatarUrl ?? updatedUser.avatar ?? "");
+
+      setFullName(updatedUser.fullName || updatedUser.userName || "");
+      setEmail(updatedUser.email || "");
+      setPhone(updatedUser.phone || "");
+      setAvatarUrl(resolvedAvatar || "/avatar.png");
       setAvatarFile(null);
 
-      // Update localStorage user object safely
-      const newStoredUser = {
-        ...stored,
-        fullName: updatedName || stored.fullName,
-        email: updatedEmail || stored.email,
-        avatar: updatedAvatar || stored.avatar,
-        phone: updatedPhone || stored.phone,
-      };
-      localStorage.setItem("user", JSON.stringify(newStoredUser));
+      if (typeof auth.setUser === "function") {
+        try {
+          auth.setUser(updatedUser);
+        } catch {
+          // ignore
+        }
+      }
 
-      setMessage(t("Profile updated successfully!"));
+      // Merge into localStorage.user safely and preserve token
+      try {
+        const storedRaw = localStorage.getItem("user");
+        const stored = storedRaw ? JSON.parse(storedRaw) : {};
+        const merged = { ...stored, ...(typeof updatedUser === "object" ? updatedUser : {}) };
+        if (stored?.token && !merged?.token) merged.token = stored.token;
+        localStorage.setItem("user", JSON.stringify(merged));
+      } catch {
+        // ignore localStorage errors
+      }
+
+      setMessage(t("Profile updated successfully!") || "Profile updated successfully!");
     } catch (err) {
-      console.error(err);
-      // Prefer server message, fallback to JS message, fallback to translation
-      const serverMessage = err?.response?.data?.message;
-      const msg = serverMessage || err.message || t("Failed to update profile");
+      console.error("Profile save error:", err);
+      const serverMessage = err?.response?.data?.message ?? err?.response?.data?.error;
+      const msg = serverMessage || err.message || t("Failed to update profile") || "Failed to update profile";
       setError(msg);
     } finally {
-      setUploading(false);
+      if (mountedRef.current) setSaving(false);
     }
+  };
+
+  // If avatar image fails to load (broken URL), fallback to placeholder
+  const handleAvatarError = () => {
+    setAvatarUrl("/avatar.png");
   };
 
   return (
     <Modal show={show} onHide={onHide} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>{t("Your Profile")}</Modal.Title>
+        <Modal.Title>{t("Your Profile") || "Your Profile"}</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Card className="p-3">
           <Row className="align-items-center">
             <Col md={4} className="text-center">
               <div style={{ position: "relative", display: "inline-block" }}>
-                <Image
-                  src={avatarUrl}
-                  roundedCircle
-                  width="120"
-                  height="120"
-                  alt={t("Your Profile")}
-                  style={{
-                    objectFit: "cover",
-                    boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-                  }}
-                />
+                {loadingProfile ? (
+                  <div style={{ width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Spinner animation="border" />
+                  </div>
+                ) : (
+                  <Image
+                    src={avatarUrl}
+                    roundedCircle
+                    width="120"
+                    height="120"
+                    alt={t("Your Profile") || "Your Profile"}
+                    onError={handleAvatarError}
+                    style={{ objectFit: "cover", boxShadow: "0 0 10px rgba(0,0,0,0.2)" }}
+                  />
+                )}
+
                 <div style={{ marginTop: 10 }}>
                   <input
                     ref={fileInputRef}
@@ -160,12 +330,8 @@ const ProfileModal = ({ show, onHide }) => {
                     onChange={handleFileChange}
                     style={{ display: "none" }}
                   />
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={triggerFileSelect}
-                  >
-                    {t("Upload picture")}
+                  <Button size="sm" variant="outline-primary" onClick={triggerFileSelect} disabled={loadingProfile || saving}>
+                    {t("Upload picture") || "Upload picture"}
                   </Button>
                 </div>
               </div>
@@ -176,28 +342,28 @@ const ProfileModal = ({ show, onHide }) => {
               {error && <p className="text-danger">{error}</p>}
 
               <Form onSubmit={handleSave}>
-                <Form.Group className="mb-3">
-                  <Form.Label>{t("Fullname")}</Form.Label>
+                <Form.Group className="mb-3" controlId="profileFullName">
+                  <Form.Label>{t("Fullname") || "Fullname"}</Form.Label>
                   <Form.Control
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    disabled
+                    placeholder={t("Fullname") || "Fullname"}
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t("Email")}</Form.Label>
+                <Form.Group className="mb-3" controlId="profileEmail">
+                  <Form.Label>{t("Email") || "Email"}</Form.Label>
                   <Form.Control
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled
+                    placeholder={t("Email") || "Email"}
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t("Phone")}</Form.Label>
+                <Form.Group className="mb-3" controlId="profilePhone">
+                  <Form.Label>{t("Phone") || "Phone"}</Form.Label>
                   <Form.Control
                     type="tel"
                     value={phone}
@@ -207,15 +373,17 @@ const ProfileModal = ({ show, onHide }) => {
                 </Form.Group>
 
                 <div className="d-flex gap-3">
-                  <Button
-                    variant="outline-primary"
-                    type="submit"
-                    disabled={uploading}
-                  >
-                    {uploading ? t("Saving...") : t("Save Changes")}
+                  <Button variant="primary" type="submit" disabled={saving || loadingProfile}>
+                    {saving ? (
+                      <>
+                        <Spinner animation="border" size="sm" /> {t("Saving...") || "Saving..."}
+                      </>
+                    ) : (
+                      t("Save Changes") || "Save Changes"
+                    )}
                   </Button>
-                  <Button variant="outline-secondary" onClick={onHide}>
-                    {t("Close")}
+                  <Button variant="outline-secondary" onClick={onHide} disabled={saving || loadingProfile}>
+                    {t("Close") || "Close"}
                   </Button>
                 </div>
               </Form>
@@ -225,6 +393,16 @@ const ProfileModal = ({ show, onHide }) => {
       </Modal.Body>
     </Modal>
   );
+}
+
+ProfileModal.propTypes = {
+  show: PropTypes.bool,
+  onHide: PropTypes.func,
+  apiBase: PropTypes.string,
 };
 
-export default ProfileModal;
+ProfileModal.defaultProps = {
+  show: false,
+  onHide: () => {},
+  apiBase: "",
+};

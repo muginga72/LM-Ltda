@@ -1,40 +1,142 @@
-import React, { useContext, useState } from "react";
-import { Navbar, Nav, Container, NavDropdown, Image } from "react-bootstrap";
+// src/components/NavigationBar.jsx
+import React, { useContext, useEffect, useState, useCallback } from "react";
+import { Navbar, Nav, Container, Image, Spinner } from "react-bootstrap";
 import { NavLink, useNavigate } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "../contexts/AuthContext";
 import logo from "../assets/logo-v01.png";
 import ProfileModal from "./ProfileModal";
-// import BookRoomModal from "../components/roomrentals/BookRoomModal";
+import {
+  computeInitialsFromName,
+  resolveApiBase,
+  resolveAvatar as resolveAvatarHelper,
+  checkImageExists,
+} from "../utils/avatarHelpers";
 
-const NavigationBar = () => {
-  const { user, logout } = useContext(AuthContext);
+const avatarSize = 34;
+
+const NavigationBar = ({ apiBaseProp }) => {
+  const { t } = useTranslation();
+  const { user, logout } = useContext(AuthContext) || {};
   const navigate = useNavigate();
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  // const [showBookModal, setShowBookModal] = useState(false);
 
-  const initials = user?.fullName
-    ? user.fullName
-        .split(" ")
-        .map((n) => n.trim())
-        .filter(Boolean)
-        .map((n) => n[0]?.toUpperCase())
-        .join("")
-    : "";
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null); // only string or null
+  const [initials, setInitials] = useState("?");
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
+
+  const resolvedApiBase = useCallback(() => resolveApiBase(apiBaseProp), [apiBaseProp]);
+
+  const buildAbsolute = useCallback(
+    (maybeUrl) => {
+      if (!maybeUrl) return null;
+      try {
+        return new URL(maybeUrl).toString();
+      } catch {
+        try {
+          const base = resolvedApiBase() || (typeof window !== "undefined" ? window.location.origin : "");
+          return new URL(maybeUrl, base).toString();
+        } catch {
+          return maybeUrl;
+        }
+      }
+    },
+    [resolvedApiBase]
+  );
+
+  const resolveAvatar = useCallback(
+    async (u) => {
+      setLoadingAvatar(true);
+      try {
+        if (!u) {
+          setAvatarUrl(null);
+          return;
+        }
+
+        // Prefer the helper that returns a string URL or null
+        const resolved = await resolveAvatarHelper(u, apiBaseProp);
+        if (typeof resolved === "string" && resolved.trim() !== "") {
+          setAvatarUrl(resolved);
+          return;
+        }
+
+        // Fallback: check candidate fields manually and only set avatarUrl to a string when checkImageExists returns true
+        const candidates = [u.avatarUrl, u.avatar, u.image, u.photo, u.picture, u.profileImage].filter(Boolean);
+        for (const c of candidates) {
+          const abs = buildAbsolute(c);
+          if (!abs) continue;
+          // eslint-disable-next-line no-await-in-loop
+          const exists = await checkImageExists(abs);
+          if (exists) {
+            setAvatarUrl(abs);
+            return;
+          }
+        }
+
+        // No valid image found
+        setAvatarUrl(null);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("resolveAvatar error:", err);
+        setAvatarUrl(null);
+      } finally {
+        setLoadingAvatar(false);
+      }
+    },
+    [apiBaseProp, buildAbsolute]
+  );
+
+  useEffect(() => {
+    const name = user?.fullName ?? user?.name ?? user?.displayName ?? "";
+    setInitials(name ? computeInitialsFromName(name) : "?");
+
+    if (user) {
+      resolveAvatar(user);
+    } else {
+      setAvatarUrl(null);
+    }
+  }, [user, resolveAvatar]);
 
   const handleLogout = () => {
-    logout();
+    try {
+      if (typeof logout === "function") logout();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("logout error:", err);
+    }
     navigate("/login");
   };
 
-  const avatarSize = 34;
-  const avatar = user?.avatarUrl ? (
+  // Avatar element: spinner while checking, image when avatarUrl is a non-empty string, otherwise initials
+  const avatarElement = loadingAvatar ? (
+    <div
+      style={{
+        width: avatarSize,
+        height: avatarSize,
+        borderRadius: "50%",
+        background: "#f8f9fa",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      aria-hidden="true"
+      title={t("userTitle", { name: user?.fullName ?? "User" })}
+    >
+      <Spinner animation="border" size="sm" />
+    </div>
+  ) : typeof avatarUrl === "string" && avatarUrl.trim() !== "" ? (
     <Image
-      src={user.avatarUrl}
+      src={avatarUrl}
       roundedCircle
       width={avatarSize}
       height={avatarSize}
-      alt="avatar"
+      alt={t("userAvatarAlt", { name: user?.fullName ?? "User" })}
+      style={{ objectFit: "cover" }}
+      onError={() => {
+        // If the image fails to load at runtime, clear avatarUrl so initials show
+        setAvatarUrl(null);
+      }}
     />
   ) : (
     <div
@@ -52,8 +154,9 @@ const NavigationBar = () => {
         userSelect: "none",
       }}
       aria-hidden="true"
+      title={t("userTitle", { name: user?.fullName ?? "User" })}
     >
-      {initials || "?"}
+      {initials ?? "?"}
     </div>
   );
 
@@ -62,14 +165,8 @@ const NavigationBar = () => {
       <Navbar bg="light" expand="lg">
         <Container>
           <LinkContainer to="/">
-            <Navbar.Brand className="d-flex align-items-center gap-2">
-              <img
-                src={logo}
-                alt="LM Ltd Logo"
-                width="150"
-                height="100"
-                className="rounded"
-              />
+            <Navbar.Brand className="d-flex align-items-center gap-2" title={t("logoTitle")}>
+              <img src={logo} alt={t("brandAlt")} width="150" height="100" className="rounded" />
             </Navbar.Brand>
           </LinkContainer>
 
@@ -77,46 +174,36 @@ const NavigationBar = () => {
           <Navbar.Collapse id="main-navbar">
             <Nav className="ms-auto align-items-center">
               <Nav.Link as={NavLink} to="/">
-                Home
+                {t("home")}
               </Nav.Link>
+
               <Nav.Link as={NavLink} to="/services">
-                Plan Services
+                {t("planServices")}
               </Nav.Link>
-
-              {/* <Nav.Link as={NavLink} to="/rooms">Rooms</Nav.Link> */}
-
-              {/* <NavDropdown title="Rooms" id="rooms-nav-dropdown" align="end" role="menu">
-                <LinkContainer to="/rooms/list">
-                  <NavDropdown.Item>List Rooms</NavDropdown.Item>
-                </LinkContainer>
-
-                <NavDropdown.Item onClick={() => setShowBookModal(true)}>
-                  Book Room
-                </NavDropdown.Item>
-              </NavDropdown> */}
 
               {!user ? (
                 <>
                   <Nav.Link as={NavLink} to="/login">
-                    Login
+                    {t("login")}
                   </Nav.Link>
                   <Nav.Link as={NavLink} to="/register">
-                    Register
+                    {t("registerNav")}
                   </Nav.Link>
                   <Nav.Link as={NavLink} to="/admin-login">
-                    Admin
+                    {t("admin")}
                   </Nav.Link>
                 </>
               ) : (
                 <>
                   {user.role === "admin" && (
                     <Nav.Link as={NavLink} to="/admin">
-                      Dashboard
+                      {t("navigationBar")}
                     </Nav.Link>
                   )}
+
                   {user.role === "user" && (
                     <Nav.Link as={NavLink} to="/dashboard">
-                      Dashboard
+                      {t("navigationBar")}
                     </Nav.Link>
                   )}
 
@@ -124,14 +211,14 @@ const NavigationBar = () => {
                     onClick={() => setShowProfileModal(true)}
                     className="d-flex align-items-center p-0 ms-2"
                     style={{ cursor: "pointer" }}
-                    title="Profile"
-                    aria-label="Open profile"
+                    title={t("openProfile")}
+                    aria-label={t("openProfile")}
                   >
-                    {avatar}
+                    {avatarElement}
                   </Nav.Link>
 
                   <Nav.Link onClick={handleLogout} className="text-danger ms-2">
-                    Logout
+                    {t("logout")}
                   </Nav.Link>
                 </>
               )}
@@ -140,11 +227,7 @@ const NavigationBar = () => {
         </Container>
       </Navbar>
 
-      {user && (
-        <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />
-      )}
-
-      {/* <BookRoomModal show={showBookModal} onHide={() => setShowBookModal(false)} /> */}
+      {user && <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />}
     </>
   );
 };
