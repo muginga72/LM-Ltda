@@ -7,13 +7,6 @@ const BASE = ENV_BASE.replace(/\/$/, "");
 const DEFAULT_PATH = "/api/services";
 const PRIMARY_COLOR = "#0d6efd";
 
-/**
- * ServicesList
- * - Resolves endpoint to an absolute URL (prop -> build-time env -> runtime window.__ENV__ -> same-origin)
- * - Handles 304/204/404 correctly
- * - Retries once forcing no-cache when server returns no body
- * - Defensive parsing, normalization, dedupe
- */
 function ServicesList({ endpoint: endpointProp }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -22,7 +15,6 @@ function ServicesList({ endpoint: endpointProp }) {
   const abortRef = useRef(null);
 
   const resolveEndpointAbsolute = useCallback(() => {
-    // 1) explicit prop
     if (endpointProp) {
       try {
         return new URL(endpointProp).toString();
@@ -37,7 +29,6 @@ function ServicesList({ endpoint: endpointProp }) {
       }
     }
 
-    // 2) build-time env
     if (BASE) {
       try {
         return new URL(`${BASE}${DEFAULT_PATH}`).toString();
@@ -46,7 +37,6 @@ function ServicesList({ endpoint: endpointProp }) {
       }
     }
 
-    // 3) runtime-injected config (inject window.__ENV__ in index.html)
     try {
       // eslint-disable-next-line no-undef
       const runtime = typeof window !== "undefined" ? window.__ENV__ : null;
@@ -60,7 +50,6 @@ function ServicesList({ endpoint: endpointProp }) {
       }
     } catch {}
 
-    // 4) same-origin absolute path
     try {
       return new URL(DEFAULT_PATH, window.location.origin).toString();
     } catch {
@@ -167,7 +156,6 @@ function ServicesList({ endpoint: endpointProp }) {
       setError(null);
 
       try {
-        // First attempt: allow caching (server may return 304)
         const firstOptions = {
           method: "GET",
           headers: { Accept: "application/json" },
@@ -177,14 +165,12 @@ function ServicesList({ endpoint: endpointProp }) {
 
         let { res, payload } = await fetchOnce(endpoint, firstOptions);
 
-        // If 404, treat as configuration error (API not found at this URL)
         if (res.status === 404) {
           throw new Error(
             `API not found (404) at ${endpoint}. Check REACT_APP_API_BASE or runtime config and ensure the API is reachable.`
           );
         }
 
-        // If no body (304/204/null) and retry allowed, force fresh fetch
         if ((res.status === 304 || payload === null || payload === undefined) && opts.retry) {
           const retryOptions = {
             method: "GET",

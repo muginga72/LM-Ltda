@@ -45,6 +45,7 @@ const CLIENT_ORIGIN = (process.env.CLIENT_ORIGIN || "").trim() || null;
 const allowedOrigins = [
   'http://localhost:3000',
   'https://www.lmuginga.com',
+  'https://lmuginga.com',
   CLIENT_ORIGIN,
 ].filter(Boolean);
 

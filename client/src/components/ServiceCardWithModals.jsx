@@ -4,7 +4,7 @@ import { Card, Button, ButtonGroup, Modal, Form, Spinner, } from "react-bootstra
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTranslation } from "react-i18next";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 const ServiceCardWithModals = ({
   serviceId,
