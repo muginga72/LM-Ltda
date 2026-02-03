@@ -25,6 +25,7 @@ const uploadFilesRoutes = require('./routes/uploadFilesRoutes');
 const paymentsRouter = require('./routes/payments/payments');
 const calendarRouter = require('./routes/calendar');
 const contactRouter = require('./routes/contact');
+const { normalizeStatus } = require('./normalizeStatus');
 const roomListingRequestRoutes = require('./routes/roomrental/roomListingRequestRoutes');
 const adminCalendarRouterFactory = require('./routes/adminCalendar');
 const calendarAvailabilityRouter = require('./routes/calendarAvailability');
@@ -302,6 +303,20 @@ app.use((err, req, res, next) => {
 
   console.error('Unhandled error:', err);
   res.status(err?.status || 500).json({ error: err?.message || 'Internal Server Error' });
+});
+
+app.post('/normalize', (req, res) => {
+  const rows = Array.isArray(req.body.rows) ? req.body.rows : [];
+  const normalized = rows.map(r => {
+    // support both camelCase and header-style keys
+    const raw = r.restrictionStatus ?? r['Restriction Status'] ?? r.status ?? null;
+    const canonical = normalizeStatus(raw);
+    return {
+      name: r.name || r.fileName || r.filename || '',
+      restrictionStatusCanonical: canonical
+    };
+  });
+  res.json({ rows: normalized });
 });
 
 // --- Start DB + server ---
