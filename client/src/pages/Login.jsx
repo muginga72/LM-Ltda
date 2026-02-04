@@ -1,6 +1,14 @@
 // src/pages/Login.jsx
 import React, { useState, useContext, useEffect } from "react";
-import { Form, Button, Container, Alert, Card } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Container,
+  Alert,
+  Card,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ChangePasswordModal from "../components/ChangePasswordModal";
@@ -10,43 +18,51 @@ import "../i18n";
 const LOGIN_PATH = "/api/auth/login";
 const ME_PATH = "/api/auth/me";
 
-function resolveApiBase(endpointProp) {
-  const envBase =
-    typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE
-      ? process.env.REACT_APP_API_BASE
-      : "";
-  const baseFromEnv = (envBase || "").replace(/V$/, "");
-
-  if (endpointProp) {
-    try {
-      return new URL(endpointProp).toString();
-    } catch {
-      try {
-        if (typeof window !== "undefined" && window.location && window.location.origin) {
-          return new URL(endpointProp, window.location.origin).toString();
-        }
-      } catch {
-        return endpointProp;
-      }
-    }
+function normalizeApiBase(s) {
+  if (!s || typeof s !== "string") return "";
+  const out = s.trim();
+  try {
+    const u = new URL(
+      out,
+      typeof window !== "undefined" ? window.location.origin : undefined,
+    );
+    if (/^https?:\/\//i.test(out)) return u.origin;
+    if (out.startsWith("/")) return "";
+    return out.replace(/V+$/, "");
+  } catch {
+    return out.replace(/V+$/, "");
   }
+}
 
-  if (baseFromEnv) return baseFromEnv.replace(/V$/, "");
-
+function resolveApiBase(apiBaseProp) {
+  if (apiBaseProp) return normalizeApiBase(apiBaseProp);
   try {
-    if (typeof window !== "undefined") {
-      const runtime = window._ENV_ || null;
-      if (runtime && runtime.API_BASE) return runtime.API_BASE.replace(/V$/, "");
+    if (
+      typeof process !== "undefined" &&
+      process.env &&
+      process.env.REACT_APP_API_BASE
+    ) {
+      const candidate = process.env.REACT_APP_API_BASE;
+      if (candidate) return normalizeApiBase(candidate);
     }
   } catch {}
-
   try {
-    if (typeof window !== "undefined" && window.location && window.location.origin) {
-      return window.location.origin;
+    if (
+      typeof window !== "undefined" &&
+      window._ENV_ &&
+      window._ENV_.API_BASE
+    ) {
+      return normalizeApiBase(window._ENV_.API_BASE);
     }
   } catch {}
-
   return "";
+}
+
+function buildUrl(base, path) {
+  if (!path) return base || "";
+  if (!base) return path.startsWith("/") ? path : `/${path}`;
+  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  return `${normalizedBase}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 async function parseJsonSafe(res) {
@@ -75,16 +91,13 @@ async function parseJsonSafe(res) {
 
 async function loginFallback(emailArg, passwordArg, apiBaseOverride) {
   const base = resolveApiBase(apiBaseOverride);
-  if (!base) throw new Error("API base missing");
-
-  const loginUrl = `${base.replace(/V$/, "")}${LOGIN_PATH}`;
+  const loginUrl = buildUrl(base, LOGIN_PATH);
   const res = await fetch(loginUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     credentials: "include",
     body: JSON.stringify({ email: emailArg, password: passwordArg }),
   });
-
   if (res.status === 404) throw new Error(`404 ${loginUrl}`);
   const payload = await parseJsonSafe(res);
   if (!res.ok) {
@@ -96,8 +109,7 @@ async function loginFallback(emailArg, passwordArg, apiBaseOverride) {
 
 async function fetchCurrentUser(apiBaseOverride) {
   const base = resolveApiBase(apiBaseOverride);
-  if (!base) return null;
-  const meUrl = `${base.replace(/V$/, "")}${ME_PATH}`;
+  const meUrl = buildUrl(base, ME_PATH);
   const res = await fetch(meUrl, {
     method: "GET",
     headers: { Accept: "application/json" },
@@ -109,28 +121,26 @@ async function fetchCurrentUser(apiBaseOverride) {
   return payload;
 }
 
-/* Login component */
 function Login({ apiBaseProp, apiBase }) {
   const { t } = useTranslation();
   const authContext = useContext(AuthContext) || {};
-  const contextLogin = authContext.login || null;
-  const contextSetUser = authContext.setUser || null;
-  const contextSetAuth = authContext.setAuth || null;
+  const contextLogin =
+    typeof authContext.login === "function" ? authContext.login : null;
+  const contextSetUser =
+    typeof authContext.setUser === "function" ? authContext.setUser : null;
+  const contextSetAuth =
+    typeof authContext.setAuth === "function" ? authContext.setAuth : null;
   const contextUser = authContext.user || null;
-  const contextToken = authContext.token || null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Change password modal state
   const [showChangeModal, setShowChangeModal] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If already authenticated, redirect
     const user = contextUser;
     if (user && user.role) {
       const role = user.role;
@@ -138,134 +148,147 @@ function Login({ apiBaseProp, apiBase }) {
       else navigate("/services");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [contextUser, navigate]);
+
+  const getStoredToken = () => {
+    try {
+      const t1 = localStorage.getItem("auth_token");
+      if (t1) return t1;
+      const t2 = localStorage.getItem("token");
+      if (t2) return t2;
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          return (
+            parsed?.token ?? parsed?.accessToken ?? parsed?.access_token ?? null
+          );
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
+      const apiBaseToUse = apiBaseProp ?? apiBase ?? undefined;
       const loginFn =
         typeof contextLogin === "function"
           ? contextLogin
-          : (e, p) => loginFallback(e, p, apiBaseProp || apiBase);
+          : (em, pw) => loginFallback(em, pw, apiBaseToUse);
       const result = await loginFn(email, password);
 
-      // result may contain { user, token } or user directly
       let user = result?.user ?? result ?? null;
-      let token = result?.token ?? result?.accessToken ?? result?.access_token ?? null;
+      let token =
+        result?.token ?? result?.accessToken ?? result?.access_token ?? null;
 
       if (!user) {
-        const me = await fetchCurrentUser(apiBaseProp || apiBase);
-        if (me) user = me.user || me;
+        const me = await fetchCurrentUser(apiBaseToUse);
+        if (me) user = me.user ?? me;
+      }
+
+      if (!user && token) {
+        try {
+          localStorage.setItem("auth_token", token);
+        } catch {}
+        const me = await fetchCurrentUser(apiBaseToUse);
+        if (me) user = me.user ?? me;
+      }
+
+      if (!user && !token) {
+        throw new Error(t("Login failed") || "Login failed");
       }
 
       if (token) {
         try {
           localStorage.setItem("auth_token", token);
         } catch {}
+      } else {
+        const stored = getStoredToken();
+        if (stored) token = stored;
       }
 
-      if (typeof contextSetUser === "function" && user) contextSetUser(user);
-      if (typeof contextSetAuth === "function") contextSetAuth({ user, token });
+      try {
+        const toStore = {
+          ...(typeof user === "object" ? user : {}),
+          token: token || undefined,
+        };
+        localStorage.setItem("user", JSON.stringify(toStore));
+      } catch {}
 
-      const role = user?.role ?? result?.role;
-      if (role === "admin") navigate("/admin");
+      if (contextSetUser) contextSetUser(user);
+      if (contextSetAuth) contextSetAuth({ user, token: token || null });
+
+      if (user && user.role === "admin") navigate("/admin");
       else navigate("/services");
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Login error:", err);
-      let msg = t("login.failed") || "Login failed";
-      if (err?.message === "API base missing") msg = t("error.apiBaseMissing") || "API base missing";
-      else if (String(err?.message).includes("404"))
-        msg = t("error.endpoint404", { url: err.message }) || `Endpoint not found: ${err.message}`;
-      else if (err?.message === "no-body") msg = t("error.noBody") || "No response body";
-      else if (err?.message) msg = err.message;
-      setError(msg);
+      setError(
+        err?.message || String(err) || t("Login failed") || "Login failed",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Determine userId and token to pass to modal (if available)
-  const userId = contextUser?._id ?? contextUser?.id ?? null;
-  const token =
-    contextToken ??
-    (function () {
-      try {
-        return localStorage.getItem("auth_token");
-      } catch {
-        return null;
-      }
-    })();
-
   return (
-    <>
-      <Container style={{ maxWidth: 700, marginTop: 40 }}>
-        <Card className="p-4">
-          <h2 className="mb-3">{t("login.title") || "Login"}</h2>
-          {error && <Alert variant="danger">{error}</Alert>}
+    <Container className="mt-5">
+      <Row className="justify-content-center">
+        <Col md={6}>
+          <Card className="p-4 shadow-sm">
+            <h3 className="mb-3">Login</h3>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Form onSubmit={handleSubmit}>
+              <Form.Group className="mb-3" controlId="loginEmail">
+                <Form.Label>{t("Email") || "Email"}</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("login.placeholder.email") || "you@example.com"}
+                  required
+                  autoComplete="email"
+                />
+              </Form.Group>
 
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="loginEmail">
-              <Form.Label>{t("login.email") || "Email"}</Form.Label>
-              <Form.Control
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("login.placeholder.email") || "you@example.com"}
-                required
-                autoComplete="email"
-              />
-            </Form.Group>
+              <Form.Group className="mb-3" controlId="loginPassword">
+                <Form.Label>{t("Password") || "Password"}</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t("login.placeholder.password") || "Password"}
+                  required
+                  autoComplete="current-password"
+                />
+              </Form.Group>
 
-            <Form.Group className="mb-3" controlId="loginPassword">
-              <Form.Label>{t("login.password") || "Password"}</Form.Label>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t("login.placeholder.password") || "Password"}
-                required
-                autoComplete="current-password"
-              />
-            </Form.Group>
+              <div className="d-flex gap-2">
+                <Button variant="primary" type="submit" disabled={loading}>
+                  {loading ? "Logging in..." : t("Login") || "Login"}
+                </Button>
+                <Button variant="link" onClick={() => setShowChangeModal(true)}>
+                  {t("Change Password") || "Change Password"}
+                </Button>
+              </div>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
 
-            <Button type="submit" className="mb-3" disabled={loading}>
-              {loading ? (t("login.logging") || "Logging in...") : (t("login.button") || "Login")}
-            </Button>
-
-            {/* Link below login button to open change-password modal 
-            <div className="mt-2">
-              <a
-                href="#change-password"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowChangeModal(true);
-                }}
-                style={{ fontSize: "0.9rem", display: "inline-block" }}
-              >
-                Change password
-              </a>
-            </div>*/}
-          </Form>
-
-          {/* The modal can be opened even if user is not logged in; it will attempt to use token/localStorage */}
-          <ChangePasswordModal
-            show={showChangeModal}
-            onHide={() => setShowChangeModal(false)}
-            apiBase={apiBaseProp || apiBase}
-            userId={userId}
-            token={token}
-          />
-        </Card>
-      </Container>
-
-      <hr />
-      <footer className="text-center py-2">
-        <small>{t("app.copyright", { year: new Date().getFullYear() }) || `© ${new Date().getFullYear()}`}</small>
-      </footer>
-    </>
+      <ChangePasswordModal
+        show={showChangeModal}
+        onHide={() => setShowChangeModal(false)}
+      />
+    </Container>
   );
 }
 
