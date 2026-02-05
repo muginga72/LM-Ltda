@@ -1,17 +1,7 @@
 // src/pages/Profile.jsx
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  Image,
-  Form,
-  Button,
-  Card,
-  Spinner,
-  Alert,
-} from "react-bootstrap";
+import { Container, Row, Col, Image, Form, Button, Card, Spinner, Alert } from "react-bootstrap";
 import { AuthContext } from "../contexts/AuthContext";
 
 function resolveApiBase() {
@@ -23,9 +13,9 @@ function resolveApiBase() {
           const u = new URL(candidate, typeof window !== "undefined" ? window.location.origin : undefined);
           if (/^https?:\/\//i.test(candidate)) return u.origin;
           if (candidate.startsWith("/")) return "";
-          return candidate.replace(/V+$/, "");
+          return candidate.replace(/\/+$/, "");
         } catch {
-          return candidate.replace(/V+$/, "");
+          return candidate.replace(/\/+$/, "");
         }
       }
     }
@@ -38,9 +28,9 @@ function resolveApiBase() {
           const u = new URL(candidate, window.location.origin);
           if (/^https?:\/\//i.test(candidate)) return u.origin;
           if (candidate.startsWith("/")) return "";
-          return candidate.replace(/V+$/, "");
+          return candidate.replace(/\/+$/, "");
         } catch {
-          return candidate.replace(/V+$/, "");
+          return candidate.replace(/\/+$/, "");
         }
       }
     }
@@ -144,6 +134,7 @@ export default function Profile() {
         if (mounted) setLoading(false);
       }
     }
+
     if (!user) fetchMe();
     return () => {
       mounted = false;
@@ -229,12 +220,10 @@ export default function Profile() {
                     <Form.Label>Email</Form.Label>
                     <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </Form.Group>
-
                   <Form.Group className="mb-3">
                     <Form.Label>Avatar URL</Form.Label>
                     <Form.Control type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)} placeholder="/images/avatar.png" />
                   </Form.Group>
-
                   <Button variant="primary" type="submit" disabled={saving}>
                     {saving ? (
                       <>

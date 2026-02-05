@@ -1,4 +1,4 @@
-// components/UserDashboard.jsx
+// src/components/UserDashboard.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UploadProofModal from "./UploadProofModal";
@@ -7,36 +7,82 @@ import PaymentModal from "./PaymentModal";
 import PayInstructionsModal from "./PayInstructionsModal";
 import { useTranslation } from "react-i18next";
 
+function resolveApiBase(apiBaseProp) {
+  if (apiBaseProp) return apiBaseProp;
+  try {
+    if (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE) {
+      const candidate = String(process.env.REACT_APP_API_BASE).trim();
+      if (candidate) {
+        try {
+          const u = new URL(candidate, typeof window !== "undefined" ? window.location.origin : undefined);
+          if (/^https?:\/\//i.test(candidate)) return u.origin;
+          if (candidate.startsWith("/")) return "";
+          return candidate.replace(/\/+$/, "");
+        } catch {
+          return candidate.replace(/\/+$/, "");
+        }
+      }
+    }
+  } catch {}
+  try {
+    if (typeof window !== "undefined" && window._ENV_ && window._ENV_.API_BASE) {
+      const candidate = String(window._ENV_.API_BASE).trim();
+      if (candidate) {
+        try {
+          const u = new URL(candidate, window.location.origin);
+          if (/^https?:\/\//i.test(candidate)) return u.origin;
+          if (candidate.startsWith("/")) return "";
+          return candidate.replace(/\/+$/, "");
+        } catch {
+          return candidate.replace(/\/+$/, "");
+        }
+      }
+    }
+  } catch {}
+  return "http://localhost:5000";
+}
+
+function buildUrl(base, path) {
+  if (!path) return base || "";
+  if (!base) return path.startsWith("/") ? path : `/${path}`;
+  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  return `${normalizedBase}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 function UserDashboard({ apiBaseUrl, user, userPayment }) {
   const { t, i18n } = useTranslation();
-  const API = apiBaseUrl || process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const API = resolveApiBase(apiBaseUrl);
   const [services, setServices] = useState([]);
   const [selected, setSelected] = useState(null);
 
   // Payment modal state
   const [showPayment, setShowPayment] = useState(false);
   const [paymentService, setPaymentService] = useState(null);
-
   // Pay instructions modal state
   const [showInstructions, setShowInstructions] = useState(false);
   const [bankInfo, setBankInfo] = useState(null);
-
   // Upload proof modal state
   const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     axios
-      .get(`${API}/api/services`)
-      .then((r) => setServices(r.data))
-      .catch(console.error);
+      .get(buildUrl(API, "/api/services"))
+      .then((r) => setServices(r.data || []))
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error("Failed to load services:", err);
+      });
   }, [API, user]);
 
   const refreshServices = () => {
     axios
-      .get(`${API}/api/services`)
-      .then((r) => setServices(r.data))
-      .catch(console.error);
+      .get(buildUrl(API, "/api/services"))
+      .then((r) => setServices(r.data || []))
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error("Failed to refresh services:", err);
+      });
   };
 
   const relevantServices = services.filter(
@@ -48,7 +94,7 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
 
   const formatPrice = (value) => {
     if (value === undefined || value === null) return "";
-    const locale = i18n.language || "en-US";
+    const locale = i18n?.language || "en-US";
     const currency = locale.startsWith("pt") ? "AOA" : locale.startsWith("fr") ? "EUR" : "USD";
     return new Intl.NumberFormat(locale, {
       style: "currency",
@@ -58,7 +104,6 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
   };
 
   const translateTitle = (rawTitle) => t(`service.${rawTitle}.title`, { defaultValue: rawTitle });
-
   const translateDescription = (rawTitle, rawDescription) =>
     t(`service.${rawTitle}.description`, { defaultValue: rawDescription });
 
@@ -66,7 +111,6 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
     setPaymentService(service);
     setShowPayment(true);
   };
-
   const handlePaid = () => {
     refreshServices();
   };
@@ -89,7 +133,7 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
       ) : (
         <div className="row">
           {relevantServices.map((s) => (
-            <div className="col-md-6 mb-3" key={s._id}>
+            <div className="col-md-6 mb-3" key={s._id || s.id}>
               <div
                 className="card h-100"
                 style={{
@@ -98,18 +142,20 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
                   border: "1px solid rgba(0,0,0,0.08)",
                 }}
               >
-                <img
-                  src={s.imagePath}
-                  className="card-img-top"
-                  alt={s.title}
-                  style={{
-                    height: 250,
-                    objectFit: "cover",
-                    borderRadius: "24px 24px 0 0",
-                    width: "100%",
-                    display: "block",
-                  }}
-                />
+                {s.imagePath && (
+                  <img
+                    src={s.imagePath}
+                    className="card-img-top"
+                    alt={s.title}
+                    style={{
+                      height: 250,
+                      objectFit: "cover",
+                      borderRadius: "24px 24px 0 0",
+                      width: "100%",
+                      display: "block",
+                    }}
+                  />
+                )}
                 <div className="card-body d-flex flex-column">
                   <h5>{translateTitle(s.title)}</h5>
                   <p className="mb-1 text-muted">{translateDescription(s.title, s.description)}</p>
@@ -185,11 +231,7 @@ function UserDashboard({ apiBaseUrl, user, userPayment }) {
         apiBaseUrl={API}
       />
 
-      {/* Proof of payment (if any) */}
-      <ProofAttachment
-        filePath={userPayment?.proofFile}
-        serviceTitle={userPayment?.serviceTitle}
-      />
+      <ProofAttachment filePath={userPayment?.proofFile} serviceTitle={userPayment?.serviceTitle} />
     </>
   );
 }
