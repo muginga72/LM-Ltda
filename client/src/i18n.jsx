@@ -88,6 +88,19 @@ i18n
             registrationFailed: "Registration failed. Please try again.",
             loading: "Loading...",
             footer: "All rights reserved.",
+            phone: "Phone",
+            invalidPhone:
+              "Enter a valid phone number (7–15 digits, optional +).",
+            phoneHelp:
+              "We use your phone for account verification and support.",
+            avatar: "Avatar (optional)",
+            avatarHelp:
+              "Optional: provide an image URL for your profile avatar.",
+            avatarInvalidType:
+              "Invalid image type. Allowed: JPG, PNG, WEBP, GIF.",
+            avatarTooLarge: "Image is too large. Maximum size is 5 MB.",
+            removeAvatar: "Remove",
+            avatarEmpty: "No avatar selected",
           },
 
           // ----- Home page -------
@@ -1078,6 +1091,19 @@ i18n
               "Falha no registro. Por favor, tente novamente.",
             loading: "Carregando...",
             footer: "Todos os direitos reservados.",
+            phone: "Telefone",
+            invalidPhone:
+              "Insira um número de telefone válido (7–15 dígitos, opcional +).",
+            phoneHelp:
+              "Seu telefone servira para verificação da conta e suporte tecnico.",
+            avatar: "Avatar (opcional)",
+            avatarHelp:
+              "Opcional: Carregue uma foto para o avatar do seu perfil.",
+            avatarInvalidType:
+              "Tipo de imagem inválido. Permitidos: JPG, PNG, WEBP, GIF.",
+            avatarTooLarge: "A imagem é muito grande. O tamanho máximo é 5 MB.",
+            removeAvatar: "Remover",
+            avatarEmpty: "Nenhum avatar selecionado",
           },
 
           // --------- Home page --------------
@@ -2077,6 +2103,20 @@ i18n
             registrationFailed: "Échec de l'inscription. Veuillez réessayer.",
             loading: "Chargement...",
             footer: "Tous droits réservés.",
+            phone: "Téléphone",
+            invalidPhone:
+              "Entrez un numéro de téléphone valide (7–15 chiffres, + optionnel).",
+            phoneHelp:
+              "Nous utilisons votre téléphone pour la vérification du compte et le support.",
+            avatar: "Avatar (optionnel)",
+            avatarHelp:
+              "Optionnel : fournissez une URL d'image pour votre avatar de profil.",
+            avatarInvalidType:
+              "Type d'image invalide. Autorisés : JPG, PNG, WEBP, GIF.",
+            avatarTooLarge:
+              "L'image est trop volumineuse. Taille maximale : 5 Mo.",
+            removeAvatar: "Supprimer",
+            avatarEmpty: "Aucun avatar sélectionné",
           },
 
           // ----- Home page -------
