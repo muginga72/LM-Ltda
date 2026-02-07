@@ -9,24 +9,26 @@ import logo from "../assets/logo-v01.png";
 import ProfileModal from "./ProfileModal";
 import {
   computeInitialsFromName,
-  resolveApiBase,
   resolveAvatar as resolveAvatarHelper,
   checkImageExists,
+  resolveApiBase as resolveApiBaseHelper,
 } from "../utils/avatarHelpers";
 
 const avatarSize = 34;
 
 const NavigationBar = ({ apiBaseProp }) => {
   const { t } = useTranslation();
-  const { user, logout } = useContext(AuthContext) || {};
+  const auth = useContext(AuthContext) || {};
+  const user = auth.user || null;
+  const logout = auth.logout || null;
   const navigate = useNavigate();
-
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(null); // only string or null
+
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const [initials, setInitials] = useState("?");
   const [loadingAvatar, setLoadingAvatar] = useState(false);
 
-  const resolvedApiBase = useCallback(() => resolveApiBase(apiBaseProp), [apiBaseProp]);
+  const resolvedApiBase = useCallback(() => resolveApiBaseHelper(apiBaseProp), [apiBaseProp]);
 
   const buildAbsolute = useCallback(
     (maybeUrl) => {
@@ -53,15 +55,12 @@ const NavigationBar = ({ apiBaseProp }) => {
           setAvatarUrl(null);
           return;
         }
-
-        // Prefer the helper that returns a string URL or null
         const resolved = await resolveAvatarHelper(u, apiBaseProp);
         if (typeof resolved === "string" && resolved.trim() !== "") {
           setAvatarUrl(resolved);
           return;
         }
 
-        // Fallback: check candidate fields manually and only set avatarUrl to a string when checkImageExists returns true
         const candidates = [u.avatarUrl, u.avatar, u.image, u.photo, u.picture, u.profileImage].filter(Boolean);
         for (const c of candidates) {
           const abs = buildAbsolute(c);
@@ -73,8 +72,6 @@ const NavigationBar = ({ apiBaseProp }) => {
             return;
           }
         }
-
-        // No valid image found
         setAvatarUrl(null);
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -90,12 +87,8 @@ const NavigationBar = ({ apiBaseProp }) => {
   useEffect(() => {
     const name = user?.fullName ?? user?.name ?? user?.displayName ?? "";
     setInitials(name ? computeInitialsFromName(name) : "?");
-
-    if (user) {
-      resolveAvatar(user);
-    } else {
-      setAvatarUrl(null);
-    }
+    if (user) resolveAvatar(user);
+    else setAvatarUrl(null);
   }, [user, resolveAvatar]);
 
   const handleLogout = () => {
@@ -108,7 +101,6 @@ const NavigationBar = ({ apiBaseProp }) => {
     navigate("/login");
   };
 
-  // Avatar element: spinner while checking, image when avatarUrl is a non-empty string, otherwise initials
   const avatarElement = loadingAvatar ? (
     <div
       style={{
@@ -133,10 +125,7 @@ const NavigationBar = ({ apiBaseProp }) => {
       height={avatarSize}
       alt={t("userAvatarAlt", { name: user?.fullName ?? "User" })}
       style={{ objectFit: "cover" }}
-      onError={() => {
-        // If the image fails to load at runtime, clear avatarUrl so initials show
-        setAvatarUrl(null);
-      }}
+      onError={() => setAvatarUrl(null)}
     />
   ) : (
     <div
@@ -227,7 +216,7 @@ const NavigationBar = ({ apiBaseProp }) => {
         </Container>
       </Navbar>
 
-      {user && <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />}
+      {user && <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} apiBase={apiBaseProp} />}
     </>
   );
 };

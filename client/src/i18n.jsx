@@ -72,22 +72,36 @@ i18n
 
           // =============== Register Page ================
           register: {
-            title: "Register",
-            name: "Name",
-            email: "Email",
+            title: "Create an account",
+            name: "Full name",
+            namePlaceholder: "Your full name",
+            email: "Email address",
+            emailPlaceholder: "you@example.com",
+            phone: "Phone number",
+            invalidPhone:
+              "Please enter a valid phone number (e.g. +1234567890)",
+            phoneHelp:
+              "Include country code. Only digits and an optional leading + are allowed.",
+            avatar: "Avatar",
+            avatarHelp: "Optional. JPG, PNG, WEBP or GIF. Max 5 MB.",
+            avatarInvalidType:
+              "Unsupported avatar file type. Use JPG, PNG, WEBP or GIF.",
+            avatarTooLarge: "Avatar file is too large. Maximum size is 5 MB.",
+            avatarEmpty: "No avatar selected",
+            removeAvatar: "Remove",
             password: "Password",
+            passwordPlaceholder: "Choose a secure password",
             confirmPassword: "Confirm password",
+            confirmPasswordPlaceholder: "Repeat your password",
+            registering: "Registering…",
             registerButton: "Register",
-            registering: "Registering...",
-            successRedirect: "Registration successful. Redirecting...",
-            passwordMismatch: "Passwords do not match.",
-            apiBaseMissing:
-              "API base URL not configured. Set REACT_APP_API_BASE at build time or inject window.__ENV__.API_BASE at runtime.",
-            endpointNotFound:
-              "Registration endpoint not found (404) at {{url}}. Check REACT_APP_API_BASE or runtime config.",
-            registrationFailed: "Registration failed. Please try again.",
-            loading: "Loading...",
             footer: "All rights reserved.",
+            apiBaseMissing: "API base URL is not configured",
+            endpointNotFound: "Registration endpoint not found at {{url}}",
+            passwordMismatch: "Passwords do not match",
+            registrationFailed: "Registration failed",
+            networkError: "Network error. Please check your connection.",
+            unknownServerError: "Unknown server error",
           },
 
           // ----- Home page -------
@@ -1061,23 +1075,37 @@ i18n
 
           // --------------- Register  -----------------
           register: {
-            title: "Registrar",
-            name: "Nome",
-            email: "Email",
+            title: "Criar uma conta",
+            name: "Nome completo",
+            namePlaceholder: "Seu nome completo",
+            email: "Endereço de e-mail",
+            emailPlaceholder: "voce@exemplo.com",
+            phone: "Número de telefone",
+            invalidPhone:
+              "Por favor insira um número de telefone válido (ex.: +5511999999999)",
+            phoneHelp:
+              "Inclua o código do país. Apenas dígitos e um + opcional são permitidos.",
+            avatar: "Avatar",
+            avatarHelp: "Opcional. JPG, PNG, WEBP ou GIF. Máx 5 MB.",
+            avatarInvalidType:
+              "Tipo de arquivo de avatar não suportado. Use JPG, PNG, WEBP ou GIF.",
+            avatarTooLarge:
+              "Arquivo de avatar muito grande. O tamanho máximo é 5 MB.",
+            avatarEmpty: "Nenhum avatar selecionado",
+            removeAvatar: "Remover",
             password: "Senha",
+            passwordPlaceholder: "Escolha uma senha segura",
             confirmPassword: "Confirmar senha",
+            confirmPasswordPlaceholder: "Repita sua senha",
+            registering: "Registrando…",
             registerButton: "Registrar",
-            registering: "Registrando...",
-            successRedirect: "Registro bem-sucedido. Redirecionando...",
-            passwordMismatch: "As senhas não coincidem.",
-            apiBaseMissing:
-              "URL base da API não configurada. Defina REACT_APP_API_BASE em tempo de build ou injete window.__ENV__.API_BASE em tempo de execução.",
-            endpointNotFound:
-              "Endpoint de registro não encontrado (404) em {{url}}. Verifique REACT_APP_API_BASE ou a configuração em tempo de execução.",
-            registrationFailed:
-              "Falha no registro. Por favor, tente novamente.",
-            loading: "Carregando...",
             footer: "Todos os direitos reservados.",
+            apiBaseMissing: "A URL base da API não está configurada",
+            endpointNotFound: "Endpoint de registro não encontrado em {{url}}",
+            passwordMismatch: "As senhas não coincidem",
+            registrationFailed: "Falha no registro",
+            networkError: "Erro de rede. Verifique sua conexão.",
+            unknownServerError: "Erro desconhecido no servidor",
           },
 
           // --------- Home page --------------
@@ -2061,22 +2089,38 @@ i18n
 
           // Register
           register: {
-            title: "S'inscrire",
-            name: "Nom",
-            email: "E-mail",
+            title: "Créer un compte",
+            name: "Nom complet",
+            namePlaceholder: "Votre nom complet",
+            email: "Adresse e-mail",
+            emailPlaceholder: "vous@exemple.com",
+            phone: "Numéro de téléphone",
+            invalidPhone:
+              "Veuillez saisir un numéro de téléphone valide (ex. : +33123456789)",
+            phoneHelp:
+              "Incluez l'indicatif pays. Chiffres uniquement et un + facultatif.",
+            avatar: "Avatar",
+            avatarHelp: "Optionnel. JPG, PNG, WEBP ou GIF. Max 5 Mo.",
+            avatarInvalidType:
+              "Type de fichier d'avatar non pris en charge. Utilisez JPG, PNG, WEBP ou GIF.",
+            avatarTooLarge:
+              "Le fichier avatar est trop volumineux. Taille maximale 5 Mo.",
+            avatarEmpty: "Aucun avatar sélectionné",
+            removeAvatar: "Supprimer",
             password: "Mot de passe",
+            passwordPlaceholder: "Choisissez un mot de passe sécurisé",
             confirmPassword: "Confirmer le mot de passe",
+            confirmPasswordPlaceholder: "Répétez votre mot de passe",
+            registering: "Enregistrement…",
             registerButton: "S'inscrire",
-            registering: "Inscription en cours...",
-            successRedirect: "Inscription réussie. Redirection...",
-            passwordMismatch: "Les mots de passe ne correspondent pas.",
-            apiBaseMissing:
-              "URL de base de l'API non configurée. Définissez REACT_APP_API_BASE au moment de la compilation ou injectez window.__ENV__.API_BASE à l'exécution.",
-            endpointNotFound:
-              "Point de terminaison d'inscription introuvable (404) à {{url}}. Vérifiez REACT_APP_API_BASE ou la configuration d'exécution.",
-            registrationFailed: "Échec de l'inscription. Veuillez réessayer.",
-            loading: "Chargement...",
             footer: "Tous droits réservés.",
+            apiBaseMissing: "L'URL de base de l'API n'est pas configurée",
+            endpointNotFound:
+              "Point de terminaison d'inscription introuvable à {{url}}",
+            passwordMismatch: "Les mots de passe ne correspondent pas",
+            registrationFailed: "Échec de l'inscription",
+            networkError: "Erreur réseau. Vérifiez votre connexion.",
+            unknownServerError: "Erreur serveur inconnue",
           },
 
           // ----- Home page -------
